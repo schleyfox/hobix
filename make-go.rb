@@ -76,6 +76,6 @@ EOY
 
 hobix_install_yaml += attached.to_yaml( :UseBlock => true, :UseFold => false )
 
-File.open( 'installer/hobix-install.yaml', 'w' ) do |hiy|
+File.open( 'go/hobix-install.yaml', 'w' ) do |hiy|
     hiy << hobix_install_yaml
 end

@@ -16,6 +16,7 @@
 require 'base64'
 require 'rbconfig'
 require 'yaml'
+require 'zlib'
 
 c = ::Config::CONFIG
 rubypath = c['bindir'] + '/' + c['ruby_install_name']
@@ -46,6 +47,19 @@ def copy_dir( sucmd, from_dir, to_dir, mode = nil )
         FileUtils.cp_r Dir.glob( "#{ from_dir }/*" ), to_dir
     end
 end
+def open_try_gzip( uri )
+    URI::parse( uri ).open( "Accept-Encoding" => "gzip" ) do |o|
+        if o.content_encoding.include? "gzip"
+            puts "# Beginning gzip transmission."
+            Zlib::GzipReader.wrap( o ) do |ogz|
+                yield ogz
+            end
+        else
+            puts "# Beginning base64 transmission."
+            yield o
+        end
+    end
+end
 
 # Web root
 GO_HOBIX = 'http://go.hobix.com/'
@@ -55,7 +69,9 @@ TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.str
 
 # Move through intro screens
 puts "# Readying install..."
-stream = open( GO_HOBIX + "hobix-install.yaml" ) { |yml| YAML::load_stream( yml.read ) }
+stream = open_try_gzip( GO_HOBIX + "hobix-install.yaml" ) do |yml| 
+    YAML::load_stream( yml )
+end
 den, attached = stream.documents
 
 conf = {}

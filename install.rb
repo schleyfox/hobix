@@ -446,7 +446,7 @@ class Installer
   end
 
 
-  FILETYPES = %w( bin lib ext data )
+  FILETYPES = %w( bin lib ext share )
 
   include FileOperations
 
@@ -581,7 +581,7 @@ class Installer
     command "#{config('ruby-prog')} #{curr_srcdir}/extconf.rb #{opt}"
   end
 
-  def config_dir_data( rel )
+  def config_dir_share( rel )
   end
 
   #
@@ -621,6 +621,35 @@ class Installer
   end
 
   def setup_dir_lib( relpath )
+    all_files( curr_srcdir ).each do |fname|
+      add_sharepath "#{curr_srcdir}/#{fname}"
+    end
+  end
+
+  SHAREPATH_RE = /^(\s*)SHARE_PATH\s*=\s*/
+
+  def sharepath
+    config('data-dir') + '/hobix/'
+  end
+
+  def add_sharepath( path )
+    $stderr.puts %Q<set SHARE_PATH to "!#{config('data-dir')}" for #{path} ...> if verbose?
+    return if no_harm?
+
+    tmpfile = File.basename(path) + '.tmp'
+    begin
+      File.open( path ) {|r|
+      File.open( tmpfile, 'w' ) {|w|
+          all = r.read
+          return unless SHAREPATH_RE === all
+
+          all.gsub!( SHAREPATH_RE, '\1SHARE_PATH = "' + sharepath + '"'  )
+          w.write all
+      } }
+      mv tmpfile, File.basename(path)
+    ensure
+      rm_f tmpfile if File.exist? tmpfile
+    end
   end
 
   def setup_dir_ext( relpath )
@@ -633,7 +662,7 @@ class Installer
     command config('make-prog')
   end
 
-  def setup_dir_data( relpath )
+  def setup_dir_share( relpath )
   end
 
   #
@@ -662,8 +691,8 @@ class Installer
     install_files allext('.'), config('so-dir') + '/' + rel, 0555
   end
 
-  def install_dir_data( rel )
-    install_files targfiles, config('data-dir') + '/' + rel, 0644
+  def install_dir_share( rel )
+    install_files targfiles, sharepath + rel, 0644
   end
 
   def install_files( list, dest, mode )
@@ -728,7 +757,7 @@ class Installer
     command config('make-prog') + ' clean' if File.file? 'Makefile'
   end
 
-  def clean_dir_data( rel )
+  def clean_dir_share( rel )
   end
 
   #

@@ -3,11 +3,13 @@
   date: 2004-05-16
   changes:
     - Hobix.gemspec: for anyone who wants to make a Gem.
+    - install.rb: proper installation of share dir.
     - make-go.rb: generates the go/hobix-installer.yaml, which is
         leveraged by the go/hobix-installer.rb script.
     - bin/hobix: stores personal config in '$HOME/Application Data/Hobix'
         on win32.
-    - go/hobix-installer.rb: installer script from go.hobix.com.
+    - go/hobix-installer.rb: installer script from go.hobix.com.  added
+        gzip encoding on hobix-install.yaml load.
     - lib/hobix/base.rb: now allow plugins to have config options in
         the hobix.yaml file.
     - lib/hobix/entry.rb: all entries default to folded YAML.

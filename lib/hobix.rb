@@ -19,6 +19,12 @@ require 'hobix/config'
 require 'hobix/weblog'
 
 module Hobix
+    ## Version used to compare installations
     VERSION = '0.1a'
+    ## CVS information
+    CVS_ID = "$Id$"
+    CVS_REV = "$Revision$"
+    ## Share directory contains external data files
+    SHARE_PATH = ''
 end
 
