@@ -5,12 +5,12 @@ tagline: "nice, nice, very nice"
 period: 00:60:00
 authors: {}
 linklist:  
-  - hobix: http://hobix.com/
-  - del.icio.us: http://del.icio.us/
+- hobix: http://hobix.com/
+- del.icio.us: http://del.icio.us/
 requires: 
-  - hobix/storage/filesys
-  - hobix/out/quick
-  - hobix/out/erb
-  - hobix/out/rss
-  - hobix/out/okaynews
-  - hobix/out/atom
+- hobix/storage/filesys
+- hobix/out/quick
+- hobix/out/erb
+- hobix/out/rss
+- hobix/out/okaynews
+- hobix/out/atom

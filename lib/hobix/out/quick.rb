@@ -26,7 +26,7 @@ class Quick < Hobix::BaseOutput
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
         defaults.each do |k, v|
-            k.gsub!( /\W/, '_' )
+            k = k.gsub( /\W/, '_' )
             k.untaint
             v = v.inspect
             v.untaint

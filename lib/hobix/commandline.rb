@@ -36,6 +36,9 @@ module CommandLine
     end
     RC = File.join( HOME_DIR, '.hobixrc' )
 
+    def gets;          $stdin.gets;          end
+    def puts( *args ); $stdin.puts( *args ); end
+
     def login( config = nil )
         config ||= RC
         @config = File.open( config ) { |f| YAML::load( f ) } if File.exists? RC
@@ -143,8 +146,8 @@ module CommandLine
             patcher.apply( path )
         end
 
-        join_as_author( name, hobix_yaml )
         hobix_yaml = File.join( path, "hobix.yaml" )
+        join_as_author( name, hobix_yaml )
         edit_action( Hobix::Weblog.load( hobix_yaml ) )
     end
 
