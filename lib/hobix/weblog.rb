@@ -663,7 +663,7 @@ end
 end
 
 YAML::add_domain_type( 'hobix.com,2004', 'weblog' ) do |type, val|
-    if val['linklist'].is_a? ::Array
+    if val['linklist'].class == ::Array
         val['linklist'] = YAML::transfer( 'hobix.com,2004/linklist', {'links' => val['linklist']} )
     end
     YAML::object_maker( Hobix::Weblog, val )

@@ -85,7 +85,7 @@ YAML::add_domain_type( 'hobix.com,2004', 'linklist' ) do |type, val|
     ['tagline', 'summary'].each do |f|
         val[f] = RedCloth.new( val[f].to_s ) if val[f]
     end
-    if val['links'].is_a? ::Array
+    if val['links'].class == ::Array
         val['links'] = YAML::transfer( 'omap', val['links'] )
     end
     YAML::object_maker( Hobix::LinkList, val )
