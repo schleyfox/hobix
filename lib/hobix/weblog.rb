@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -19,9 +18,21 @@ require 'hobix/entry'
 require 'hobix/linklist'
 require 'find'
 require 'ftools'
+require 'uri'
 require 'yaml'
 
 module Hobix
+# The UriStr mixin ensures that URIs are supplied a to_str
+# method and a to_yaml method which allows the URI to act more
+# like a string.  In most cases, Hobix users will be using URIs
+# as strings.
+module UriStr
+    def to_str; to_s; end
+    def to_yaml( opts = {} )
+        self.to_s.to_yaml( opts )
+    end
+end
+
 #
 # The Page class is very simple class which contains information
 # specific to a template.
@@ -100,7 +111,8 @@ end
 # data, all of which is stored in hobix.yaml.
 #
 # title::          The title of the weblog.
-# link::           The absolute url to the weblog.
+# link::           The absolute url to the weblog.  (When accessed through
+#                  the class -- weblog.link -- this is returned as a URI.)
 # authors::        A hash, in which keys are author's abbreviated names,
 #                  paired with hashes of `name', `url' and `email'
 #                  information.
@@ -252,6 +264,8 @@ class Weblog
                   :entry_path, :skel_path, :output_path, :lib_path,
                   :linklist, :lastn
 
+    attr_reader   :hobix_yaml
+
     # After the weblog is initialize, the +start+ method is called
     # with the full system path to the directory containing the configuration.
     #
@@ -260,10 +274,10 @@ class Weblog
         @hobix_yaml = hobix_yaml
         @path = File.dirname( hobix_yaml )
         @sections ||= {}
-        @entry_path = File.expand_path( @entry_path || "entries", path ).untaint
-        @skel_path = File.expand_path( @skel_path || "skel", path ).untaint
-        @output_path = File.expand_path( @output_path || "htdocs", path ).untaint
-        @lib_path = File.expand_path( @lib_path || "lib", path ).untaint
+        @entry_path = default_entry_path( @entry_path ).untaint
+        @skel_path = default_skel_path( @skel_path ).untaint
+        @output_path = default_output_path( @output_path ).untaint
+        @lib_path = default_lib_path( @lib_path ).untaint
         if File.exists?( @lib_path )
             $LOAD_PATH << @lib_path
         end
@@ -271,6 +285,20 @@ class Weblog
         @requires.each do |req|
             @plugins += Hobix::BasePlugin::start( req, self )
         end
+    end
+
+    def default_entry_path( dir = nil ); File.expand_path( dir || "entries", @path ); end
+    def default_skel_path( dir = nil ); File.expand_path( dir || "skel", @path ); end
+    def default_output_path( dir = nil ); File.expand_path( dir || "htdocs", @path ); end
+    def default_lib_path( dir = nil ); File.expand_path( dir || "lib", @path ); end
+
+    def link
+        URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr
+    end
+
+    # Translate paths, relative to the Weblog's URL
+    def expand_path( path )
+        File.expand_path( path, self.link.path + "/" )
     end
 
     # Load the weblog information from a YAML file and +start+ the Weblog.
@@ -284,6 +312,9 @@ class Weblog
     # Save the weblog configuration to its hobix.yaml (or optionally
     # provide a path where you would like to save.)
     def save( file = @hobix_yaml )
+        unless file
+            raise ArgumentError, "Missing argument: path to save configuration (0 of 1)"
+        end
         File::open( file, 'w' ) do |f|
             YAML::dump( self, f )
         end
@@ -371,27 +402,28 @@ class Weblog
             if File.basename(path)[0] == ?.
                 Find.prune 
             elsif not FileTest.directory? path
-                entry_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
-                output = outputs.detect { |p| if entry_path =~ /\.#{ p.extension }$/; entry_path = $`; end }
+                tpl_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
+                output = outputs.detect { |p| if tpl_path =~ /\.#{ p.extension }$/; tpl_path = $`; end }
                 if output
                     ## Figure out template extension and output filename
-                    page_name, entry_ext = entry_path.dup, ''
-                    while page_name =~ /\.\w+$/; page_name = $`; entry_ext = $& + entry_ext; end
-                    next if entry_ext.empty?
+                    page_name, tpl_ext = tpl_path.dup, ''
+                    while page_name =~ /\.\w+$/; page_name = $`; tpl_ext = $& + tpl_ext; end
+                    next if tpl_ext.empty?
                     ## Build the output pages
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
-                        vars[:page].add_path( File.dirname( entry_path ), entry_ext )
-                        full_entry_path = File.join( @output_path, vars[:page].link[1..-1] )
+                        vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
+                        full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
 
                         ## If retouching, skip pages outside of path
                         next if only_path and vars[:page].link.index( "/" + only_path ) != 0
 
                         ## If updating, skip any that are unchanged
-                        next if how == :update and vars[:page].updated != nil and 
-                                File.exists?( full_entry_path ) and
-                                File.mtime( path ) < File.mtime( full_entry_path ) and
-                                vars[:page].updated < File.mtime( full_entry_path )
+                        next if how == :update and 
+                                File.exists?( full_out_path ) and
+                                File.mtime( path ) < File.mtime( full_out_path ) and
+                                ( vars[:page].updated.nil? or 
+                                  vars[:page].updated < File.mtime( full_out_path ) )
 
                         ## If published already by a deeper page, skip
                         pub_by = published[vars[:page].link]
@@ -412,25 +444,24 @@ class Weblog
 
                         ## Publish the page
                         txt = output.load( path, vars )
-                        File.makedirs( File.dirname( full_entry_path ) )
-                        File.open( full_entry_path, 'w' ) do |f| 
+                        File.makedirs( File.dirname( full_out_path ) )
+                        File.open( full_out_path, 'w' ) do |f| 
                             f << txt
                             f.chmod 0664 rescue nil
                         end
                         published[vars[:page].link] = page_name
                     end
                 else
-                    full_entry_path = File.join( @output_path, entry_path )
-                    next if File.exists?( full_entry_path ) and File.mtime( full_entry_path ) >= File.mtime( path )
-                    File.makedirs( File.dirname( full_entry_path ) )
-                    File.copy( path, full_entry_path )
+                    full_out_path = File.join( @output_path, tpl_path )
+                    next if File.exists?( full_out_path ) and File.mtime( full_out_path ) > File.mtime( path )
+                    File.makedirs( File.dirname( full_out_path ) )
+                    File.copy( path, full_out_path )
                 end
             end
         end
-        published = published.values.uniq
         publishers.each do |p|
-            if p.watch & published != []
-                p.publish( p )
+            if p.watch & published.values.uniq != []
+                p.publish( published )
             end
         end
     end
@@ -604,21 +635,21 @@ class Weblog
 
     ## YAML Display
     include ToYamlExtras
-    def to_yaml_property_map
+    def property_map
         [
-            ['@title', :req], 
-            ['@link', :req], 
-            ['@tagline', :req], 
-            ['@period', :opt], 
-            ['@lastn', :opt],
-            ['@entry_path', :opt],
-            ['@skel_path', :opt],
-            ['@output_path', :opt],
-            ['@authors', :req], 
-            ['@contributors', :opt], 
-            ['@linklist', :opt],
-            ['@sections', :opt], 
-            ['@requires', :req]
+            ['@title', :req, :text], 
+            ['@link', :req, :text], 
+            ['@tagline', :req, :text], 
+            ['@period', :opt, :text], 
+            ['@lastn', :opt, :text],
+            ['@entry_path', :opt, :text],
+            ['@skel_path', :opt, :text],
+            ['@output_path', :opt, :text],
+            ['@authors', :req, :textarea], 
+            ['@contributors', :opt, :textarea], 
+            ['@linklist', :opt, :textarea],
+            ['@sections', :opt, :textarea], 
+            ['@requires', :req, :textarea]
         ]
     end
 

@@ -13,13 +13,17 @@ def check_hobix_version( path, version )
     end
     installed
 end
-attached = {}
-['../redcloth/lib/**/*.rb', 'lib/**/*.rb', 'bin/**/*', 'share/**/*', 'run-tests.rb'].collect do |dirglob|
-    Dir.glob(dirglob)
-end.flatten.each do |item| 
-    next if item.include?("CVS") or File.directory? item
-    attached[item.gsub( /^\.\.\/\w+\//, '' )] = Base64::encode64( File.read( item ) )
+def dir_to_base64( *dirs )
+    attached = {}
+    dirs.collect do |dirglob|
+        Dir.glob(dirglob)
+    end.flatten.each do |item| 
+        next if item.include?("CVS") or File.directory? item
+        attached[item.gsub( /^.*(lib|bin|share)\//, '\1/' )] = Base64::encode64( File.read( item ) )
+    end
+    attached
 end
+attached = dir_to_base64( '../redcloth/lib/**/*.rb', 'lib/**/*.rb', 'bin/**/*', 'share/**/*' )
 hobix_install_yaml =<<EOY
 version: #{ check_hobix_version( 'lib', 'hobix.rb' ) }
 setup:
@@ -43,7 +47,7 @@ setup:
 
     + ready to go + [Y/n] ?
 
-- - libpath
+- - sitelibdir
   - |
     # where would you like to install the libraries??
     # the default is your ruby site libs dir, which is
@@ -51,7 +55,7 @@ setup:
 
     + lib path [ENTER for default] +
 
-- - binpath
+- - bindir
   - |
     # where would you like to install the hobix
     # command-line tool?? the default is
@@ -59,12 +63,12 @@ setup:
 
     + cmd path [ENTER for default] +
 
-- - sharepath
+- - sharedir
   - |
     # where would you like to install the hobix
     # accessory data?? (this includes the default
     # blogging templates.)  the default is
-    # CONFIG['sharepath']
+    # CONFIG['sharedir']
     
     + share path [ENTER for default] +
 
@@ -111,4 +115,9 @@ hobix_install_yaml += attached.to_yaml( :UseBlock => true, :UseFold => false )
 
 File.open( 'go/hobix-install.yaml', 'w' ) do |hiy|
     hiy << hobix_install_yaml
+end
+
+win32_att = dir_to_base64( 'win32/lib/**/*' )
+File.open( 'go/hobix-install-win32.yaml', 'w' ) do |hiw|
+    hiw << win32_att.to_yaml( :UseBlock => true, :UseFold => false )
 end

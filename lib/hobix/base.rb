@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -146,8 +145,17 @@ end
 
 module ToYamlExtras
     def to_yaml_properties
-        to_yaml_property_map.reject do |prop, req|
-            req == :opt and not instance_variable_get( prop )
+        property_map.find_all do |prop, req, edit|
+            case req
+            when :opt
+                val = nil
+                if respond_to?( "default_#{ prop[1..-1] }" )
+                    val = method( "default_#{ prop[1..-1] }" ).call
+                end
+                val != instance_variable_get( prop )
+            when :req
+                true
+            end
         end.
         collect do |prop, req|
             prop

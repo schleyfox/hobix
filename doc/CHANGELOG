@@ -1,7 +1,38 @@
 --- %YAML:1.0
+- version: 0.2f
+  date: 2004-10-04
+  changes:
+    - make-go.rb: added win32-only files.
+    - lib/hobix/entry.rb: generalized new property_map
+        method from old to_yaml_property_map.
+    - lib/hobix/weblog.rb: ditto.
+    - lib/hobix/linklist.rb: ditto.
+    - lib/hobix/util/objedit.rb: ncurses-based editor for
+       people who don't `use editor'.
+    - lib/hobix/commandline.rb: aorta now uses ObjEdit class.
+
+# Many thank to William Morgan for his testing and suggestions.
+# The majority of the changes in the 0.2e release were instigated by
+# his messages to the hobix-is-the-way mailing list.  Thanks, Wm!!
+- version: 0.2e
+  date: 2004-10-01
+  changes:
+    - bin/hobix: reuses config data from initial installation.
+    - go/hobix-install.rb: ditto.
+    - lib/hobix/commandline.rb: creation of weblog also spawns
+        editor for hobix.yaml after creation.
+    - lib/hobix/weblog.rb: Hobix::Weblog#link is now a URI object.
+        paths are only saved if they differ from the default.
+        templates without entries are updated only if the template
+        changes or the output file is missing.  more detailed
+        page information is passed into publish plugins.
+    - lib/hobix/out/quick.rb: monthly archive dates reversed.
+        blank `footer' template chunk added. 
+
 - version: 0.2d
   date: 2004-09-20
   changes:
+    - COPYING: added BSD license text.
     - lib/hobix/out/quick.rb: absolute links.
     - lib/hobix/storage/filesys.rb: ditto.
     - lib/hobix/share/default-blog.apache-ssi.patch: ditto.

@@ -8,9 +8,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -97,6 +96,7 @@ class Quick < Hobix::BaseOutput
         <div class="tagline"><%= weblog.tagline %></div>
         </div> }
     end
+    def footer_erb; end
     def sidebar_erb
      %{ <div id="sidebar">
         <+ sidebar_list +>
@@ -110,7 +110,7 @@ class Quick < Hobix::BaseOutput
         <h2 class="sidebarTitle">Archive</h2>
         <ul>
         <% months = weblog.storage.get_months( weblog.storage.find ) %>
-        <% months.each do |month_start, month_end, month_id| %>
+        <% months.reverse.each do |month_start, month_end, month_id| %>
             <li><a href="<%= weblog.link %>/<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
         <% end %>
         </ul>
@@ -142,6 +142,7 @@ class Quick < Hobix::BaseOutput
     end
     def entries_erb
      %{ <% entries.each_day do |day, day_entries| %>
+            <a name="<%= day.strftime( "%Y%m%d" ) %>"/>
             <+ day_header +>
             <% day_entries.each do |entry| %>
                 <+ entry +>
@@ -194,6 +195,9 @@ class Quick < Hobix::BaseOutput
 <+ blog +>
 
 </div>
+
+<+ footer +>
+
 </div>
 
 </body>

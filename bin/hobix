@@ -37,7 +37,7 @@ mname = nil
 if cmd == 'setup_blogs'
     mname = cmd
 elsif cmdline.respond_to? "#{ cmd }_app"
-    mname = "#{ cmd }_app"
+    mname = "#{ cmd }_app"; opts = [YAML::load( DATA )]
 elsif cmdline.respond_to? "#{ cmd }_weblog"
     mname = "#{ cmd }_weblog"
 elsif cmdline.respond_to? "#{ cmd }_action"

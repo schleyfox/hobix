@@ -19,10 +19,11 @@ require 'yaml'
 require 'zlib'
 require 'open-uri'
 
-c = ::Config::CONFIG
-rubypath = c['bindir'] + '/' + c['ruby_install_name']
-c['sharepath'] = c['datadir'] + '/hobix'
-def die( msg ); puts msg; exit; end
+unless defined? c
+    c = ::Config::CONFIG
+    c['sharedir'] = c['datadir'] + '/hobix'
+end
+rubypath = ::Config::CONFIG['bindir'] + '/' + ::Config::CONFIG['ruby_install_name']
 def check_hobix_version( path, version )
     installed = nil
     hobixfile = File.join( path, 'hobix.rb' )
@@ -34,7 +35,7 @@ def check_hobix_version( path, version )
         end
     end
     if installed == version
-        die( "* you are already up-to-date * hobix v#{ installed } installed *" )
+        abort( "* you are already up-to-date * hobix v#{ installed } installed *" )
     else
         puts "* upgrading from hobix v#{ installed } to the latest v#{ version }"
     end
@@ -114,7 +115,7 @@ def ri_install( sucmd, libdir )
 end
 
 # Web root
-GO_HOBIX = 'http://go.hobix.com/0.2c/'
+GO_HOBIX = 'http://go.hobix.com/0.2f/'
 
 # Tempdir
 TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.strftime( 'hobix_%Y-%m-%d_%H-%M-%S' ) )
@@ -125,6 +126,13 @@ stream = open_try_gzip( GO_HOBIX + "hobix-install.yaml", c['host'] !~ /mswin32/ 
     YAML::load_stream( yml )
 end
 den, attached = stream.documents
+if c['host'] =~ /mswin32/ 
+    attached.merge!(
+        open_try_gzip( GO_HOBIX + "hobix-install-win32.yaml", c['host'] !~ /mswin32/ ) do |yml| 
+            YAML::load( yml )
+        end
+    )
+end
 
 conf = {}
 execs = {}
@@ -135,7 +143,7 @@ den['setup'].each do |action, screen|
     answer = gets.strip
     if ['welcome', 'installing'].include? action 
         answer.downcase!
-        die( "* not a problem * a pleasant day to you *" ) if answer == 'n'
+        abort( "* not a problem * a pleasant day to you *" ) if answer == 'n'
     elsif answer != ''
         if action =~ /path$/
             answer = File.expand_path( answer )
@@ -143,7 +151,7 @@ den['setup'].each do |action, screen|
         conf[action] = answer
     end
     case action
-    when 'libpath'
+    when 'sitelibdir'
         check_hobix_version( conf[action], den['version'] )
     when 'installing'
         puts
@@ -160,37 +168,37 @@ den['setup'].each do |action, screen|
             when /^bin\//
                 attfile = $'
                 opener = "#!#{ rubypath }"
-                if conf['libpath'] and not $:.include?( conf['libpath'] )
-                    opener += "\n$:.unshift #{ conf['libpath'].dump }" 
+                if conf['sitelibdir'] and not $:.include?( conf['sitelibdir'] )
+                    opener += "\n$:.unshift #{ conf['sitelibdir'].dump }" 
                 end
                 filebin.gsub!( /\A#!.+$/, opener )
                 filebin.gsub!( /__END__.*\Z/m, "__END__\n#{ conf.to_yaml }" )
                 if c['host'] =~ /mswin32/ 
                     batfile = File.join( TMPDIR, attname + ".bat" )
                     File.open( batfile, 'wb' ) do |out|
-                        out << "@echo off\r\n\"#{ conf['binpath'] }/ruby.exe\" \"#{ conf['binpath'] }/#{ attfile }\" %1 %2 %3 %4 %5 %6 %7 %8 %9\r\n"
+                        out << "@echo off\r\n\"#{ rubypath }.exe\" \"#{ conf['bindir'] }/#{ attfile }\" %1 %2 %3 %4 %5 %6 %7 %8 %9\r\n"
                     end
-                    execs[attfile] = File.join( conf['binpath'], attfile + ".bat" )
+                    execs[attfile] = File.join( conf['bindir'], attfile + ".bat" )
                 else
-                    execs[attfile] = File.join( conf['binpath'], attfile )
+                    execs[attfile] = File.join( conf['bindir'], attfile )
                 end
             when "lib/hobix.rb"
-                filebin.gsub!( /^(\s*)SHARE_PATH = (.*)$/, "\\1SHARE_PATH = #{ conf['sharepath'].dump }" )
+                filebin.gsub!( /^(\s*)SHARE_PATH = (.*)$/, "\\1SHARE_PATH = #{ conf['sharedir'].dump }" )
             end
             fileloc = File.join( TMPDIR, attname )
             File.open( fileloc, 'wb' ) do |out|
                 out << filebin
             end
         end
-        copy_dir( conf['sucmd'], File.join( TMPDIR, 'lib' ), conf['libpath'] )
-        clean_dir( conf['sucmd'], conf['sharepath'] )
-        copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), conf['sharepath'] )
-        copy_dir( conf['sucmd'], File.join( TMPDIR, 'bin' ), conf['binpath'], 0755 )
+        copy_dir( conf['sucmd'], File.join( TMPDIR, 'lib' ), conf['sitelibdir'] )
+        clean_dir( conf['sucmd'], conf['sharedir'] )
+        copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), conf['sharedir'] )
+        copy_dir( conf['sucmd'], File.join( TMPDIR, 'bin' ), conf['bindir'], 0755 )
         ri_install( conf['sucmd'], File.join( TMPDIR, 'lib' ) )
     when 'setup'
         # Load new Hobix classes
         if conf['setup'].to_s.downcase != 'n'
-            require File.join( conf['libpath'], 'hobix/commandline.rb' )
+            require File.join( conf['sitelibdir'], 'hobix/commandline.rb' )
             cmdline = Class.new
             cmdline.extend Hobix::CommandLine
             puts "# Configuration stored in #{ Hobix::CommandLine::RC }"

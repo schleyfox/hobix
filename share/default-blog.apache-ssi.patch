@@ -21,7 +21,7 @@ diff -wurP bokononist/lib/local.rb boko.ssi/lib/local.rb
 +end
 +class Out::Quick
 +    def sidebar_erb
-+        "<!--#include virtual='<%= weblog.output_path %>/sidebar.html'-->"
++        "<!--#include virtual='<%= weblog.expand_path( 'sidebar.html' ) %>'-->"
 +    end
 +end
 +end

@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -52,15 +51,15 @@ class LinkList < Entry
 
     # Definition map for outputting YAML.  Used by +to_yaml+,
     # see +ToYamlExtras+ module.
-    def to_yaml_property_map
+    def property_map
         [
-            ['@title', :opt], 
-            ['@author', :opt], 
-            ['@contributors', :opt], 
-            ['@created', :opt], 
-            ['@tagline', :opt], 
-            ['@summary', :opt], 
-            ['@links', :req]
+            ['@title', :opt, :text], 
+            ['@author', :opt, :text], 
+            ['@contributors', :opt, :textarea], 
+            ['@created', :opt, :text], 
+            ['@tagline', :opt, :text], 
+            ['@summary', :opt, :textarea], 
+            ['@links', :req, :textarea]
         ]
     end
 
@@ -86,6 +85,8 @@ YAML::add_domain_type( 'hobix.com,2004', 'linklist' ) do |type, val|
     ['tagline', 'summary'].each do |f|
         val[f] = RedCloth.new( val[f].to_s ) if val[f]
     end
-    val['links'] = YAML::transfer( 'omap', val['links'] )
+    if val['links'].is_a? ::Array
+        val['links'] = YAML::transfer( 'omap', val['links'] )
+    end
     YAML::object_maker( Hobix::LinkList, val )
 end

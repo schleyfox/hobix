@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -50,10 +49,10 @@ class Atom < Hobix::BaseOutput
     <copyright></copyright>
 </feed>
 EOXML
-        uri = URI::parse( vars[:weblog].link )
+        uri = vars[:weblog].link
         rssdoc << REXML::XMLDecl.new
         rssdoc.elements['/feed/title'].text = vars[:weblog].title
-        rssdoc.elements['/feed/link'].attributes['href'] = vars[:weblog].link
+        rssdoc.elements['/feed/link'].attributes['href'] = vars[:weblog].link.to_s
         rssdoc.elements['/feed/tagline'].text = vars[:weblog].tagline
         rssdoc.elements['/feed/modified'].text = vars[:page].updated.strftime( "%Y-%m-%dT%H:%M:%SZ" )
         rssdoc.elements['/feed/id'].text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }"
@@ -67,7 +66,7 @@ EOXML
             ele.x( 'issued', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'modified', e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'summary', 
-                e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" ),
+                e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
                 {'type' => 'text/html', 'mode' => 'escaped'} ) if e.summary
             author = vars[:weblog].authors[e.author]
             ele_auth = REXML::Element.new 'author'
@@ -77,7 +76,7 @@ EOXML
             ele_auth.x( 'email', author['email'] ) if author['email']
             ele << ele_auth
             ele.x( 'content',
-                e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" ),
+                e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
                 {'type' => 'text/html', 'mode' => 'escaped'} )
             rssdoc.elements['/feed'].add ele
         end

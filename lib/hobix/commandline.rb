@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -53,8 +52,10 @@ module CommandLine
     # Update your Hobix setup
     def upgrade_app_explain; "Check for updates to Hobix."; end
     def upgrade_app_args; []; end
-    def upgrade_app
+    def upgrade_app( config )
+        require 'rbconfig'
         require 'open-uri'
+        c = ::Config::CONFIG.merge( config )
         eval(open("http://go.hobix.com/").read)
     end
 
@@ -134,7 +135,9 @@ module CommandLine
             patcher.apply( path )
         end
 
-        join_as_author( name, File.join( path, "hobix.yaml" ) )
+        hobix_yaml = File.join( path, "hobix.yaml" )
+        join_as_author( name, hobix_yaml )
+        edit_action( Hobix::Weblog.load( hobix_yaml ) )
     end
 
 
@@ -161,9 +164,7 @@ module CommandLine
         weblog = Hobix::Weblog.load( path )
         puts "*** Joining blog `#{ weblog.title }', adding you as author."
         weblog.authors[@config['username']] = @config['personal']
-        File.open( path, 'w' ) do |f|
-            YAML::dump( weblog, f )
-        end
+        weblog.save( path )
         @config['weblogs'][name] = path
         save_config
     end
@@ -172,9 +173,10 @@ module CommandLine
     def edit_action_explain; "Edit weblog's configuration"; end
     def edit_action_args; ['weblog-name']; end
     def edit_action( weblog )
+        path = weblog.hobix_yaml
         weblog = aorta( weblog )
         return if weblog.nil?
-        weblog.save
+        weblog.save( path )
     end
 
     # Delete a weblog from local config
@@ -354,19 +356,24 @@ module CommandLine
     end
 
     def aorta( obj )
-        tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
-        File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
-        created = File.mtime( tempfile )
-        system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-        return nil unless File.exists?( tempfile )
+        if @config['use editor']
+            tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
+            File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
+            created = File.mtime( tempfile )
+            system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
+            return nil unless File.exists?( tempfile )
 
-        if created < File.mtime( tempfile )
-            obj = YAML::load( File.open( tempfile ) )
+            if created < File.mtime( tempfile )
+                obj = YAML::load( File.open( tempfile ) )
+            else
+                puts "** Edit aborted"
+                obj = nil
+            end
+            File.delete( tempfile )
         else
-            puts "** Edit aborted"
-            obj = nil
+            require 'hobix/util/objedit'
+            obj = Hobix::Util::ObjEdit( obj )
         end
-        File.delete( tempfile )
         obj
     end
 

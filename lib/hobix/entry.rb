@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -57,15 +56,15 @@ class Entry
     def section_id; File.dirname( id ); end
 
     include ToYamlExtras
-    def to_yaml_property_map
+    def property_map
         [
-            ['@title', :req], 
-            ['@author', :req], 
-            ['@contributors', :opt], 
-            ['@created', :opt], 
-            ['@tagline', :opt], 
-            ['@summary', :opt], 
-            ['@content', :req]
+            ['@title', :req, :text], 
+            ['@author', :req, :text], 
+            ['@contributors', :opt, :textarea], 
+            ['@created', :opt, :text], 
+            ['@tagline', :opt, :text], 
+            ['@summary', :opt, :textarea], 
+            ['@content', :req, :textarea]
         ]
     end
 

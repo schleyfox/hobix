@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -36,7 +35,7 @@ class Ping < Hobix::BasePublish
                 server = XMLRPC::Client.new( u.host, u.path, u.port )
 
                 begin
-                    result = server.call( "weblogUpdates.ping", @title, @link )
+                    result = server.call( "weblogUpdates.ping", @title, @link.to_s )
                 rescue XMLRPC::FaultException => e
                     puts "Error: "
                     puts e.faultCode

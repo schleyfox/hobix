@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -49,7 +48,7 @@ class RSS < Hobix::BaseOutput
 EOXML
         rssdoc << REXML::XMLDecl.new
         rssdoc.elements['/rss/channel/title'].text = vars[:weblog].title
-        rssdoc.elements['/rss/channel/link'].text = vars[:weblog].link
+        rssdoc.elements['/rss/channel/link'].text = vars[:weblog].link.to_s
         rssdoc.elements['/rss/channel/description'].text = vars[:weblog].tagline
         rssdoc.elements['/rss/channel/dc:date'].text = Time.now.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
         ( vars[:entries] || [vars[:entry]] ).each do |e|
@@ -74,7 +73,7 @@ EOXML
             ele_pubDate.text = e.created.dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
             ele << ele_pubDate
             ele_desc = REXML::Element.new 'description'
-            ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" )
+            ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" )
             ele << ele_desc
             rssdoc.elements['/rss/channel'].add ele
         end

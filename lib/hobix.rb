@@ -7,9 +7,8 @@
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 #
-# This program is free software. You can re-distribute and/or
-# modify this program under the same terms of ruby itself ---
-# Ruby Distribution License or GNU General Public License.
+# This program is free software, released under a BSD license.
+# See COPYING for details.
 #
 #--
 # $Id$
@@ -207,7 +206,7 @@ require 'hobix/weblog'
 #
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.2c'
+    VERSION = '0.2f'
     ## CVS information
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
