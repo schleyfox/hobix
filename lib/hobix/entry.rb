@@ -53,7 +53,9 @@ end
 end
 
 YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0' ) do |type, val|
-    val['content'] = RedCloth.new( val['content'].to_s )
+    ['content', 'tagline', 'summary'].each do |f|
+        val[f] = RedCloth.new( val[f].to_s ) if val[f]
+    end
     YAML::object_maker( Hobix::Entry, val )
 end
 YAML::add_domain_type( 'hobix.com,2004', 'entry' ) do |type, val|
