@@ -96,6 +96,20 @@ class FileSys < Hobix::BaseStorage
         YAML::dump( @index, File.open( index_path, 'w' ) )
         true
     end
+    def path_storage( p )
+        return self if ['', '.'].include? p
+        load_index
+        path_storage = self.dup
+        path_storage.instance_eval do
+            @index = @index.dup.delete_if do |id, time|
+                if id.index( p ) != 0
+                    @modified.delete( p )
+                    true
+                end
+            end
+        end
+        path_storage
+    end
     def find( search = {} )
         load_index
         entries = @index.reject do |entry|

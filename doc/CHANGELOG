@@ -3,7 +3,9 @@
   date: 2004-08-19
   changes:
     - lib/hobix/weblog.rb: both relative and absolute URLs now how meaning
-        for the Page class.
+        for the Page class.  skel methods now receive path_storage.  conflicts
+        in output now resolved by the deeper skel template.
+    - lib/hobix/storage/filesys.rb: path_storage method for skel methods.
 
 - version: 0.1g
   date: 2004-06-30
