@@ -37,14 +37,18 @@ class Atom < Hobix::BaseOutput
     end
     def load( file_name, vars )
         rssdoc = REXML::Document.new( <<EOXML )
-<feed version="0.3" xmlns="http://purl.org/atom/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="en">
-<title></title>
-<link rel="alternate" type="text/html" href="" />
-<modified></modified>
-<tagline></tagline>
-<id></id>
-<generator url="http://hobix.com/" version="#{ Hobix::VERSION }">Hobix</generator>
-<copyright></copyright>
+<feed version="0.3"
+  xmlns="http://purl.org/atom/ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xml:lang="en">
+    <title></title>
+    <link rel="alternate" type="text/html" href="" />
+    <modified></modified>
+    <tagline></tagline>
+    <id></id>
+    <generator url="http://hobix.com/" version="#{ Hobix::VERSION }">Hobix</generator>
+    <copyright></copyright>
+</feed>
 EOXML
         uri = URI::parse( vars[:weblog].link )
         rssdoc << REXML::XMLDecl.new

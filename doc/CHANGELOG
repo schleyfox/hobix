@@ -1,4 +1,13 @@
 --- %YAML:1.0
+- version: 0.1k
+  date: 2004-09-09
+  changes:
+   - go/hobix-install.rb: added ri installation to the web install.
+   - lib/hobix/out/atom.rb: the feed tag wasn't closed.
+   - lib/hobix/util/patcher.rb: new module, applies unified diffs.
+       used for adding patches to the default blog.
+   - share/default-blog.*: patches for using apache SSIs.
+
 - version: 0.1j
   date: 2004-08-29
   changes:

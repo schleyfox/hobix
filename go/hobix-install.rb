@@ -80,6 +80,30 @@ def open_try_gzip( uri, gzip_on = true )
         end
     end
 end
+def ri_install( sucmd, libdir )
+    begin
+        require 'rdoc/rdoc'
+        ri_site = true
+        if RDOC_VERSION =~ /^0\./
+            require 'rdoc/options'
+            unless Options::OptionList::OPTION_LIST.assoc('--ri-site')
+                ri_site = false
+            end
+        end
+        if ri_site
+            ricmd = "rdoc --ri-site --all \"#{ libdir }\""
+            if sucmd == 'su'
+                `su root -c '#{ ricmd }'`
+            elsif sucmd == 'sudo'
+                `sudo #{ ricmd }`
+            else
+                RDoc::RDoc.new.document(["--ri-site", "--all", libdir])
+            end
+        end
+    rescue
+        puts "** Unable to install Ri documentation for Hobix **"
+    end
+end
 
 # Web root
 GO_HOBIX = 'http://go.hobix.com/'
@@ -146,23 +170,25 @@ den['setup'].each do |action, screen|
         clean_dir( conf['sucmd'], sharepath )
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), sharepath )
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'bin' ), conf['binpath'], 0755 )
+        ri_install( conf['sucmd'], File.join( TMPDIR, 'lib' ) )
     when 'setup'
         # Load new Hobix classes
-        require 'hobix/commandline'
-        cmdline = Class.new
-        cmdline.extend Hobix::CommandLine
-        unless cmdline.login
-            puts "# Welcome to hobix (a simple weblog tool).  Looks like your \n" +
-                 "# first time running hobix, eh?  Time to get a bit of information \n" +
-                 "# from you before you start using hobix.  (All of this will be stored \n"
-                 "# in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
-            cmdline.setup
-            puts    
-        else
-            puts "# Configuration found in #{ Hobix::CommandLine::RC }"
+        if conf['setup'].to_s.downcase != 'n'
+            require 'hobix/commandline'
+            cmdline = Class.new
+            cmdline.extend Hobix::CommandLine
+            unless cmdline.login
+                puts "# Welcome to hobix (a simple weblog tool).  Looks like your \n" +
+                     "# first time running hobix, eh?  Time to get a bit of information \n" +
+                     "# from you before you start using hobix.  (All of this will be stored \n"
+                     "# in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
+                cmdline.setup
+                puts    
+            else
+                puts "# Configuration found in #{ Hobix::CommandLine::RC }"
+            end
+            cmdline.setup_blogs
         end
-        cmdline.setup_blogs
-
     end
     puts
 end

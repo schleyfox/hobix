@@ -11,14 +11,13 @@ authors:
     email: ghosty@hobixghostfriends.com
 
 sections:
-  site:
+  about:
     ignore: true
     sort_by: id
 
-linklist: !^linklist
-  links:
-  - hobix: http://hobix.com/
-  - del.icio.us: http://del.icio.us/
+linklist:
+- hobix: http://hobix.com/
+- del.icio.us: http://del.icio.us/
  
 requires:
 - hobix/storage/filesys

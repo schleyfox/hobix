@@ -48,11 +48,27 @@ module CommandLine
         end
     end
 
+    # List all your weblogs
+    def blogs_weblog_explain; "List your weblogs."; end
+    def blogs_weblog_args; []; end
+    def blogs_weblog
+        blogs = @config['weblogs'].sort
+        name_width = blogs.collect { |b| b[0].length }.max + 1
+        tabular( blogs, [[-name_width, 0, 'weblog-name'], [-40, 1, 'path']] )
+    end
+
     # Create a new skeleton for a weblog
     def create_weblog_explain; "Create a brand new weblog."; end
     def create_weblog_args; ['weblog-name', '/path/to/']; end
     def create_weblog( name, path )
         @config['weblogs'] ||= {}
+        if @config['weblogs'][name]
+            print "*** Blog '#{ name }' exists already! Overwrite?? [y/N]: "
+            if gets.strip.upcase != 'Y'
+                puts "*** Creation of weblog `#{ name }' aborted."
+                return
+            end
+        end
         puts <<-NOTE
         |*** Creation of weblog `#{ name }' will add the following directory"
         |    structure to directory #{ path }"
@@ -82,9 +98,31 @@ module CommandLine
             return
         end
 
+        modes = File.open( "#{ Hobix::SHARE_PATH }/default-blog-modes.yaml" ) { |f| YAML::load( f ) }
+
+        puts "The default blog is available in the following modes:"
+        puts "  #{ modes.keys.join( ', ' ) }"
+        puts
+        mode = nil
+        loop do
+            print "Mode: [Enter for none] "
+            mode = gets.strip.downcase
+            break if mode.empty? or modes.has_key? mode
+            puts "*** No `#{ mode }' mode available."
+        end
+
         require 'fileutils'
         FileUtils.makedirs path
         FileUtils.cp_r Dir.glob( "#{ Hobix::SHARE_PATH }/default-blog/*" ), path
+
+        # apply any patches
+        if modes[mode]
+            require 'hobix/util/patcher'
+            patchlist = modes[mode].collect { |p| "#{ Hobix::SHARE_PATH }/default-blog.#{ p }.patch" }
+            patcher = Hobix::Util::Patcher[ *patchlist ]
+            patcher.apply( path )
+        end
+
         @config['weblogs'][name] = File.join( path, "hobix.yaml" )
         save_config
     end
@@ -227,6 +265,7 @@ module CommandLine
     ##
     def setup_blogs
         puts
+        puts "            === Joining an existing weblog? ==="
         puts "If you want to join an existing hobix weblog, we can do that now."
         puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
         puts "to simply move on."
@@ -248,6 +287,7 @@ module CommandLine
 
         puts "To setup more weblogs later, use: hobix add #{ add_weblog_args.join( ' ' ) }"
         puts
+        puts "            === Create a new weblog? ==="
         puts "If you want to create a new hobix weblog, we can do that now."
         puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
         puts "to simply move on."
@@ -288,7 +328,10 @@ module CommandLine
     end
 
     def tabular( table, fields, desc = nil )
-        client_format = fields.collect { |f| "%#{ f[0] }s" }.join( ': ' )
+        client_format = fields.collect do |f| 
+            f[0] = [f[0], f[2].length].max * ( f[0] / f[0].abs )
+            "%#{ f[0] }s"
+        end.join( ': ' )
         puts client_format % fields.collect { |f| f[2] }
         puts fields.collect { |f| "-" * f[0].abs }.join( ':-' )
         table.each do |row|
