@@ -69,11 +69,33 @@ class Weblog
             vars[:entries] = index_entries.collect { |e| storage.load_entry( e[0] ) }
             p vars[:page]
             yield vars
+        when 'daily'
+            entry_range = storage.find
+            first_time, last_time = entry_range.last[1], entry_range.first[1]
+            start = Time.mktime( first_time.year, first_time.month, first_time.day, 0, 0, 0 ) + 1
+            stop = Time.mktime( last_time.year, last_time.month, last_time.day, 23, 59, 59 )
+            days = []
+            one_day = 24 * 60 * 60
+            until start > stop
+                day_entries = storage.within( start, start + one_day - 1 )
+                days << [day_entries.last[1], day_entries] unless day_entries.empty?
+                start += one_day
+            end
+            days.extend Hobix::Enumerable
+            days.each_with_neighbors do |prev, curr, nextd| 
+                vars[:page] = Page.new( curr[0].strftime( "/%Y/%m/%d" ) )
+                vars[:page].prev = prev[0].strftime( "/%Y/%m/%d" ) if prev
+                vars[:page].next = nextd[0].strftime( "/%Y/%m/%d" ) if nextd
+                vars[:page].timestamp = curr[0]
+                vars[:entries] = curr[1].collect! { |e| storage.load_entry( e[0] ) }
+                p vars[:page]
+                yield vars
+            end
         when 'monthly'
             entry_range = storage.find
             first_time, last_time = entry_range.last[1], entry_range.first[1]
-            start = Time.local( first_time.year, first_time.month, 1 )
-            stop = Time.local( last_time.year, last_time.month, last_time.day )
+            start = Time.mktime( first_time.year, first_time.month, 1 )
+            stop = Time.mktime( last_time.year, last_time.month, last_time.day )
             months = []
             until start > stop
                 next_year, next_month = start.year, start.month + 1

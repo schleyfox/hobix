@@ -35,9 +35,14 @@ class FileSys < Hobix::BaseStorage
     def load_entry( id )
         @entry_cache ||= {}
         unless @entry_cache.has_key? id
-            e = Hobix::Entry::load( File.join( @basepath, id + "." + extension ) )
+            entry_file = File.join( @basepath, id + "." + extension )
+            e = Hobix::Entry::load( entry_file )
             e.id = id
             e.link = @link + id + ".html"
+            unless e.created
+                e.created = @index[id]
+                YAML::dump( e, File.open( entry_file, 'w' ) )
+            end
             @entry_cache[id] = e
         else
             @entry_cache[id]
@@ -94,7 +99,7 @@ class FileSys < Hobix::BaseStorage
                       end
                       skip
                   end
-        entries.slice!( search[:lastn]..-1 ) if search[:lastn]
+        entries.slice!( search[:lastn]..-1 ) if search[:lastn] and entries.length > search[:lastn]
         entries
     end
     def modified( entry_id )

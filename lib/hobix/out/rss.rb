@@ -46,6 +46,9 @@ EOXML
             ele_title = REXML::Element.new 'title'
             ele_title.text = e.title
             ele << ele_title
+            ele_guid = REXML::Element.new 'link'
+            ele_guid.text = "#{ e.link }"
+            ele << ele_guid
             ele_guid = REXML::Element.new 'guid'
             ele_guid.text = "#{ vars[:weblog].link }#{ e.created.strftime( "%Y/%m/%d/" ) }#{ e.created.to_i }"
             ele << ele_guid

@@ -23,6 +23,10 @@ class Entry
                   :contributor, :modified, :issued, :created,
                   :summary, :body
 
+    def to_yaml_type
+        "!hobix.com,2004/entry"
+    end
+
     # Load the weblog entry from a file.
     def Entry::load( file )
         YAML::load( File::open( file ) )
