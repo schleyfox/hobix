@@ -172,8 +172,9 @@ module CommandLine
     def edit_action_explain; "Edit weblog's configuration"; end
     def edit_action_args; ['weblog-name']; end
     def edit_action( weblog )
-        webconf = aorta( weblog )
-        return if webconf.nil?
+        weblog = aorta( weblog )
+        return if weblog.nil?
+        weblog.save
     end
 
     # Delete a weblog from local config

@@ -68,3 +68,6 @@ rescue ArgumentError => ae
     puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
 end
 
+__END__
+# configuration
+--- {}

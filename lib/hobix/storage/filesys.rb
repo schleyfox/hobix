@@ -48,7 +48,7 @@ class FileSys < Hobix::BaseStorage
 
         @entry_cache ||= {}
         e.id = id
-        e.link = @link + id + ".html"
+        e.link = "#{ @link }/#{ id }.html"
         e.modified = Time.now
         @entry_cache[id] = e
 
@@ -65,7 +65,7 @@ class FileSys < Hobix::BaseStorage
             entry_file = entry_path( id )
             e = Hobix::Entry::load( entry_file )
             e.id = id
-            e.link = @link + id + ".html"
+            e.link = "#{ @link }/#{ id }.html"
             e.modified = modified( id )
             unless e.created
                 e.created = @index[id]

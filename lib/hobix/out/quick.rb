@@ -111,7 +111,7 @@ class Quick < Hobix::BaseOutput
         <ul>
         <% months = weblog.storage.get_months( weblog.storage.find ) %>
         <% months.each do |month_start, month_end, month_id| %>
-            <li><a href="<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
+            <li><a href="<%= weblog.link %>/<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
         <% end %>
         </ul>
         </div> }
@@ -126,7 +126,7 @@ class Quick < Hobix::BaseOutput
      %{ <div class="sidebarBox">
         <h2 class="sidebarTitle">Syndicate</h2>
         <ul>
-            <li><a href="/index.xml">RSS 2.0</a></li>
+            <li><a href="<%= weblog.link %>/index.xml">RSS 2.0</a></li>
         </ul>
         </div> }
     end
@@ -167,7 +167,7 @@ class Quick < Hobix::BaseOutput
      %{ posted by <%= weblog.authors[entry.author]['name'] %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
     end
     def head_tags_erb; end
-    def css_erb; %{ @import "/site.css"; }; end
+    def css_erb; %{ @import "<%= weblog.link %>/site.css"; }; end
     def doctype_erb
      %{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">}
     end

@@ -256,22 +256,14 @@ class Weblog
     # with the full system path to the directory containing the configuration.
     #
     # This method sets up all the paths and loads the plugins.
-    def start( path )
-        path = File.expand_path( path )
-        @path = path
+    def start( hobix_yaml )
+        @hobix_yaml = hobix_yaml
+        @path = File.dirname( hobix_yaml )
         @sections ||= {}
-        @entry_path ||= "entries"
-        @entry_path = File.join( path, @entry_path ) if @entry_path !~ /^\//
-        @entry_path.untaint
-        @skel_path ||= "skel"
-        @skel_path = File.join( path, @skel_path ) if @skel_path !~ /^\//
-        @skel_path.untaint
-        @output_path ||= "htdocs"
-        @output_path = File.join( path, @output_path ) if @output_path !~ /^\//
-        @output_path.untaint
-        @lib_path ||= "lib"
-        @lib_path = File.join( path, @lib_path ) if @lib_path !~ /^\//
-        @lib_path.untaint
+        @entry_path = File.expand_path( @entry_path || "entries", path ).untaint
+        @skel_path = File.expand_path( @skel_path || "skel", path ).untaint
+        @output_path = File.expand_path( @output_path || "htdocs", path ).untaint
+        @lib_path = File.expand_path( @lib_path || "lib", path ).untaint
         if File.exists?( @lib_path )
             $LOAD_PATH << @lib_path
         end
@@ -282,10 +274,20 @@ class Weblog
     end
 
     # Load the weblog information from a YAML file and +start+ the Weblog.
-    def Weblog::load( file )
-        weblog = YAML::load( File::open( file ) )
-        weblog.start( File.dirname( file ) )
+    def Weblog::load( hobix_yaml )
+        hobix_yaml = File.expand_path( hobix_yaml )
+        weblog = YAML::load( File::open( hobix_yaml ) )
+        weblog.start( hobix_yaml )
         weblog
+    end
+
+    # Save the weblog configuration to its hobix.yaml (or optionally
+    # provide a path where you would like to save.)
+    def save( file = @hobix_yaml )
+        File::open( file, 'w' ) do |f|
+            YAML::dump( self, f )
+        end
+        self
     end
 
     # Used by +regenerate+ to construct the vars hash by calling

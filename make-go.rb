@@ -59,6 +59,15 @@ setup:
 
     + cmd path [ENTER for default] +
 
+- - sharepath
+  - |
+    # where would you like to install the hobix
+    # accessory data?? (this includes the default
+    # blogging templates.)  the default is
+    # CONFIG['sharepath']
+    
+    + share path [ENTER for default] +
+
 - - sucmd
   - |-
     # will you be using su or sudo??  this way you can

@@ -1,4 +1,22 @@
 --- %YAML:1.0
+- version: 0.2d
+  date: 2004-09-20
+  changes:
+    - lib/hobix/out/quick.rb: absolute links.
+    - lib/hobix/storage/filesys.rb: ditto.
+    - lib/hobix/share/default-blog.apache-ssi.patch: ditto.
+
+- version: 0.2c
+  date: 2004-09-12
+  changes:
+    - go/hobix-install.rb: unquoted commands were going to 'su'.
+        caching configuration data at the botttom of bin/hobix.
+    - lib/hobix/commandline.rb: fixing 'edit' to actually save.
+    - lib/hobix/weblog.rb: using File.expand_path rather than
+        File.join to figure out if @entry_path, @output_path,
+        and @skel_path are relative or absolute. (people are
+        seeing c:/blog/c:/blog/skel as a result on Windows.
+
 - version: 0.2b
   date: 2004-09-11
   changes:

@@ -21,7 +21,7 @@ require 'open-uri'
 
 c = ::Config::CONFIG
 rubypath = c['bindir'] + '/' + c['ruby_install_name']
-sharepath = c['prefix'] + '/share/hobix'
+c['sharepath'] = c['datadir'] + '/hobix'
 def die( msg ); puts msg; exit; end
 def check_hobix_version( path, version )
     installed = nil
@@ -41,10 +41,10 @@ def check_hobix_version( path, version )
 end
 def clean_dir( sucmd, to_dir )
     rm = "rm -rf #{ to_dir }"
-    mk = "mkdir #{ to_dir }"
+    mk = "mkdir -p #{ to_dir }"
     if sucmd == 'su'
-        `su root -c #{ rm }`
-        `su root -c #{ mk }`
+        `su root -c '#{ rm }'`
+        `su root -c '#{ mk }'`
     elsif sucmd == 'sudo'
         `sudo #{ rm }`
         `sudo #{ mk }`
@@ -55,14 +55,21 @@ def clean_dir( sucmd, to_dir )
     end
 end
 def copy_dir( sucmd, from_dir, to_dir, mode = nil )
+    mk = nil
     cp = "cp -r #{ from_dir }/* #{ to_dir }"
     Dir[File.join(from_dir, '*')].each { |f| File.chmod mode, f } if mode
+    unless File.exists? to_dir
+        mk = "mkdir -p #{ to_dir }"
+    end
     if sucmd == 'su'
+        `su root -c '#{ mk }'` if mk
         `su root -c '#{ cp }'`
     elsif sucmd == 'sudo'
+        `sudo #{ mk }` if mk
         `sudo #{ cp }`
     else
         require 'fileutils'
+        FileUtils.mkdir_p to_dir if mk
         FileUtils.cp_r Dir.glob( "#{ from_dir }/*" ), to_dir
     end
 end
@@ -107,7 +114,7 @@ def ri_install( sucmd, libdir )
 end
 
 # Web root
-GO_HOBIX = 'http://go.hobix.com/'
+GO_HOBIX = 'http://go.hobix.com/0.2c/'
 
 # Tempdir
 TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.strftime( 'hobix_%Y-%m-%d_%H-%M-%S' ) )
@@ -130,6 +137,9 @@ den['setup'].each do |action, screen|
         answer.downcase!
         die( "* not a problem * a pleasant day to you *" ) if answer == 'n'
     elsif answer != ''
+        if action =~ /path$/
+            answer = File.expand_path( answer )
+        end
         conf[action] = answer
     end
     case action
@@ -149,6 +159,12 @@ den['setup'].each do |action, screen|
             case attname
             when /^bin\//
                 attfile = $'
+                opener = "#!#{ rubypath }"
+                if conf['libpath'] and not $:.include?( conf['libpath'] )
+                    opener += "\n$:.unshift #{ conf['libpath'].dump }" 
+                end
+                filebin.gsub!( /\A#!.+$/, opener )
+                filebin.gsub!( /__END__.*\Z/m, "__END__\n#{ conf.to_yaml }" )
                 if c['host'] =~ /mswin32/ 
                     batfile = File.join( TMPDIR, attname + ".bat" )
                     File.open( batfile, 'wb' ) do |out|
@@ -156,11 +172,10 @@ den['setup'].each do |action, screen|
                     end
                     execs[attfile] = File.join( conf['binpath'], attfile + ".bat" )
                 else
-                    filebin.gsub!( /\A#!.+$/, "#!#{ rubypath }" )
                     execs[attfile] = File.join( conf['binpath'], attfile )
                 end
             when "lib/hobix.rb"
-                filebin.gsub!( /^(\s*)SHARE_PATH = (.*)$/, "\\1SHARE_PATH = #{ sharepath.dump }" )
+                filebin.gsub!( /^(\s*)SHARE_PATH = (.*)$/, "\\1SHARE_PATH = #{ conf['sharepath'].dump }" )
             end
             fileloc = File.join( TMPDIR, attname )
             File.open( fileloc, 'wb' ) do |out|
@@ -168,14 +183,14 @@ den['setup'].each do |action, screen|
             end
         end
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'lib' ), conf['libpath'] )
-        clean_dir( conf['sucmd'], sharepath )
-        copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), sharepath )
+        clean_dir( conf['sucmd'], conf['sharepath'] )
+        copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), conf['sharepath'] )
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'bin' ), conf['binpath'], 0755 )
         ri_install( conf['sucmd'], File.join( TMPDIR, 'lib' ) )
     when 'setup'
         # Load new Hobix classes
         if conf['setup'].to_s.downcase != 'n'
-            require 'hobix/commandline'
+            require File.join( conf['libpath'], 'hobix/commandline.rb' )
             cmdline = Class.new
             cmdline.extend Hobix::CommandLine
             puts "# Configuration stored in #{ Hobix::CommandLine::RC }"
