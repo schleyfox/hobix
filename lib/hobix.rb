@@ -16,6 +16,7 @@
 #++
 
 require 'hobix/config'
+require 'hobix/weblog'
 
 module Hobix
     VERSION = '0.1'

@@ -64,7 +64,7 @@ class Weblog
     end
 
     def build_pages( page_name )
-        puts "Building #{ page_name }..."
+        puts "Building #{ page_name } pages..."
         vars = {}
         if respond_to? "skel_#{ page_name }"
             method( "skel_#{ page_name }" ).call( page_name ) do |vars|
