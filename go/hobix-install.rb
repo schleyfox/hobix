@@ -17,6 +17,7 @@ require 'base64'
 require 'rbconfig'
 require 'yaml'
 require 'zlib'
+require 'open-uri'
 
 c = ::Config::CONFIG
 rubypath = c['bindir'] + '/' + c['ruby_install_name']
