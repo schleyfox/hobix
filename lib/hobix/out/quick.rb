@@ -232,7 +232,7 @@ class QuickArchive < Quick
      %{ <div id="archives">
         <ul>
         <% entries.each_day do |day, day_entries| %>
-            <li><+ day_header +></li>
+            <li><+ day_header +>
             <ul>
             <% day_entries.each do |entry| %>
                 <li><+ entry +></li>
