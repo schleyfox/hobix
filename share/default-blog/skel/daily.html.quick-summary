@@ -1,1 +1,0 @@
-title: <%= weblog.title %> &raquo; Archive for <%= page.timestamp.strftime( '%A, %B %d, %Y' ) %>

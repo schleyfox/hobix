@@ -1,5 +1,0 @@
---- !hobix.com,2004/entry 
-title: "Writing C -- in Ruby!"
-author: why
-created: 2005-01-31 01:30:40.963825 -05:00
-content: Ryan Davis says @ruby2c@ is mere "hours away":http://blog.zenspider.com/archives/2005/01/ruby2c_mailing.html.  His goal has been to translate the entire Ruby stdlib.  Which is "happening":http://blog.zenspider.com/archives/2005/01/r2c_rsn_no_real.html.
