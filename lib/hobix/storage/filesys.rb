@@ -14,7 +14,6 @@
 #--
 # $Id$
 #++
-require 'hobix/entry'
 require 'find'
 require 'yaml'
 
@@ -120,6 +119,24 @@ class FileSys < Hobix::BaseStorage
     end
     def modified( entry_id )
         @modified[entry_id]
+    end
+    def get_months( entries )
+        first_time = entries.collect { |e| e[1] }.min
+        last_time = entries.collect { |e| e[1] }.max
+        start = Time.mktime( first_time.year, first_time.month, 1 )
+        stop = Time.mktime( last_time.year, last_time.month, last_time.day )
+        months = []
+        until start > stop
+            next_year, next_month = start.year, start.month + 1
+            if next_month > 12
+                next_year += next_month / 12
+                next_month %= 12
+            end
+            month_end = Time.mktime( next_year, next_month, 1 ) - 1
+            months << [ start, month_end, start.strftime( "/%Y/%m/" ) ]
+            start = month_end + 1
+        end
+        months
     end
 end
 end

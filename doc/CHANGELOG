@@ -1,4 +1,19 @@
 --- %YAML:1.0
+- version: 0.1d
+  date: 2004-05-22
+  changes:
+    - bin/hobix: Added 'edit' and 'list' commands with method for tabular display.
+        Objects no longer save if nothing is updated from the $EDITOR.
+    - lib/hobix/base.rb: ToYamlExtras module contains property mapping code.
+    - lib/hobix/entry.rb: EntryEnum class for covering common iteration schemes,
+        such as each_day.  RedCloth is default text processor.  Allow specification
+        of text processor fields and clean YAML output.
+    - lib/hobix/linklist.rb: New LinkList entry type.  For storing links, will be
+        used for sidebar links.
+    - lib/hobix/storage/filesys.rb: new get_months method for retrieving all
+        archive months.
+    - lib/hobix/weblog.rb: cleaner YAML output for weblog config.  cleaner
+        output during regen.
 - version: 0.1a
   date: 2004-05-16
   changes:

@@ -23,7 +23,12 @@ class Entry
                   :contributors, :modified, :issued, :created,
                   :content
 
-    def to_yaml_properties
+    def day_id; created.strftime( "/%Y/%m/%d/" ); end
+    def month_id; created.strftime( "/%Y/%m/" ); end
+    def year_id; created.strftime( "/%Y/" ); end
+
+    include ToYamlExtras
+    def to_yaml_property_map
         [
             ['@title', :req], 
             ['@author', :req], 
@@ -32,22 +37,26 @@ class Entry
             ['@tagline', :opt], 
             ['@summary', :opt], 
             ['@content', :req]
-        ].
-        reject do |prop, req|
-            req == :opt and not instance_variable_get( prop )
-        end.
-        collect do |prop, req|
-            prop
-        end
+        ]
     end
 
     def to_yaml_type
-        "!okay/news/entry#1.0"
+        "!hobix.com,2004/entry"
     end
 
     alias to_yaml_orig to_yaml
     def to_yaml( opts = {} )
         opts[:UseFold] = true
+        Entry::text_processor_fields.each do |f|
+            v = instance_variable_get( '@' + f )
+            if v.is_a? Entry::text_processor
+                instance_eval %{
+                    def @#{ f }.to_yaml( opts = {} )
+                        self.to_str.to_yaml( opts )
+                    end
+                }
+            end
+        end
         to_yaml_orig( opts )
     end
 
@@ -55,16 +64,43 @@ class Entry
     def Entry::load( file )
         YAML::load( File::open( file ) )
     end
+
+    def Entry::text_processor; RedCloth; end
+    def Entry::text_processor_fields; ['content', 'tagline', 'summary']; end
+
 end
 end
 
-YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0' ) do |type, val|
-    ['content', 'tagline', 'summary'].each do |f|
-        val[f] = RedCloth.new( val[f].to_s ) if val[f]
+entry_proc = Proc.new do |type, val|
+    Hobix::Entry::text_processor_fields.each do |f|
+        if val[f].respond_to? :value
+            str = val[f].value
+            def str.to_html
+                self
+            end
+            val[f] = str
+        elsif val[f].respond_to? :to_str
+            val[f] = Hobix::Entry::text_processor.new( val[f].to_str ) 
+        end
     end
     YAML::object_maker( Hobix::Entry, val )
 end
-YAML::add_domain_type( 'hobix.com,2004', 'entry' ) do |type, val|
-    val['content'] = RedCloth.new( val['body'].to_s )
-    YAML::object_maker( Hobix::Entry, val )
+YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0', &entry_proc )
+YAML::add_domain_type( 'hobix.com,2004', 'entry', &entry_proc )
+
+module Hobix
+module EntryEnum
+    def each_day
+        last_day, day = nil, []
+        each do |e|
+            if last_day and last_day != e.day_id
+                yield day.first.created, day
+                day = []
+            end
+            last_day = e.day_id
+            day << e
+        end
+        yield day.first.created, day if last_day
+    end
+end
 end

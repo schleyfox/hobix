@@ -35,10 +35,10 @@ module CommandLine
     end
 
     # Create a new skeleton for a weblog
-    # def create_weblog_explain; "Create a brand new weblog."; end
-    # def create_weblog_args; ['weblog-name']; end
-    # def create_weblog( name )
-    # end
+    def create_weblog_explain; "Create a brand new weblog."; end
+    def create_weblog_args; ['weblog-name']; end
+    def create_weblog( name )
+    end
 
 
     # Add a weblog to local config
@@ -51,11 +51,12 @@ module CommandLine
     end
 
     # Edit a weblog from local config
-    # def edit_action_explain; "Edit weblog's configuration"; end
-    # def edit_action_args; ['weblog-name']; end
-    # def edit_action( weblog )
-    #     aorta( weblog )
-    # end
+    def edit_action_explain; "Edit weblog's configuration"; end
+    def edit_action_args; ['weblog-name']; end
+    def edit_action( weblog )
+        webconf = aorta( weblog )
+        return if webconf.nil?
+    end
 
     # Delete a weblog from local config
     def del_weblog_explain; "Remove weblog from your list."; end
@@ -64,6 +65,16 @@ module CommandLine
         @config['weblogs'] ||= {}
         @config['weblogs'].delete( name )
         save_config
+    end
+
+    # List entries
+    def list_action_explain; "List all posts within a given path."; end
+    def list_action_args; ['weblog-name', 'search/path']; end
+    def list_action( weblog, inpath = '' )
+        entries = weblog.storage.find( :all => true, :inpath => inpath ).
+                  sort { |e1, e2| e1[0] <=> e2[0] }
+        name_width = entries.collect { |e| e[0].length }.max + 1
+        tabular( entries, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
     end
 
     # Post a new entry
@@ -78,7 +89,10 @@ module CommandLine
             entry.author = @config['username']
         end
         entry = aorta( entry )
+        return if entry.nil?
+
         weblog.storage.save_entry( entry_id, entry )
+        weblog.regenerate( :update ) if @config['post upgen']
     end
 
     # Update the site
@@ -130,6 +144,17 @@ module CommandLine
             @config['use editor'] = false
         end
 
+        puts
+        print "When posting a new entry, would you like Hobix to automatically"
+        print "update the site? [Y/n]: "
+        post_upgen = gets.strip.upcase
+
+        if post_upgen == 'N'
+            @config['post upgen'] = false
+        else
+            @config['post upgen'] = true
+        end
+
         # puts
         # puts "If you want to create a new hobix weblog, we can do that now."
         # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
@@ -148,13 +173,33 @@ module CommandLine
     def aorta( obj )
         tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
         File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
+        created = File.mtime( tempfile )
         system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-        return obj unless File.exists?( tempfile )
+        return nil unless File.exists?( tempfile )
 
-        content = YAML::load( File.open( tempfile ) )
+        if created < File.mtime( tempfile )
+            obj = YAML::load( File.open( tempfile ) )
+        else
+            puts "** Edit aborted"
+            obj = nil
+        end
         File.delete( tempfile )
-        content
+        obj
     end
+
+    def tabular( table, fields, desc = nil )
+        client_format = fields.collect { |f| "%#{ f[0] }s" }.join( ': ' )
+        puts client_format % fields.collect { |f| f[2] }
+        puts fields.collect { |f| "-" * f[0].abs }.join( ':-' )
+        table.each do |row|
+            puts client_format % fields.collect { |f| row[ f[1] ] }
+            if desc
+                puts row[ desc ]
+                puts
+            end
+        end
+    end
+
 end
 end
 

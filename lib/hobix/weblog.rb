@@ -15,6 +15,8 @@
 # $Id$
 #++
 require 'hobix/base'
+require 'hobix/entry'
+require 'hobix/linklist'
 require 'find'
 require 'ftools'
 require 'yaml'
@@ -64,7 +66,7 @@ class Weblog
     end
 
     def build_pages( page_name )
-        puts "Building #{ page_name } pages..."
+        puts "[Building #{ page_name } pages]"
         vars = {}
         if respond_to? "skel_#{ page_name }"
             method( "skel_#{ page_name }" ).call do |vars|
@@ -114,7 +116,7 @@ class Weblog
                                 File.exists?( full_entry_path ) and
                                 File.mtime( path ) < File.mtime( full_entry_path ) and
                                 vars[:page].updated < File.mtime( full_entry_path )
-                        p vars[:page]
+                        p_publish vars[:page]
                         vars.keys.each do |var_name|
                             case var_name.to_s
                             when /entry$/
@@ -123,6 +125,7 @@ class Weblog
                                 vars[var_name].collect! do |e|
                                     storage.load_entry( e[0] )
                                 end
+                                vars[var_name].extend Hobix::EntryEnum
                             end
                         end
 
@@ -181,21 +184,7 @@ class Weblog
     end
 
     def skel_monthly
-        entry_range = storage.find
-        first_time, last_time = entry_range.last[1], entry_range.first[1]
-        start = Time.mktime( first_time.year, first_time.month, 1 )
-        stop = Time.mktime( last_time.year, last_time.month, last_time.day )
-        months = []
-        until start > stop
-            next_year, next_month = start.year, start.month + 1
-            if next_month > 12
-                next_year += next_month / 12
-                next_month %= 12
-            end
-            month_end = Time.mktime( next_year, next_month, 1 ) - 1
-            months << [ start, month_end ]
-            start = month_end + 1
-        end
+        months = storage.get_months( storage.find )
         months.extend Hobix::Enumerable
         months.each_with_neighbors do |prev, curr, nextm| 
             entries = storage.within( curr[0], curr[1] )
@@ -267,6 +256,33 @@ class Weblog
     def to_yaml_type
         "!hobix.com,2004/weblog"
     end
+
+    def p_publish( obj )
+        puts "## Page: #{ obj.link }, updated #{ obj.updated }"
+    end
+
+    ## YAML Display
+    include ToYamlExtras
+    def to_yaml_property_map
+        [
+            ['@title', :req], 
+            ['@link', :req], 
+            ['@tagline', :req], 
+            ['@period', :opt], 
+            ['@entry_path', :opt],
+            ['@skel_path', :opt],
+            ['@output_path', :opt],
+            ['@authors', :req], 
+            ['@contributors', :opt], 
+            ['@sections', :opt], 
+            ['@requires', :req]
+        ]
+    end
+
+    def to_yaml_type
+        "!hobix.com,2004/weblog"
+    end
+
 end
 end
 

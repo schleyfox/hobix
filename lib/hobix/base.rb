@@ -106,4 +106,15 @@ module Enumerable
         self
     end
 end
+
+module ToYamlExtras
+    def to_yaml_properties
+        to_yaml_property_map.reject do |prop, req|
+            req == :opt and not instance_variable_get( prop )
+        end.
+        collect do |prop, req|
+            prop
+        end
+    end
+end
 end

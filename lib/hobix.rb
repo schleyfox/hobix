@@ -20,10 +20,10 @@ require 'hobix/weblog'
 
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.1a'
+    VERSION = '0.1d'
     ## CVS information
     CVS_ID = "$Id$"
-    CVS_REV = "$Revision$"
+    CVS_REV = "$Revision$"[11..-3]
     ## Share directory contains external data files
     SHARE_PATH = "/usr/local/share/hobix/"
 end
