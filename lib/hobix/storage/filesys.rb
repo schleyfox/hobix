@@ -97,7 +97,9 @@ class FileSys < Hobix::BaseStorage
                 entry_id = entry_paths.join( '/' )
                 @modified[entry_id] = File.mtime( path )
                 unless index.has_key? entry_id
-                    @index[entry_id] = @modified[entry_id]
+                    efile = entry_path( entry_id )
+                    e = Hobix::Entry::load( efile )
+                    @index[entry_id] = e.created || @modified[entry_id]
                 else
                     @index[entry_id] = index[entry_id]
                     index.delete( entry_id )
@@ -108,8 +110,12 @@ class FileSys < Hobix::BaseStorage
         true
     end
     def sort_index
+        return unless @index
+        index_path = File.join( @basepath, 'index.hobix' )
         @index.sort! { |x,y| y[1] <=> x[1] }
-        YAML::dump( @index, File.open( index_path, 'w' ) ) rescue nil
+        File.open( index_path, 'w' ) do |f|
+            YAML::dump( @index, f )
+        end
     end
     def path_storage( p )
         return self if ['', '.'].include? p

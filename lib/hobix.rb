@@ -213,7 +213,7 @@ require 'hobix/weblog'
 #
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.1i'
+    VERSION = '0.1j'
     ## CVS information
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]

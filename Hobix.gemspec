@@ -1,7 +1,7 @@
 require 'rubygems'
 spec = Gem::Specification.new do |s|
   s.name = 'Hobix'
-  s.version = "0.1"
+  s.version = "0.1i"
   s.platform = Gem::Platform::RUBY
   s.summary = "Hobix"
 #  s.requirements << 'um?'
@@ -12,10 +12,9 @@ spec = Gem::Specification.new do |s|
   s.autorequire = 'hobix'
   s.author = "Why the Lucky Stiff"
   s.email = "why@ruby-lang.org"
-# s.rubyforge_project = "redcloth"
+  s.rubyforge_project = "hobix"
   s.homepage = "http://hobix.com/"
 end
 if $0==__FILE__
-p spec
   Gem::Builder.new(spec).build
 end

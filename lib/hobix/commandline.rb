@@ -50,8 +50,43 @@ module CommandLine
 
     # Create a new skeleton for a weblog
     def create_weblog_explain; "Create a brand new weblog."; end
-    def create_weblog_args; ['weblog-name']; end
-    def create_weblog( name )
+    def create_weblog_args; ['weblog-name', '/path/to/']; end
+    def create_weblog( name, path )
+        @config['weblogs'] ||= {}
+        puts <<-NOTE
+        |*** Creation of weblog `#{ name }' will add the following directory"
+        |    structure to directory #{ path }"
+        |
+        |    #{ path }
+        |       hobix.yaml <- configuration
+        |       
+        |       entries/   <- edit and organize
+        |                     your news items,
+        |                     articles and so on.
+        |       
+        |       skel/      <- contains your
+        |                     templates
+        |       
+        |       htdocs/    <- html is created here,
+        |                     store all your images here,
+        |                     this is your viewable
+        |                     websyht
+        |       
+        |       lib/       <- extra hobix libraries
+        |                     (plugins) go here
+        |
+        NOTE
+        print "Create this structure? [y/N]: "
+        if gets.strip.upcase != 'Y'
+            puts "*** Creation of weblog `#{ name }' aborted."
+            return
+        end
+
+        require 'fileutils'
+        FileUtils.makedirs path
+        FileUtils.cp_r Dir.glob( "#{ Hobix::SHARE_PATH }/default-blog/*" ), path
+        @config['weblogs'][name] = File.join( path, "hobix.yaml" )
+        save_config
     end
 
 
@@ -60,6 +95,18 @@ module CommandLine
     def add_weblog_args; ['weblog-name', '/path/to/hobix.yaml']; end
     def add_weblog( name, path )
         @config['weblogs'] ||= {}
+        puts "*** Checking for existence of blog."
+        require 'hobix/weblog'
+        if File.directory? path
+            path = File.join( path, 'hobix.yaml' )
+            puts "*** Path is a directory, using `#{ path }'."
+        end
+        unless File.exists? path
+            puts "*** No file `#{ path }' found!  Aborting."
+            return
+        end
+        hobix_weblog = Hobix::Weblog.load( path )
+        puts "*** Found blog `#{ hobix_weblog.title }', added to your config"
         @config['weblogs'][name] = path
         save_config
     end
@@ -163,7 +210,7 @@ module CommandLine
         end
 
         puts
-        puts "When posting a new entry, would you like Hobix to automatically"
+        puts "After posting a new entry, would you like Hobix to automatically"
         print "update the site? [Y/n]: "
         post_upgen = gets.strip.upcase
 
@@ -172,20 +219,55 @@ module CommandLine
         else
             @config['post upgen'] = true
         end
-
-        # puts
-        # puts "If you want to create a new hobix weblog, we can do that now."
-        # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
-        # puts "to simply move on."
-        # @config['weblogs'] ||= {}
-        # ## XX TODO XX
-
-        # puts
-        # puts "If you want to join an existing hobix weblog, we can do that now."
-        # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
-        # puts "to simply move on."
-        # ## XX TODO XX
         save_config
+    end
+
+    ##
+    ## Extra setup, triggered upon installation
+    ##
+    def setup_blogs
+        puts
+        puts "If you want to join an existing hobix weblog, we can do that now."
+        puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
+        puts "to simply move on."
+        loop do
+            puts
+            puts "Short name for weblog, used on the command line (i.e. hobix upgen blogName)."
+            print ": "
+            blogname = gets.strip
+            break if blogname.empty?
+
+            print "Path to weblog's hobix.yaml `#{ blogname }': "
+            blogpath = gets.strip
+            if blogpath.empty?
+                "*** Aborting setup of weblog `#{ blogname }'."
+                break
+            end
+            add_weblog( blogname, blogpath )
+        end
+
+        puts "To setup more weblogs later, use: hobix add #{ add_weblog_args.join( ' ' ) }"
+        puts
+        puts "If you want to create a new hobix weblog, we can do that now."
+        puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
+        puts "to simply move on."
+        loop do
+            puts
+            puts "Short name for weblog, used on the command line (i.e. hobix upgen blogName)."
+            print ": "
+            blogname = gets.strip
+            break if blogname.empty?
+
+            print "Path to create weblog `#{ blogname }': "
+            blogpath = gets.strip
+            if blogpath.empty?
+                "*** Aborting creation of weblog `#{ blogname }'."
+                break
+            end
+            create_weblog( blogname, blogpath )
+        end
+        puts "To create more weblogs later, use: hobix create #{ create_weblog_args.join( ' ' ) }"
+        puts
     end
 
     def aorta( obj )
@@ -218,6 +300,9 @@ module CommandLine
         end
     end
 
+    def puts( str = '' )
+        Kernel::puts str.gsub( /^\s+\|/, '' )
+    end
 end
 end
 

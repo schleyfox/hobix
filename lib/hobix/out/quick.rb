@@ -26,16 +26,14 @@ class Quick < Hobix::BaseOutput
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
         defaults.each do |k, v|
-            if respond_to? "#{ k }_erb"
-                k.untaint
-                v = v.inspect
-                v.untaint
-                instance_eval %{
-                    def #{ k }_erb
-                        #{ v }
-                    end
-                }
-            end
+            k.untaint
+            v = v.inspect
+            v.untaint
+            instance_eval %{
+                def #{ k }_erb
+                    #{ v }
+                end
+            }
         end
     end
     def extension
@@ -108,29 +106,33 @@ class Quick < Hobix::BaseOutput
         ['sidebar_archive', 'sidebar_links', 'sidebar_syndicate', 'sidebar_hobix']
     end
     def sidebar_archive_erb
-     %{ <div id="sidebarBox">
+     %{ <div class="sidebarBox">
         <h2 class="sidebarTitle">Archive</h2>
+        <ul>
         <% months = weblog.storage.get_months( weblog.storage.find ) %>
         <% months.each do |month_start, month_end, month_id| %>
-            <a href="<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a><br />
+            <li><a href="<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
         <% end %>
+        </ul>
         </div> }
     end
     def sidebar_links_erb
-     %{ <div id="sidebarBox">
+     %{ <div class="sidebarBox">
         <h2 class="sidebarTitle">Links</h2>
         <%= weblog.linklist.content.to_html %>
         </div> }
     end
     def sidebar_syndicate_erb
-     %{ <div id="sidebarBox">
+     %{ <div class="sidebarBox">
         <h2 class="sidebarTitle">Syndicate</h2>
-        <a href="/index.xml">RSS 2.0</a>
+        <ul>
+            <li><a href="/index.xml">RSS 2.0</a></li>
+        </ul>
         </div> }
     end
     def sidebar_hobix_erb
-     %{ <div id="sidebarBox">
-        Built upon <a href="http://hobix.com">Hobix</a>
+     %{ <div class="sidebarBox">
+        <p>Built upon <a href="http://hobix.com">Hobix</a></p>
         </div> }
     end
     def blog_erb

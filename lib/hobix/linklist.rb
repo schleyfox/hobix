@@ -69,8 +69,8 @@ class LinkList < Entry
     def content
         RedCloth.new( 
             @links.collect do |title, url|
-                "\"#{ title }\":#{ url }"
-            end.join( "\n\n" )
+                "* \"#{ title }\":#{ url }"
+            end.join( "\n" )
         )
     end
 

@@ -20,19 +20,37 @@ require 'zlib'
 
 c = ::Config::CONFIG
 rubypath = c['bindir'] + '/' + c['ruby_install_name']
+sharepath = c['prefix'] + '/share/hobix'
 def die( msg ); puts msg; exit; end
 def check_hobix_version( path, version )
-    begin
-        require File.join( path, 'hobix' )
-    rescue LoadError
-    end
-    begin
-        if Hobix::VERSION == version
-            die( "* you are already up-to-date * hobix v#{ Hobix::VERSION } installed *" )
-        else
-            puts "* upgrading from hobix v#{ Hobix::VERSION } to the latest v#{ version }"
+    installed = nil
+    hobixfile = File.join( path, 'hobix.rb' )
+    if File.exists? hobixfile
+        File.open( hobixfile ) do |f|
+            f.grep( /VERSION\s+=\s+'([^']+)'/ ) do |line|
+                installed = $1
+            end
         end
-    rescue NameError
+    end
+    if installed == version
+        die( "* you are already up-to-date * hobix v#{ installed } installed *" )
+    else
+        puts "* upgrading from hobix v#{ installed } to the latest v#{ version }"
+    end
+end
+def clean_dir( sucmd, to_dir )
+    rm = "rm -rf #{ to_dir }"
+    mk = "mkdir #{ to_dir }"
+    if sucmd == 'su'
+        `su root -c #{ rm }`
+        `su root -c #{ mk }`
+    elsif sucmd == 'sudo'
+        `sudo #{ rm }`
+        `sudo #{ mk }`
+    else
+        require 'fileutils'
+        FileUtils.rm_rf to_dir
+        FileUtils.mkdir_p to_dir
     end
 end
 def copy_dir( sucmd, from_dir, to_dir, mode = nil )
@@ -77,6 +95,7 @@ end
 den, attached = stream.documents
 
 conf = {}
+execs = {}
 den['setup'].each do |action, screen|
     print screen.gsub( /CONFIG\['(\w+)'\]/ ) { conf[action] = c[$1] }.
                  gsub( /^CONF$/ ) { conf.to_yaml }
@@ -88,9 +107,10 @@ den['setup'].each do |action, screen|
     elsif answer != ''
         conf[action] = answer
     end
-    if action == 'libpath'
+    case action
+    when 'libpath'
         check_hobix_version( conf[action], den['version'] )
-    elsif action == 'installing'
+    when 'installing'
         puts
         require 'ftools'
         attached.each do |attname, att64|
@@ -101,12 +121,21 @@ den['setup'].each do |action, screen|
                           decode64( att64 )
                       end
             File.makedirs( File.join( TMPDIR, File.dirname( attname ) ) )
-            if attname =~ /^bin\/\w+$/
+            case attname
+            when /^bin\//
+                attfile = $'
                 if c['host'] =~ /mswin32/ 
-                    attname += ".rb"
+                    batfile = File.join( TMPDIR, attname + ".bat" )
+                    File.open( batfile, 'wb' ) do |out|
+                        out << "@echo off\r\n\"#{ conf['binpath'] }/ruby.exe\" \"#{ conf['binpath'] }/#{ attfile }\" %1 %2 %3 %4 %5 %6 %7 %8 %9\r\n"
+                    end
+                    execs[attfile] = File.join( conf['binpath'], attfile + ".bat" )
                 else
                     filebin.gsub!( /\A#!.+$/, "#!#{ rubypath }" )
+                    execs[attfile] = File.join( conf['binpath'], attfile )
                 end
+            when "lib/hobix.rb"
+                filebin.gsub!( /^(\s*)SHARE_PATH = (.*)$/, "\\1SHARE_PATH = #{ sharepath.dump }" )
             end
             fileloc = File.join( TMPDIR, attname )
             File.open( fileloc, 'wb' ) do |out|
@@ -114,8 +143,28 @@ den['setup'].each do |action, screen|
             end
         end
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'lib' ), conf['libpath'] )
+        clean_dir( conf['sucmd'], sharepath )
+        copy_dir( conf['sucmd'], File.join( TMPDIR, 'share' ), sharepath )
         copy_dir( conf['sucmd'], File.join( TMPDIR, 'bin' ), conf['binpath'], 0755 )
+    when 'setup'
+        # Load new Hobix classes
+        require 'hobix/commandline'
+        cmdline = Class.new
+        cmdline.extend Hobix::CommandLine
+        unless cmdline.login
+            puts "# Welcome to hobix (a simple weblog tool).  Looks like your \n" +
+                 "# first time running hobix, eh?  Time to get a bit of information \n" +
+                 "# from you before you start using hobix.  (All of this will be stored \n"
+                 "# in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
+            cmdline.setup
+            puts    
+        else
+            puts "# Configuration found in #{ Hobix::CommandLine::RC }"
+        end
+        cmdline.setup_blogs
+
     end
     puts
 end
+
 

@@ -1,15 +1,27 @@
-require 'hobix'
 require 'base64'
+require 'yaml'
 
+def check_hobix_version( path, version )
+    installed = nil
+    hobixfile = File.join( path, 'hobix.rb' )
+    if File.exists? hobixfile
+        File.open( hobixfile ) do |f|
+            f.grep( /VERSION\s+=\s+'([^']+)'/ ) do |line|
+                installed = $1
+            end
+        end
+    end
+    installed
+end
 attached = {}
-['../redcloth/lib/**/*.rb', 'lib/**/*.rb', 'bin/**/*', 'run-tests.rb'].collect do |dirglob|
+['../redcloth/lib/**/*.rb', 'lib/**/*.rb', 'bin/**/*', 'share/**/*', 'run-tests.rb'].collect do |dirglob|
     Dir.glob(dirglob)
 end.flatten.each do |item| 
     next if item.include?("CVS") or File.directory? item
     attached[item.gsub( /^\.\.\/\w+\//, '' )] = Base64::encode64( File.read( item ) )
 end
 hobix_install_yaml =<<EOY
-version: #{ Hobix::VERSION.dump }
+version: #{ check_hobix_version( 'lib', 'hobix.rb' ) }
 setup:
 - - welcome
   - |-
@@ -63,6 +75,14 @@ setup:
 
     + all set + [Yn] ?
 
+- - setup
+  - |-
+    # brilliant, it's all installed.  would you like to setup your hobix
+    # configuration now??  (if not, you can use `hobix setup_blogs' at your
+    # convenience.
+
+    + setup your blogs + [Yn] ? 
+
 - - complete 
   - |
     # your hobix installation is complete!! to get
@@ -71,6 +91,10 @@ setup:
     # hobix actions!!  (here are you configs again:)
 
     CONF
+
+    # See hobix.com for a tutorial on using your new Hobix blogs!!  And
+    # when you have your blog up, let everybody know at let.us.all.hobix.com,
+    # okay?? great, thanks.
 
 EOY
 

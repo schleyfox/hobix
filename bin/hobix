@@ -40,10 +40,17 @@ unless cmdline.login
     puts    
 end
 
-if cmdline.respond_to? "#{ cmd }_weblog"
+if cmd == 'setup_blogs'
+    cmdline.setup_blogs
+elsif cmdline.respond_to? "#{ cmd }_weblog"
     cmdline.method( "#{ cmd }_weblog" ).call( *opts )
 elsif cmdline.respond_to? "#{ cmd }_action"
     weblog = opts.shift
+    unless cmdline.config['weblogs'].respond_to? :has_key?
+        puts "*** no weblogs found in your configuration."
+        puts "*** use `hobix create' or `hobix add' to setup."
+        exit
+    end
     unless cmdline.config['weblogs'].has_key? weblog
         puts "*** no weblog `#{ weblog }' found in your configuration."
         puts "*** type `hobix help' and check your spelling."

@@ -1,4 +1,16 @@
 --- %YAML:1.0
+- version: 0.1j
+  date: 2004-08-29
+  changes:
+    - make-go.rb: installation of share goods.  version sniffing
+        without require.  automatic setup of blogs.
+    - go/hobix-install.rb: ditto.
+    - lib/hobix/commandline.rb: obscure setup_blogs command.
+    - lib/hobix/linklist.rb: links now display as list items.
+    - lib/hobix/out/quick.rb: allow custom template entries. all
+        sidebar entries are now list items.
+    - lib/hobix/storage/filesys.rb: better date created detection.
+
 - version: 0.1i
   date: 2004-08-24
   changes:
