@@ -8,7 +8,7 @@ def print_usage( cmdline )
     puts "hobix #{ Hobix::VERSION } on ruby #{ ::RUBY_VERSION } (#{ ::RUBY_RELEASE_DATE }) [#{ ::RUBY_PLATFORM }]"
     puts "Usage: hobix command weblog-name [command-options]"
     puts "Commands are"
-    ['weblog', 'action'].each do |cmd_type|
+    ['app', 'weblog', 'action'].each do |cmd_type|
         cmdline.methods.collect do |m|
             if m =~ /^(\w+)_(#{ cmd_type })$/
                 [$1, $&]
@@ -33,10 +33,13 @@ ARGV.clear
          
 cmdline.login
 
+mname = nil
 if cmd == 'setup_blogs'
-    cmdline.setup_blogs
+    mname = cmd
+elsif cmdline.respond_to? "#{ cmd }_app"
+    mname = "#{ cmd }_app"
 elsif cmdline.respond_to? "#{ cmd }_weblog"
-    cmdline.method( "#{ cmd }_weblog" ).call( *opts )
+    mname = "#{ cmd }_weblog"
 elsif cmdline.respond_to? "#{ cmd }_action"
     weblog = opts.shift
     unless cmdline.config['weblogs'].respond_to? :has_key?
@@ -50,8 +53,18 @@ elsif cmdline.respond_to? "#{ cmd }_action"
         exit
     end
     hobix_weblog = Hobix::Weblog.load( cmdline.config['weblogs'][ weblog ] )
-    cmdline.method( "#{ cmd }_action" ).call( hobix_weblog, *opts )
-else
+    opts.unshift hobix_weblog
+    mname = "#{ cmd }_action"
+end
+unless mname
     puts "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
+end
+m = cmdline.method( mname )
+begin
+    m.call( *opts )
+rescue ArgumentError => ae
+    arglist = [cmd] + cmdline.method( "#{ mname }_args" ).call
+    puts "*** #{ ae.message }"
+    puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
 end
 

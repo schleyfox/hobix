@@ -50,6 +50,14 @@ module CommandLine
         end
     end
 
+    # Update your Hobix setup
+    def upgrade_app_explain; "Check for updates to Hobix."; end
+    def upgrade_app_args; []; end
+    def upgrade_app
+        require 'open-uri'
+        eval(open("http://go.hobix.com/").read)
+    end
+
     # List all your weblogs
     def blogs_weblog_explain; "List your weblogs."; end
     def blogs_weblog_args; []; end
@@ -71,6 +79,7 @@ module CommandLine
                 return
             end
         end
+        path = File.expand_path( path )
         puts <<-NOTE
         |*** Creation of weblog `#{ name }' will add the following directory"
         |    structure to directory #{ path }"
@@ -134,6 +143,7 @@ module CommandLine
     def add_weblog_args; ['weblog-name', '/path/to/hobix.yaml']; end
     def add_weblog( name, path )
         @config['weblogs'] ||= {}
+        path = File.expand_path( path )
         puts "*** Checking for existence of blog."
         require 'hobix/weblog'
         if File.directory? path

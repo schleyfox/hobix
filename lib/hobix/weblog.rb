@@ -257,6 +257,7 @@ class Weblog
     #
     # This method sets up all the paths and loads the plugins.
     def start( path )
+        path = File.expand_path( path )
         @path = path
         @sections ||= {}
         @entry_path ||= "entries"
@@ -607,11 +608,13 @@ class Weblog
             ['@link', :req], 
             ['@tagline', :req], 
             ['@period', :opt], 
+            ['@lastn', :opt],
             ['@entry_path', :opt],
             ['@skel_path', :opt],
             ['@output_path', :opt],
             ['@authors', :req], 
             ['@contributors', :opt], 
+            ['@linklist', :opt],
             ['@sections', :opt], 
             ['@requires', :req]
         ]

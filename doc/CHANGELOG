@@ -1,4 +1,17 @@
 --- %YAML:1.0
+- version: 0.2b
+  date: 2004-09-11
+  changes:
+    - bin/hobix: handling bad arguments, reporting proper syntax.
+    - lib/hobix/weblog.rb: dumping linklist and lastn in YAML.
+    - go/hobix-install.rb: allowing customization of sharepath.
+
+- version: 0.2a
+  date: 2004-09-10
+  changes:
+    - lib/hobix/commandline.rb: new `hobix upgrade' command.
+    - lib/hobix/config.rb: fixing errors when loading YAML config.
+
 - version: 0.2
   date: 2004-09-10
   changes:

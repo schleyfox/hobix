@@ -19,19 +19,22 @@ require 'yaml'
 
 module Hobix
 class Config
-    attr_accessor :weblogs, :username
+    attr_accessor :weblogs, :username, :personal, 
+                  :post_upgen, :use_editor
     def initialize
         @username = ENV['USER'] unless @username
         self
     end
     def Config.load( conf_file )
         c = YAML::load( File::open( conf_file ) )
-        c = YAML::object_maker( Hobix::Config, c ) if c.is_a? Hash
+        c.keys.each do |k|
+            if k =~ /\s/
+                k_ = k.gsub( /\s/, '_' )
+                c[k_] = c.delete( k )
+            end
+        end
+        c = YAML::object_maker( Hobix::Config, c )
         c.initialize
     end
 end
-end
-
-YAML::add_domain_type( 'whytheluckystiff.net,2004', 'hobix/config' ) do |type, val|
-    YAML::object_maker( Hobix::Config, val )
 end
