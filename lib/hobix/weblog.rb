@@ -382,7 +382,7 @@ class Weblog
                     end
                 else
                     full_entry_path = File.join( @output_path, entry_path )
-                    next if File.mtime( full_entry_path ) >= File.mtime( path )
+                    next if File.exists?( full_entry_path ) and File.mtime( full_entry_path ) >= File.mtime( path )
                     File.makedirs( File.dirname( full_entry_path ) )
                     File.copy( path, full_entry_path )
                 end

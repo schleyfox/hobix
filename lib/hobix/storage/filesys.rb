@@ -38,11 +38,17 @@ class FileSys < Hobix::BaseStorage
     end
     def save_entry( id, e )
         e.created = Time.now
-        YAML::dump( e, File.open( entry_path( id ), 'w' ) )
+        path = entry_path( id )
+        YAML::dump( e, File.open( path, 'w' ) )
 
-        load_index
         @entry_cache ||= {}
+        e.id = id
+        e.link = @link + id + ".html"
+        e.created = e.modified = File.mtime( path )
         @entry_cache[id] = e
+
+        return unless @index
+        @index[id] = @modified[id] = e.modified
     end
     def load_entry( id )
         @entry_cache ||= {}

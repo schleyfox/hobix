@@ -2,9 +2,12 @@
 - version: 0.1f
   date: 2004-06-07
   changes:
+    - lib/hobix/commandline.rb: default title to a capitalized version of the shortName.
     - lib/hobix/weblog.rb: new `section' prefix.
-    - lib/hobix/storage/filesys.rb: all entry ids should use forward slashes.
+    - lib/hobix/storage/filesys.rb: all entry ids should use forward slashes.  bug in save_entry
+        kept load_entry from working on that entry ID.
     - lib/hobix/entry.rb: section_id gives the URL path the entry lies in.
+    - lib/hobix/out/rss.rb: better timestamps, using Dublin Core now.
     - lib/hobix/out/quick.rb: new quick templates are the true treasure and all
         will default to them!!
 
