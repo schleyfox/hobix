@@ -41,7 +41,9 @@ module Hobix
 #
 # The +updated+ accessor contains the latest date pertinent to
 # the page.  Usually this would be the most recent modification
-# time among entries on the page.
+# time among entries on the page.  This accessor is used by the
+# regeneration system to determine if a page needs regeneration.
+# See +Hobix::Weblog#regenerate+ for more.
 #
 # == Context in Hobix
 #
@@ -210,12 +212,17 @@ end
 #
 # See, the regeneration system will do the business of loading the full entries.
 # The skel method's job is just to report which entries *qualify* for a
-# template.  The regeneration system will then look at those entries and figure out
+# template.  The regeneration system will only load those entries
 # if an update is needed.
 #
 # We create a Page object, which dictates that the output will be saved to
 # /sidebar.ext.  A modification time is discovered by passing a combined list
-# to +Hobix::BaseStorage#last_modified+.
+# to +Hobix::BaseStorage#last_modified+.  The +updated+ property is being
+# set to the latest timestamp among the about and learn entries.
+#
+# PLEASE NOTE: The +updated+ property is very important.  The regeneration
+# system will use this timestamp to determine what pages need updating.
+# See +Hobix::Weblog#regenerate+ for more.
 #
 # We then yield to the regeneration system.  Note that any hash key which
 # ends with `entries' will have its contents loaded as full Entry objects, should
@@ -308,6 +315,27 @@ class Weblog
     # The _how_ parameter dictates how this is done,
     # Currently, if _how_ is nil the weblog is completely regen'd.
     # If it is :update, the weblog is only upgen'd.
+    #
+    # == How Updates Work
+    #
+    # It's very important to know how updates work, especially if
+    # you are writing custom skel methods or devious new kinds of
+    # templates.  When performing an update, this method will skip
+    # pages if the following conditions are met:
+    #
+    # 1. The Page object for a given output page must have its
+    #    +updated+ timestamp set.
+    # 2. The output file pointed to by the Page object must
+    #    already exist.
+    # 3. The +updated+ timestamp must be older than than the
+    #    modification time of the output file.
+    # 4. The modification time of the input template must be older 
+    #    than than the modification time of the output file.
+    #
+    # To ensure that your custom methods and templates are qualifying
+    # to be skipped on an upgen, be sure to set the +updated+ timestamp
+    # of the Page object to the latest date of the content's modification.
+    #
     def regenerate( how = nil )
         published = []
         Find::find( @skel_path ) do |path|
@@ -481,8 +509,7 @@ class Weblog
         end
         section_map.each do |section, entries|
             page = Page.new( section + "/index" )
-            page.timestamp = storage.modified( entries )
-            page.updated = storage.modified( entries )
+            page.updated = storage.last_modified( entries )
             yield :page => page, :entries => entries
         end
     end
