@@ -78,7 +78,7 @@ EOXML
             ele_pubDate.text = ( e.modified || e.created ).dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
             ele << ele_pubDate
             ele_desc = REXML::Element.new 'description'
-            ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" )
+            ele_desc.text = e.content.to_html.gsub( /(src|href)="\//, "\\1=\"#{ vars[:weblog].link.rooturi }/" )
             ele << ele_desc
             rssdoc.elements['/rss/channel'].add ele
         end

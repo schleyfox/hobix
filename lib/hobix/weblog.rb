@@ -31,6 +31,11 @@ module UriStr
     def to_yaml( opts = {} )
         self.to_s.to_yaml( opts )
     end
+    def rooturi
+        rooturi = vars[:weblog].link.dup
+        rooturi.path = ''
+        rooturi
+    end
 end
 
 #
@@ -99,6 +104,8 @@ class Page
     def add_path( dir, ext ) #:nodoc:
         @dir, @ext = dir, ext
     end
+    def reference_fields; [:next, :prev]; end
+    def references; reference_fields.map { |f| self.send f }.compact; end
 end
 #
 # The Weblog class is the core of Hobix scripting.  Although often
@@ -308,7 +315,8 @@ class Weblog
         URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr
     end
 
-    # Translate paths, relative to the Weblog's URL
+    # Translate paths relative to the weblahhg's URL.  This is especially important
+    # if a weblog isn't at the root directory for a domain.
     def expand_path( path )
         File.expand_path( path.gsub( /^\/+/, '' ), self.link.path + "/" )
     end
@@ -336,15 +344,36 @@ class Weblog
     # Used by +regenerate+ to construct the vars hash by calling
     # the appropriate skel method for each page.
     def build_pages( page_name )
-        vars = {}
+        pages = []
+        ref_time = {}
         paths = page_name.split( '/' )
         loop do
             try_page = paths.join( '_' )
             if respond_to? "skel_#{ try_page }"
                 path_storage = storage.path_storage( File.dirname( page_name ) )
+
+                ## Simply collect all the pages, keeping track of the max reference time of each (if any)
                 method( "skel_#{ try_page }" ).call( path_storage ) do |vars|
                     vars[:weblog] = self
                     raise TypeError, "No `page' variable returned from skel_#{ try_page }." unless vars[:page]
+                    pages.push vars
+
+                    vars[:page].references.each do |ref|
+                        ref_time[ref] = if ref_time[ref].nil?
+                                            vars[:page].updated
+                                        elsif vars[:page].updated.nil?
+                                            ref_time[ref]
+                                        else
+                                            [ vars[:page].updated, ref_time[ref] ].max
+                                        end
+                    end
+                end
+
+                ## Now yield the pages, modifying the update time if necessary
+                pages.each do |vars|
+                    if ref_time[vars[:page].link]
+                        vars[:page].updated = [ vars[:page].updated || Time.at(0), ref_time[vars[:page].link] ].max
+                    end
                     yield vars
                 end
                 return
@@ -493,7 +522,7 @@ class Weblog
                         vars[var_name] = load_and_validate_entry( vars[var_name] )
                     when /entries$/
                         vars[var_name].collect! do |e|
-                            load_and_validate_entry( e[0] )
+                            load_and_validate_entry( e.id )
                         end
                         vars[var_name].extend Hobix::EntryEnum
                     end
@@ -526,8 +555,8 @@ class Weblog
     def skel_index( path_storage )
         index_entries = path_storage.lastn( @lastn )
         page = Page.new( 'index' )
-        page.prev = index_entries.last[1].strftime( "%Y/%m/index" )
-        page.timestamp = index_entries.first[1]
+        page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
+        page.timestamp = index_entries.first.created
         page.updated = path_storage.last_modified( index_entries )
         yield :page => page, :entries => index_entries
     end
@@ -538,14 +567,14 @@ class Weblog
     # to be output as `/%Y/%m/%d.ext'.
     def skel_daily( path_storage )
         entry_range = path_storage.find
-        first_time, last_time = entry_range.last[1], entry_range.first[1]
+        first_time, last_time = entry_range.last.created, entry_range.first.created
         start = Time.mktime( first_time.year, first_time.month, first_time.day, 0, 0, 0 ) + 1
         stop = Time.mktime( last_time.year, last_time.month, last_time.day, 23, 59, 59 )
         days = []
         one_day = 24 * 60 * 60
         until start > stop
             day_entries = path_storage.within( start, start + one_day - 1 )
-            days << [day_entries.last[1], day_entries] unless day_entries.empty?
+            days << [day_entries.last.created, day_entries] unless day_entries.empty?
             start += one_day
         end
         days.extend Hobix::Enumerable
@@ -583,7 +612,7 @@ class Weblog
     # to be output as `/%Y/index.ext'.
     def skel_yearly( path_storage )
         entry_range = path_storage.find
-        first_time, last_time = entry_range.last[1], entry_range.first[1]
+        first_time, last_time = entry_range.last.created, entry_range.first.created
         years = (first_time.year..last_time.year).collect do |y|
             [ Time.mktime( y, 1, 1 ), Time.mktime( y + 1, 1, 1 ) - 1 ]
         end
@@ -608,12 +637,12 @@ class Weblog
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
             entry_set.each_with_neighbors do |nexte, entry, prev|
-                page = Page.new( "/#{ entry[0] }" )
-                page.prev = prev[0] if prev
-                page.next = nexte[0] if nexte
-                page.timestamp = entry[1]
-                page.updated = path_storage.modified( entry[0] )
-                yield :page => page, :entry => entry[0]
+                page = Page.new( "/#{ entry.id }" )
+                page.prev = prev.id if prev
+                page.next = nexte.id if nexte
+                page.timestamp = entry.created
+                page.updated = path_storage.modified( entry.id )
+                yield :page => page, :entry => entry.id
             end
         end
     end
@@ -624,7 +653,7 @@ class Weblog
     def skel_section( path_storage )
         section_map = {}
         path_storage.all.each do |entry|
-            dirs = entry[0].split( '/' )
+            dirs = entry.id.split( '/' )
             while ( dirs.pop; dirs.first )
                 section = dirs.join( '/' )
                 section_map[ section ] ||= []

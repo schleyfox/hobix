@@ -18,6 +18,39 @@ require 'yaml'
 
 module Hobix
 module Storage
+class IndexEntry
+    attr_accessor :id, :created, :modified
+
+    def initialize( entry, fields = IndexEntry.fields )
+        fields.each do |field|
+            val = if entry.respond_to? field
+                      entry.send( field )
+                  elsif respond_to? "make_#{field}"
+                      send( "make_#{field}", entry )
+                  else
+                      :unset
+                  end
+            send( "#{field}=", val )
+        end
+
+        yield self if block_given?
+    end
+
+    def to_yaml_type
+        "!hobix.com,2004/storage/indexEntry"
+    end
+
+    def self.fields
+        ( instance_methods - Object.instance_methods ).collect do |meth|
+            if meth =~ /^(.*)=$/ then $1 else nil end
+        end.compact
+    end
+end
+
+YAML::add_domain_type( 'hobix.com,2004', 'storage/indexEntry' ) do |type, val|
+    YAML::object_maker( IndexEntry, val )
+end
+
 class FileSys < Hobix::BaseStorage
     def initialize( weblog )
         @modified = {}
@@ -41,7 +74,7 @@ class FileSys < Hobix::BaseStorage
     def save_entry( id, e )
         load_index
         check_id( id )
-        e.created ||= @index[id] || Time.now
+        e.created ||= (@index.has_key?( id ) ? @index[id].created : Time.now)
         path = entry_path( id )
         YAML::dump( e, File.open( path, 'w' ) )
 
@@ -51,7 +84,9 @@ class FileSys < Hobix::BaseStorage
         e.modified = Time.now
         @entry_cache[id] = e
 
-        @index[id] = e.created
+        @index[id] = IndexEntry.new( e ) do |i|
+            i.modified = e.modified
+        end
         @modified[id] = e.modified
         sort_index
         e
@@ -67,7 +102,7 @@ class FileSys < Hobix::BaseStorage
             e.link = "#{ @link }/#{ id }.html"
             e.modified = modified( id )
             unless e.created
-                e.created = @index[id]
+                e.created = @index[id].created
                 YAML::dump( e, File.open( entry_file, 'w' ) )
             end
             @entry_cache[id] = e
@@ -84,6 +119,8 @@ class FileSys < Hobix::BaseStorage
                     YAML::Omap::new
                 end
         @index = YAML::Omap::new
+
+        index_fields = IndexEntry.fields
         Find::find( @basepath ) do |path|
             path.untaint
             if FileTest.directory? path
@@ -95,13 +132,23 @@ class FileSys < Hobix::BaseStorage
                 entry_paths.shift if entry_paths.first == '.'
                 entry_id = entry_paths.join( '/' )
                 @modified[entry_id] = File.mtime( path )
-                unless index.has_key? entry_id
+
+
+                index_entry = nil
+                if ( index.has_key? entry_id ) and !( index[entry_id].is_a? ::Time ) # old index format
+                    index_entry = index[entry_id]
+                end
+                ## we will (re)load the entry if:
+                if index_entry.nil? or # it's new
+                        ( index_entry.modified != @modified[entry_id] ) or # it's changed
+                        index_fields.detect { |f| index_entry.send( f ).nil? } # index fields have been added
+
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
-                    @index[entry_id] = e.created || @modified[entry_id]
-                else
-                    @index[entry_id] = index[entry_id]
-                    index.delete( entry_id )
+                    index_entry = IndexEntry.new( e, index_fields ) do |i|
+                        i.id = entry_id
+                        i.modified = @modified[entry_id]
+                    end
                 end
             end
         end
@@ -111,7 +158,7 @@ class FileSys < Hobix::BaseStorage
     def sort_index
         return unless @index
         index_path = File.join( @basepath, 'index.hobix' )
-        @index.sort! { |x,y| y[1] <=> x[1] }
+        @index.sort! { |x,y| y[1].created <=> x[1].created }
         File.open( index_path, 'w' ) do |f|
             YAML::dump( @index, f )
         end
@@ -121,7 +168,7 @@ class FileSys < Hobix::BaseStorage
         load_index
         path_storage = self.dup
         path_storage.instance_eval do
-            @index = @index.dup.delete_if do |id, time|
+            @index = @index.dup.delete_if do |id, entry|
                 if id.index( p ) != 0
                     @modified.delete( p )
                     true
@@ -132,47 +179,47 @@ class FileSys < Hobix::BaseStorage
     end
     def find( search = {} )
         load_index
-        entries = @index.reject do |entry|
+        entries = @index.collect do |id, entry|
                       skip = false
                       if @ignore_test and not search[:all]
-                          skip = entry[0] =~ @ignore_test
+                          skip = entry.id =~ @ignore_test
                       end
                       search.each do |skey, sval|
                           break if skip
                           skip = case skey
                                  when :after
-                                     entry[1] < sval
+                                     entry.created < sval
                                  when :before
-                                     entry[1] > sval
+                                     entry.created > sval
                                  when :inpath
-                                     entry[0].index( sval ) != 0
+                                     entry.id.index( sval ) != 0
                                  when :match
                                      entry[0].match sval
                                  else
                                      false
                                  end
                       end
-                      skip
-                  end
+                      if skip then nil else entry end
+                  end.compact
         entries.slice!( search[:lastn]..-1 ) if search[:lastn] and entries.length > search[:lastn]
         entries
     end
     def last_modified( entries )
         entries.collect do |entry|
-            @modified[entry[0]]
+            @modified[entry.id]
         end.max
     end
     def last_created( entries )
         entries.collect do |entry|
-            entry[1]
+            entry.created
         end.max
     end
     def modified( entry_id )
         @modified[entry_id]
     end
     def get_months( entries )
-        first_time = entries.collect { |e| e[1] }.min
-        last_time = entries.collect { |e| e[1] }.max
+        first_time = entries.collect { |e| e.created }.min
+        last_time = entries.collect { |e| e.created }.max
         start = Time.mktime( first_time.year, first_time.month, 1 )
         stop = Time.mktime( last_time.year, last_time.month, last_time.day )
         months = []

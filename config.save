@@ -1,12 +1,12 @@
 bin-dir=$prefix/bin
 site-ruby=$prefix/lib/ruby/site_ruby/1.8
 prefix=/usr/local
-ruby-path=/usr/local/bin/ruby18
+ruby-path=/usr/local/bin/ruby
 make-prog=make
 rb-dir=$site-ruby
 without-ext=no
-ruby-prog=/usr/local/bin/ruby18
+ruby-prog=/usr/local/bin/ruby
 site-ruby-common=$prefix/lib/ruby/site_ruby
 std-ruby=$prefix/lib/ruby/1.8
 data-dir=$prefix/share
-so-dir=$prefix/lib/ruby/site_ruby/1.8/i386-freebsd4
+so-dir=$prefix/lib/ruby/site_ruby/1.8/i386-freebsd4.7
