@@ -1,0 +1,163 @@
+#!/usr/local/bin/ruby18
+require 'hobix'
+require 'yaml'
+
+module Hobix
+    ##
+    ## Locate RC
+    ##
+    [ENV['HOME']].each do |home_dir|
+        if File.exists? home_dir
+            HOME_DIR = home_dir
+            break
+        end
+    end
+    RC = File.join( HOME_DIR, '.hobixrc' )
+
+    SCREEN_WIDTH = 70
+
+    def Hobix.login
+        @config = YAML::load( File.open( RC ) ) if File.exists? RC
+    end
+
+    def Hobix.save_config
+        File.open( RC, "w" ) do |f|
+            f.write @config.to_yaml
+        end
+    end
+
+    # Add a weblog to local config
+    def Hobix.add_weblog( name, path )
+        @config['weblogs'] ||= {}
+        @config['weblogs'][name] = path
+        save_config
+    end
+
+    # Delete a weblog from local config
+    def Hobix.del_weblog( name )
+        @config['weblogs'] ||= {}
+        @config['weblogs'].delete( name )
+        save_config
+    end
+
+    ##          
+    ## Setup user's RC
+    ##
+    def Hobix.setup
+        @config = {}
+
+        username = ''
+        default_user = ''
+        user_prompt = 'Your hobix username'
+        if ENV['USER']
+            default_user = ENV['USER']
+            user_prompt << " [<Enter> for #{ ENV['USER'] }]"
+        end
+        while username.empty?
+            puts
+            print "#{ user_prompt }: "
+            username = gets.strip
+            if username.empty?
+                username = default_user
+            end
+        end
+        @config['username'] = username
+
+        puts
+        puts "Your EDITOR environment variable is set to '#{ ENV['EDITOR'] }'."
+        puts "You can edit entries with your EDITOR or you can just use hobix."
+        print "Use your EDITOR to edit entries? [y/N]: "
+        editor = gets.strip.upcase
+
+        if editor == 'Y'
+            @config['use editor'] = true
+        else
+            @config['use editor'] = false
+        end
+
+        # puts
+        # puts "If you want to join an existing hobix weblog, we can do that now."
+        # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
+        # puts "to simply move on."
+        @config['weblogs'] ||= {}
+        ## XX TODO XX
+    end
+
+    def Hobix.editor( str )
+        tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
+        File.open( tempfile, "w" ) { |f| f.write str }
+        system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
+        return false unless File.exists?( tempfile )
+
+        content = File.open( tempfile ).read
+        File.delete( tempfile )
+        content
+    end
+end
+
+if __FILE__ == $0
+    
+    def print_usage
+        puts "hobix #{ Hobix::VERSION } on ruby #{ ::VERSION } (#{ ::RELEASE_DATE }) [#{ ::PLATFORM }]"
+        puts DATA.read
+        exit
+    end
+
+    print_usage if ARGV.length < 2
+
+    weblog, cmd, *opts = ARGV
+    ARGV.clear
+             
+    unless Hobix.login
+        puts "Welcome to hobix (a simple weblog tool).  Looks like your \n" +
+             "first time running hobix, eh?  Time to get a bit of information \n" +
+             "from you before you start using hobix.  (All of this will be stored \n"
+             "in the file #{ Hobix::RC } if you need to edit.)\n\n"
+        Hobix.setup
+        puts    
+    end
+
+    case cmd
+    
+    when "add"
+    Hobix.add_weblog( weblog, opts[0] )
+
+    when "del"
+    Hobix.del_weblog( weblog )
+
+    when "edit"
+    
+    else
+        
+        unless @config['weblogs'].has_key? weblog
+            puts "*** No weblog `#{ weblog }' found in your configuration."
+            exit
+        end
+        hobix_weblog = Hobix::Weblog.load( @config['weblogs'] )
+        case cmd
+        when "post"
+
+        when "post-list"
+
+        when "upgen"
+            hobix_weblog.regenerate( :update )
+
+        when "regen"
+            hobix_weblog.regenerate
+        end
+
+    end
+end
+
+__END__
+Usage: hobix weblog-name command [command-options]
+Commands are
+    add /path/to/weblog.yaml        Add a new weblog to your list.
+    edit                            Edit weblog's configuration.
+    del                             Remove weblog from your list.
+
+    post shortName                  Add a new post with identifier 'shortName'.
+    post-edit shortName             Edit post with identifier 'shortName'.
+    post-list                       List all posts and titles.
+    upgen                           Update site with only the latest changes.
+    regen                           Regenerate all pages through the site.
