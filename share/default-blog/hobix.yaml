@@ -1,6 +1,6 @@
---- !hobix.com,2004/weblog
+--- !hobix.com,2004/^weblog
 title: a bokononist asks
-link: http://bokononist.com/
+link: http://bokononist.hobix.com/
 tagline: nice, nice, very nice
 period: 00:60:00
 
@@ -11,13 +11,19 @@ authors:
     email: ghosty@hobixghostfriends.com
 
 sections:
-  about: &ordered
+  site:
     ignore: true
     sort_by: id
-  reviews: *ordered
 
+linklist: !^linklist
+  links:
+  - hobix: http://hobix.com/
+  - del.icio.us: http://del.icio.us/
+ 
 requires:
 - hobix/storage/filesys
+- hobix/out/quick
 - hobix/out/erb
 - hobix/out/rss
 - hobix/out/okaynews
+- hobix/out/atom
