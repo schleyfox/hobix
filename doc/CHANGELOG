@@ -1,10 +1,17 @@
 --- %YAML:1.0
 - version: 0.3a
-  date: 2004-10-07
+  date: 2004-10-16
   changes:
     - lib/hobix/entry.rb: switched from Object#is_a? to Class#==.  was causing problems
         when loading !omaps.
-    - lib/hobix/weblog.rb: ditto.
+    - lib/hobix/weblog.rb: ditto. also, moved out computation of the output_map.
+        this map contains all the information needed to regenerate. having this information
+        readily available is useful for building site maps and determining canonical links
+        in advance. new central_prefix and central_ext settings.
+    - lib/hobix/bixwik.rb: the absolutely ridiculous hobix-based wiki. seriously, why am i
+        doing this??
+    - lib/hobix/base.rb: added BaseStorage#match for find entries based on regexp.
+    - lib/hobix/out/quick.rb: new prepend and append operators for templates.
 
 - version: 0.3
   date: 2004-10-06

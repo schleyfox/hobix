@@ -262,7 +262,7 @@ class Weblog
     attr_accessor :title, :link, :authors, :contributors, :tagline,
                   :copyright, :period, :path, :sections, :requires,
                   :entry_path, :skel_path, :output_path, :lib_path,
-                  :linklist, :lastn
+                  :linklist, :lastn, :central_prefix, :central_ext
 
     attr_reader   :hobix_yaml
 
@@ -278,6 +278,10 @@ class Weblog
         @skel_path = default_skel_path( @skel_path ).untaint
         @output_path = default_output_path( @output_path ).untaint
         @lib_path = default_lib_path( @lib_path ).untaint
+        @central_prefix = default_central_prefix unless @central_prefix =~ /^[\w\.]+$/
+        @central_prefix.untaint
+        @central_ext = default_central_ext unless @central_ext =~ /^\w*$/
+        @central_ext.untaint
         if File.exists?( @lib_path )
             $LOAD_PATH << @lib_path
         end
@@ -291,6 +295,8 @@ class Weblog
     def default_skel_path( dir = nil ); File.expand_path( dir || "skel", @path ); end
     def default_output_path( dir = nil ); File.expand_path( dir || "htdocs", @path ); end
     def default_lib_path( dir = nil ); File.expand_path( dir || "lib", @path ); end
+    def default_central_prefix; "entry"; end
+    def default_central_ext; "html"; end
 
     def link
         URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr
@@ -324,7 +330,6 @@ class Weblog
     # Used by +regenerate+ to construct the vars hash by calling
     # the appropriate skel method for each page.
     def build_pages( page_name )
-        puts "[Building #{ page_name } pages]"
         vars = {}
         paths = page_name.split( '/' )
         loop do
@@ -364,6 +369,54 @@ class Weblog
         @plugins.find_all { |p| p.is_a? BasePublish }
     end
 
+    # Clears the hash used to cache the results of +output_map+.
+    def reset_output_map; @output_map = nil; end
+
+    # Reads +skel_path+ for templates and builds a hash of all the various output
+    # files which will be generated.  This method will cache the output_map once.
+    # Subsequent calls to +output_map+ will quickly return the cached hash.  To reset
+    # the cache, use +reset_output_map+.
+    def output_map
+        @output_map ||= nil
+        return @output_map if @output_map
+        path_watch = {}
+        Find::find( @skel_path ) do |path|
+            path.untaint
+            if File.basename(path)[0] == ?.
+                Find.prune 
+            elsif not FileTest.directory? path
+                tpl_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
+                output = outputs.detect { |p| if tpl_path =~ /\.#{ p.extension }$/; tpl_path = $`; end }
+                if output
+                    ## Figure out template extension and output filename
+                    page_name, tpl_ext = tpl_path.dup, ''
+                    while page_name =~ /\.\w+$/; page_name = $`; tpl_ext = $& + tpl_ext; end
+                    next if tpl_ext.empty?
+                    ## Build the output pages
+                    build_pages( page_name ) do |vars|
+                        ## Extension and Path
+                        vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
+                        vars[:template] = path
+                        vars[:output] = output
+
+                        ## If output by a deeper page, skip
+                        pub_name, = path_watch[vars[:page].link]
+                        next if pub_name unless vars[:page].link.index( page_name ) == 0 and
+                                              page_name.length > pub_name.length
+
+                        path_watch[vars[:page].link] = [page_name, vars]
+                    end
+                end
+            end
+        end
+        @output_map = {}
+        path_watch.each_value do |page_name, vars|
+            @output_map[page_name] ||= []
+            @output_map[page_name] << vars
+        end
+        @output_map
+    end
+
     # Regenerates the weblog, processing templates in +skel_path+
     # with the data found in +entry_path+, storing output in
     # +output_path+.
@@ -397,66 +450,45 @@ class Weblog
     end
     def retouch( only_path = nil, how = nil )
         published = {}
-        Find::find( @skel_path ) do |path|
-            path.untaint
-            if File.basename(path)[0] == ?.
-                Find.prune 
-            elsif not FileTest.directory? path
-                tpl_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
-                output = outputs.detect { |p| if tpl_path =~ /\.#{ p.extension }$/; tpl_path = $`; end }
-                if output
-                    ## Figure out template extension and output filename
-                    page_name, tpl_ext = tpl_path.dup, ''
-                    while page_name =~ /\.\w+$/; page_name = $`; tpl_ext = $& + tpl_ext; end
-                    next if tpl_ext.empty?
-                    ## Build the output pages
-                    build_pages( page_name ) do |vars|
-                        ## Extension and Path
-                        vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
-                        full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
+        output_map.each do |page_name, outputs|
+            puts "[Building #{ page_name } pages]"
+            outputs.each do |vars|
+                full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
 
-                        ## If retouching, skip pages outside of path
-                        next if only_path and vars[:page].link.index( "/" + only_path ) != 0
+                ## If retouching, skip pages outside of path
+                next if only_path and vars[:page].link.index( "/" + only_path ) != 0
 
-                        ## If updating, skip any that are unchanged
-                        next if how == :update and 
-                                File.exists?( full_out_path ) and
-                                File.mtime( path ) < File.mtime( full_out_path ) and
-                                ( vars[:page].updated.nil? or 
-                                  vars[:page].updated < File.mtime( full_out_path ) )
+                ## If updating, skip any that are unchanged
+                next if how == :update and 
+                        File.exists?( full_out_path ) and
+                        File.mtime( vars[:template] ) < File.mtime( full_out_path ) and
+                        ( vars[:page].updated.nil? or 
+                          vars[:page].updated < File.mtime( full_out_path ) )
 
-                        ## If published already by a deeper page, skip
-                        pub_by = published[vars[:page].link]
-                        next if pub_by unless vars[:page].link.index( page_name ) == 0 and
-                                              page_name.length > pub_by.length
-                        p_publish vars[:page]
-                        vars.keys.each do |var_name|
-                            case var_name.to_s
-                            when /entry$/
-                                vars[var_name] = load_and_validate_entry( vars[var_name] )
-                            when /entries$/
-                                vars[var_name].collect! do |e|
-                                    load_and_validate_entry( e[0] )
-                                end
-                                vars[var_name].extend Hobix::EntryEnum
-                            end
+                p_publish vars[:page]
+                vars.keys.each do |var_name|
+                    case var_name.to_s
+                    when /entry$/
+                        vars[var_name] = load_and_validate_entry( vars[var_name] )
+                    when /entries$/
+                        vars[var_name].collect! do |e|
+                            load_and_validate_entry( e[0] )
                         end
-
-                        ## Publish the page
-                        txt = output.load( path, vars )
-                        File.makedirs( File.dirname( full_out_path ) )
-                        File.open( full_out_path, 'w' ) do |f| 
-                            f << txt
-                            f.chmod 0664 rescue nil
-                        end
-                        published[vars[:page].link] = page_name
+                        vars[var_name].extend Hobix::EntryEnum
                     end
-                else
-                    full_out_path = File.join( @output_path, tpl_path )
-                    next if File.exists?( full_out_path ) and File.mtime( full_out_path ) > File.mtime( path )
-                    File.makedirs( File.dirname( full_out_path ) )
-                    File.copy( path, full_out_path )
                 end
+
+                ## Publish the page
+                vars = vars.dup
+                output = vars.delete( :output )
+                template = vars.delete( :template )
+                txt = output.load( template, vars )
+                File.makedirs( File.dirname( full_out_path ) )
+                File.open( full_out_path, 'w' ) do |f| 
+                    f << txt
+                    f.chmod 0664 rescue nil
+                end
+                published[vars[:page].link] = page_name
             end
         end
         publishers.each do |p|
@@ -642,6 +674,8 @@ class Weblog
             ['@tagline', :req, :text], 
             ['@period', :opt, :text], 
             ['@lastn', :opt, :text],
+            ['@central_prefix', :opt, :text],
+            ['@central_ext', :opt, :text],
             ['@entry_path', :opt, :text],
             ['@skel_path', :opt, :text],
             ['@output_path', :opt, :text],
@@ -667,4 +701,9 @@ YAML::add_domain_type( 'hobix.com,2004', 'weblog' ) do |type, val|
         val['linklist'] = YAML::transfer( 'hobix.com,2004/linklist', {'links' => val['linklist']} )
     end
     YAML::object_maker( Hobix::Weblog, val )
+end
+
+YAML::add_domain_type( 'hobix.com,2004', 'bixwik' ) do |type, val|
+    require 'hobix/bixwik'
+    YAML::object_maker( Hobix::BixWik, val )
 end

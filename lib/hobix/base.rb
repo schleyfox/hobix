@@ -95,6 +95,9 @@ class BaseStorage < BasePlugin
     def before( before, n = nil )
         find( :before => before, :lastn => n )
     end
+    def match( expr )
+        find( :match => expr )
+    end
     def within( after, before )
         find( :after => after, :before => before )
     end

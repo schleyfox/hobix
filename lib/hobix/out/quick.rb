@@ -22,17 +22,33 @@ module Out
 class QuickError < StandardError; end
 
 class Quick < Hobix::BaseOutput
+    APPEND_TPL_RE = /^(.+)\s*(<<|>>)$/
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
         defaults.each do |k, v|
             k.untaint
             v = v.inspect
             v.untaint
-            instance_eval %{
-                def #{ k }_erb
-                    #{ v }
-                end
-            }
+            if k =~ APPEND_TPL_RE
+                k = $1.strip
+                v = if $2 == ">>"
+                        "#{ v } + #{ k }_erb_orig"
+                    else
+                        "#{ k }_erb_orig + #{ v }"
+                    end
+                instance_eval %{
+                    alias #{ k }_erb_orig #{ k }_erb
+                    def #{ k }_erb
+                        #{ v }
+                    end
+                }
+            else
+                instance_eval %{
+                    def #{ k }_erb
+                        #{ v }
+                    end
+                }
+            end
         end
     end
     def extension
@@ -52,6 +68,16 @@ class Quick < Hobix::BaseOutput
                      else
                          YAML::load( quick_file )
                      end
+        quick_data.each do |k, v|
+            if k =~ APPEND_TPL_RE
+                k = $1.strip
+                quick_data[k] = if $2 == ">>"
+                                    v + method( "#{ k }_erb" ).call
+                                else
+                                    method( "#{ k }_erb" ).call + v
+                                end
+            end
+        end
         erb_src = make( 'page', quick_data, vars.has_key?( :entries ) )
         erb_src.untaint
         erb = ::ERB.new( erb_src )

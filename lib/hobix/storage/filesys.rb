@@ -146,6 +146,8 @@ class FileSys < Hobix::BaseStorage
                                      entry[1] > sval
                                  when :inpath
                                      entry[0].index( sval ) != 0
+                                 when :match
+                                     entry[0].match sval
                                  else
                                      false
                                  end
