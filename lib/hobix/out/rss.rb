@@ -66,11 +66,16 @@ EOXML
             ele_subject = REXML::Element.new 'dc:subject'
             ele_subject.text = e.section_id
             ele << ele_subject
+            e.keywords.each do |kw|
+                ele_subject = REXML::Element.new 'dc:subject'
+                ele_subject.text = kw
+                ele << ele_subject
+            end
             ele_creator = REXML::Element.new 'dc:creator'
             ele_creator.text = vars[:weblog].authors[e.author]['name']
             ele << ele_creator
             ele_pubDate = REXML::Element.new 'dc:date'
-            ele_pubDate.text = e.created.dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
+            ele_pubDate.text = ( e.modified || e.created ).dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
             ele << ele_pubDate
             ele_desc = REXML::Element.new 'description'
             ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" )

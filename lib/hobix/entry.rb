@@ -30,6 +30,7 @@ module Hobix
 # link::             The full URL to this entry from the weblog.
 # title::            The heading for this entry.
 # tagline::          The subheading for this entry.
+# keywords::         A list of free-tagged categories.
 # author::           The author's username.
 # contributors::     An Array of contributors' usernames.
 # modified::         A modification time.
@@ -46,14 +47,16 @@ module Hobix
 # year_id::          A path for the year's entries.
 class Entry
     attr_accessor :id, :link, :title, :tagline, :summary, :author,
-                  :contributors, :modified, :created,
+                  :contributors, :modified, :created, :keywords,
                   :content
 
     def initialize; yield self if block_given?; end
-    def day_id; created.strftime( "%Y/%m/%d" ); end
-    def month_id; created.strftime( "%Y/%m" ); end
-    def year_id; created.strftime( "%Y" ); end
-    def section_id; File.dirname( id ); end
+    def day_id; created.strftime( "%Y/%m/%d" ) if created; end
+    def month_id; created.strftime( "%Y/%m" ) if created; end
+    def year_id; created.strftime( "%Y" ) if created; end
+    def section_id; File.dirname( id ) if id; end
+    def force_keywords; []; end
+    def keywords; force_keywords + Array( @keywords ); end
 
     include ToYamlExtras
     def property_map
@@ -63,6 +66,7 @@ class Entry
             ['@contributors', :opt, :textarea], 
             ['@created', :opt, :text], 
             ['@tagline', :opt, :text], 
+            ['@keywords', :opt, :text],
             ['@summary', :opt, :textarea], 
             ['@content', :req, :textarea]
         ]
@@ -101,26 +105,31 @@ class Entry
     def Entry::text_processor; RedCloth; end
     # Returns an Array of fields to which the text processor applies.
     def Entry::text_processor_fields; ['content', 'tagline', 'summary']; end
-
-end
-end
-
-entry_proc = Proc.new do |type, val|
-    Hobix::Entry::text_processor_fields.each do |f|
-        if val[f].respond_to? :value
-            str = val[f].value
-            def str.to_html
-                self
+    # Factory method for generating Entry classes from a hash.  Used
+    # by the YAML loader.
+    def Entry::maker( val )
+        self::text_processor_fields.each do |f|
+            if val[f].respond_to? :value
+                str = val[f].value
+                def str.to_html
+                    self
+                end
+                val[f] = str
+            elsif val[f].respond_to? :to_str
+                val[f] = self::text_processor.new( val[f].to_str ) 
             end
-            val[f] = str
-        elsif val[f].respond_to? :to_str
-            val[f] = Hobix::Entry::text_processor.new( val[f].to_str ) 
         end
+        YAML::object_maker( self, val )
     end
-    YAML::object_maker( Hobix::Entry, val )
 end
-YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0', &entry_proc )
-YAML::add_domain_type( 'hobix.com,2004', 'entry', &entry_proc )
+end
+
+YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0' ) do |type, val|
+    Hobix::Entry::maker( val )
+end
+YAML::add_domain_type( 'hobix.com,2004', 'entry' ) do |type, val|
+    Hobix::Entry::maker( val )
+end
 
 module Hobix
 # The EntryEnum class is mixed into an Array of entries just before

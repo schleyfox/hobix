@@ -29,13 +29,15 @@ class Ping < Hobix::BasePublish
     end
     def publish( page_name )
         @urls.each do |u|
+            link = @link.to_s
+            u, link = u.keys.first, u.values.first if Hash === u
             puts "pinging #{ u }..."
             u = URI::parse( u )
             begin
                 server = XMLRPC::Client.new( u.host, u.path, u.port )
 
                 begin
-                    result = server.call( "weblogUpdates.ping", @title, @link.to_s )
+                    result = server.call( "weblogUpdates.ping", @title, link )
                 rescue XMLRPC::FaultException => e
                     puts "Error: "
                     puts e.faultCode

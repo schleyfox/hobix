@@ -26,6 +26,7 @@ class Quick < Hobix::BaseOutput
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
         defaults.each do |k, v|
+            k.gsub!( /\W/, '_' )
             k.untaint
             v = v.inspect
             v.untaint
@@ -84,6 +85,10 @@ class Quick < Hobix::BaseOutput
         begin
             erb.result( @bind )
         rescue Exception => e
+            puts "--- erb source ---"
+            puts erb_src
+            puts "--- erb source ---"
+            puts e.backtrace
             raise QuickError, "Error `#{ e.message }' in erb #{ file_name }."
         end
     end
@@ -98,7 +103,7 @@ class Quick < Hobix::BaseOutput
         if part == 'entries' and not has_entries
             part = 'entry'
         end
-        erb = quick_data[part] || method( "#{ part }_erb" ).call
+        erb = quick_data[part] || method( "#{ part.gsub( /\W+/, '_' ) }_erb" ).call
         if erb.respond_to? :gsub
             erb.gsub( /<\+\s*(\w+)\s*\+>/ ) do
                 make( $1, quick_data, has_entries )
@@ -137,7 +142,7 @@ class Quick < Hobix::BaseOutput
         <ul>
         <% months = weblog.storage.get_months( weblog.storage.find ) %>
         <% months.reverse.each do |month_start, month_end, month_id| %>
-            <li><a href="<%= weblog.link %>/<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
+            <li><a href="<%= weblog.expand_path month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
         <% end %>
         </ul>
         </div> }
@@ -194,7 +199,7 @@ class Quick < Hobix::BaseOutput
      %{ posted by <%= weblog.authors[entry.author]['name'] %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
     end
     def head_tags_erb; end
-    def css_erb; %{ @import "<%= weblog.link %>/site.css"; }; end
+    def css_erb; %{ @import "<%= weblog.expand_path "site.css" %>"; }; end
     def doctype_erb
      %{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">}
     end

@@ -83,20 +83,21 @@ end
 #
 class Page
     attr_accessor :link, :next, :prev, :timestamp, :updated
-    def initialize( link )
-        @link = link
+    def initialize( id )
+        @id = id
     end
+    def id; dirj( @dir, @id ).gsub( /^\/+/, '' ); end
+    def link; dirj( @dir, @id ) + @ext; end
+    def next; dirj( @dir, @next ) + @ext if @next; end
+    def prev; dirj( @dir, @prev ) + @ext if @prev; end
     def dirj( dir, link ) #:nodoc:
-        if link[0] != ?/
-            dir = "/" + ( dir == '.' ? '' : dir )
-            link = File.join( dir, link )
+        if link[0] != ?/ and link != '.' 
+            link = File.join( dir == '.' ? "/" : dir, link )
         end
         link
     end
     def add_path( dir, ext ) #:nodoc:
-        @link = dirj( dir, @link ) + ext if @link
-        @next = dirj( dir, @next ) + ext if @next
-        @prev = dirj( dir, @prev ) + ext if @prev
+        @dir, @ext = dir, ext
     end
 end
 #
@@ -262,7 +263,8 @@ class Weblog
     attr_accessor :title, :link, :authors, :contributors, :tagline,
                   :copyright, :period, :path, :sections, :requires,
                   :entry_path, :skel_path, :output_path, :lib_path,
-                  :linklist, :lastn, :central_prefix, :central_ext
+                  :linklist, :lastn, :central_prefix, :central_ext,
+                  :entry_class
 
     attr_reader   :hobix_yaml
 
@@ -282,6 +284,8 @@ class Weblog
         @central_prefix.untaint
         @central_ext = default_central_ext unless @central_ext =~ /^\w*$/
         @central_ext.untaint
+        @entry_class = default_entry_class
+        @entry_class.untaint
         if File.exists?( @lib_path )
             $LOAD_PATH << @lib_path
         end
@@ -297,6 +301,8 @@ class Weblog
     def default_lib_path( dir = nil ); File.expand_path( dir || "lib", @path ); end
     def default_central_prefix; "entry"; end
     def default_central_ext; "html"; end
+    def default_entry_class; "Hobix::Entry"; end
+    def entry_class; Hobix.const_find( @entry_class ); end
 
     def link
         URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr
@@ -304,7 +310,7 @@ class Weblog
 
     # Translate paths, relative to the Weblog's URL
     def expand_path( path )
-        File.expand_path( path, self.link.path + "/" )
+        File.expand_path( path.gsub( /^\/+/, '' ), self.link.path + "/" )
     end
 
     # Load the weblog information from a YAML file and +start+ the Weblog.
@@ -380,6 +386,7 @@ class Weblog
         @output_map ||= nil
         return @output_map if @output_map
         path_watch = {}
+        @output_entry_map = {}
         Find::find( @skel_path ) do |path|
             path.untaint
             if File.basename(path)[0] == ?.
@@ -398,6 +405,12 @@ class Weblog
                         vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
                         vars[:template] = path
                         vars[:output] = output
+                        eid = vars[:entry] || page_name
+                        if not @output_entry_map[ eid ]
+                            @output_entry_map[ eid ] = vars
+                        elsif tpl_ext.split( '.' )[1] == @central_ext
+                            @output_entry_map[ eid ] = vars
+                        end
 
                         ## If output by a deeper page, skip
                         pub_name, = path_watch[vars[:page].link]
@@ -415,6 +428,14 @@ class Weblog
             @output_map[page_name] << vars
         end
         @output_map
+    end
+
+    # Built from the map of output destinations described by +output_map+, this map pairs
+    # entry IDs against their canonical destinations.  The @central_prefix and @central_ext
+    # variables determine what output is canonical.
+    def output_entry_map
+        output_map
+        @output_entry_map
     end
 
     # Regenerates the weblog, processing templates in +skel_path+
@@ -496,6 +517,7 @@ class Weblog
                 p.publish( published )
             end
         end
+        reset_output_map
     end
 
     # Handler for templates with `index' prefix.  These templates will
@@ -674,6 +696,7 @@ class Weblog
             ['@tagline', :req, :text], 
             ['@period', :opt, :text], 
             ['@lastn', :opt, :text],
+            ['@entry_class', :opt, :text],
             ['@central_prefix', :opt, :text],
             ['@central_ext', :opt, :text],
             ['@entry_path', :opt, :text],

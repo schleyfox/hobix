@@ -20,6 +20,7 @@ module Hobix
 # (See http://instiki.org/ for inspiration.)
 class BixWik < Weblog
 
+    def default_entry_class; "Hobix::BixWik::Entry"; end
     def to_yaml_type
         "!hobix.com,2004/bixwik"
     end
@@ -73,18 +74,39 @@ class BixWik < Weblog
         yield :page => page, :entries => all_pages 
     end
 
-    def wiki_word( word )
-        Hobix::BixWik::QUICK_MENU[ word ].to_a[0] || word.gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }
+    def self.wiki_word( id )
+        Hobix::BixWik::QUICK_MENU[ id ].to_a.first || id.gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }
+    end
+
+    def abs_link( word )
+        output_entry_map[word] && output_entry_map[word][:page].link
     end
 
     def wiki_link( word )
-        "<a href=\"#{ expand_path( word ) }\">#{ word }</a>"
+        abs_link = output_entry_map[word]
+        if abs_link
+            "<a class=\"existingWikiWord\" href=\"#{ expand_path( abs_link[:page].link ) }\">#{ word }</a>"
+        else
+            "<span class=\"newWikiWord\">#{ word }<a href=\"#{ expand_path( "edit/#{ word }" ) }\">?</a></span>"
+        end
+    end
+end
+class BixWik::Entry < Hobix::Entry
+    def title
+        Hobix::BixWik::wiki_word( self.id )
+    end
+    def to_yaml_type
+        "!hobix.com,2004/bixwik/entry"
     end
 end
 end
 
 YAML::add_domain_type( 'hobix.com,2004', 'bixwik' ) do |type, val|
     YAML::object_maker( Hobix::BixWik, val )
+end
+
+YAML::add_domain_type( 'hobix.com,2004', 'bixwik/entry' ) do |type, val|
+    Hobix::BixWik::Entry::maker( val )
 end
 
 Hobix::BixWik::QUICK_MENU = YAML::load <<END
@@ -99,19 +121,20 @@ END
 Hobix::BixWik::QUICK_MASTER = YAML::load <<END
 --- %YAML:1.0
 banner: |
+  <% page_name = Hobix::BixWik::wiki_word( page.id ) %>
   <div id="banner">
-    <% if page.link == "HomePage" %>
-      <h1 id="title"><%= weblog.title %></h1>
+    <% if page.id == "HomePage" %>
+      <h1 id="title"><%= page_name %></h1>
     <% else %>
       <div id="title"><%= weblog.title %></div>
-      <h1 id="pageName"><%= weblog.wiki_word( page.link ) %></h1>
+      <h1 id="pageName"><%= page_name %></h1>
     <% end %>
     <form id="navigationForm" class="navigation" action="<%= weblog.expand_path( 'search' ) %>" action="get" style="font-size: 10px">  
     <% Hobix::BixWik::QUICK_MENU.each do |menu_link, attr| %>
-      <% if page.link == menu_link %>
+      <% if page.id == menu_link %>
         <%= attr[0] %>
       <% else %>
-        <a href="<%= weblog.expand_path( menu_link.gsub( %r{^/+}, '' ) ) %>" title="<%= attr[2] %>" 
+      <a href="<%= weblog.abs_link( menu_link ) %>" title="<% if attr[1] %>[<%= attr[1] %>] <% end %><%= attr[2] %>" 
            accesskey="<%= attr[1] %>"><%= attr[0] %></a>
       <% end %> |
     <% end %>
@@ -120,5 +143,5 @@ banner: |
   </div>
 sidebar: ~
 entry_footer:
-  Revision from <%= entry.created.strftime( "%B %d, %Y %H:%M" ) %> by <%= weblog.wiki_link( "authors/" + entry.author ) %>
+  Revision from <%= ( entry.modified || entry.created ).strftime( "%B %d, %Y %H:%M" ) %> by <%= weblog.wiki_link( "authors/" + entry.author ) %>
 END

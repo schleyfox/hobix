@@ -206,11 +206,18 @@ require 'hobix/weblog'
 #
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.3'
+    VERSION = '0.3b'
     ## CVS information
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
     ## Share directory contains external data files
     SHARE_PATH = "/usr/local/share/hobix/"
+
+    ## Get a top-level constant from a string
+    def self.const_find( tclass )
+        obj_class = Object
+        tclass.split( "::" ).each { |c| obj_class = obj_class.const_get( c ) }
+        obj_class
+    end
 end
 

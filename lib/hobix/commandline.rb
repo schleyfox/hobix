@@ -63,9 +63,13 @@ module CommandLine
     def blogs_weblog_explain; "List your weblogs."; end
     def blogs_weblog_args; []; end
     def blogs_weblog
-        blogs = @config['weblogs'].sort
-        name_width = blogs.collect { |b| b[0].length }.max + 1
-        tabular( blogs, [[-name_width, 0, 'weblog-name'], [-40, 1, 'path']] )
+        if @config['weblogs'].respond_to? :sort
+            blogs = @config['weblogs'].sort
+            name_width = blogs.collect { |b| b[0].length }.max + 1
+            tabular( blogs, [[-name_width, 0, 'weblog-name'], [-40, 1, 'path']] )
+        else
+            puts "** You have no blogs set up.  Use `hobix setup_blogs' to get started."
+        end
     end
 
     # Create a new skeleton for a weblog
@@ -206,7 +210,7 @@ module CommandLine
         begin
             entry = weblog.storage.load_entry( entry_id )
         rescue Errno::ENOENT
-            entry = Hobix::Entry.new
+            entry = weblog.entry_class.new
             entry.author = @config['username']
             entry.title = entry_id.split( '/' ).
                                    last.

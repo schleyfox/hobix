@@ -1,4 +1,20 @@
 --- %YAML:1.0
+- version: 0.3b
+  date: 2005-01-18
+  changes:
+    - lib/hobix/commandline.rb: suitable errors if user has no blogs setup.
+    - lib/hobix/entry.rb: new keywords, free-tagged categories for entries.
+    - lib/hobix/bixwik.rb: getting WikiWords working.
+    - lib/hobix/weblog.rb: expand_path always adds complete blohhg URL.  default
+        property methods should allow for cleaner YAML output and simpler customization.
+    - lib/hobix/out/atom.rb: added subject tags to Atom feed.
+    - lib/hobix/out/quick.rb: working on extracting the erb source for errors.  cleaner
+        paths with weblog.expand_path.
+    - lib/hobix/out/rss.rb: subject tags can be per-entry.
+    - lib/hobix/publish/ping.rb: allow passing of a URL (if you want your feed to be
+        passed as the URL.)
+    - lib/hobix/storage/filesys.rb: new find_attached method for loading comments.
+
 - version: 0.3a
   date: 2004-10-16
   changes:

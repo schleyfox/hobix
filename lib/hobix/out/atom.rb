@@ -65,6 +65,10 @@ EOXML
             ele.x( 'id', "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }entry/#{ e.id }" )
             ele.x( 'issued', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'modified', e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
+            ele.x( 'dc:subject', e.section_id )
+            e.keywords.each do |kw|
+                ele.x( 'dc:subject', kw )
+            end
             ele.x( 'summary', 
                 e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
                 {'type' => 'text/html', 'mode' => 'escaped'} ) if e.summary

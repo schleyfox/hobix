@@ -190,6 +190,13 @@ class FileSys < Hobix::BaseStorage
     end
 
     # basic entry attachment functions
+    def find_attached( id )
+        check_id( id )
+        Dir[ entry_path( id, '*' ) ].collect do |att|
+            atp = att.match( /#{ Regexp::quote( id ) }\.(?!#{ extension }$)/ )
+            atp.post_match if atp
+        end.compact
+    end
     def load_attached( id, ext )
         check_id( id )
         @attach_cache ||= {}
