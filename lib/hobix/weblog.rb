@@ -151,7 +151,7 @@ end
 #
 # = Examples
 #
-# == Viewing Configuration
+# == Example 1: Viewing Configuration
 #
 # Since configuration is stored in YAML, you can generate the hobix.yaml
 # configuration file by simply running +to_yaml+ on a weblog.
@@ -161,6 +161,60 @@ end
 #   puts weblog.to_yaml
 #     #=> --- # prints YAML configuration
 #
+# == Example 2: Adding a Template Prefix
+#
+# On Hobix.com, only news entries are shown on the front page.  The
+# site also has `about' and `learn' entry paths for storing the faqs
+# and tutorials.  Although I didn't want to display the complete
+# text of these items, I did want a sidebar to contain links to them.
+#
+# So I added a `sidebar' prefix, which loads from these entry paths.
+# I have a sidebar.html.erb, which is included using Apache SSIs.
+# The advantage to this approach is that when an update occurs in
+# either of these paths, the sidebar will be updated in the next
+# regeneration.  Rather than having to regenerate every page in the
+# site to see the change reflected.
+#
+# I added a `lib/hobix.com.rb' to the site's `lib' directory.  And
+# in hobix.yaml, I included a line requiring this file.  The file
+# simply contains the new skel method.
+#
+#   module Hobix
+#   class Weblog
+#       def skel_sidebar
+#           ## Load `about' and `learn' entries
+#           abouts = storage.find( :all => true, :inpath => 'about' ).reverse
+#           learns = storage.find( :all => true, :inpath => 'learn' ).reverse
+#   
+#           ## Create page data
+#           page = Page.new( '/sidebar' )
+#           page.updated = storage.last_modified( abouts + learns )
+#           yield :page => page, 
+#                 :about_entries => abouts, :learn_entries => learns
+#       end
+#   end
+#   end
+#
+# There is a lot going on here.  I'll try to explain the most vital parts and
+# leave the rest up to you.
+#
+# First, storage queries don't return full Entry objects.  You can read more
+# about this in the +Hobix::BaseStorage+ class docs.  The storage query returns
+# Arrays which contain each entry's id (a String) and the entry's modification time
+# (a Time object).
+#
+# See, the regeneration system will do the business of loading the full entries.
+# The skel method's job is just to report which entries *qualify* for a
+# template.  The regeneration system will then look at those entries and figure out
+# if an update is needed.
+#
+# We create a Page object, which dictates that the output will be saved to
+# /sidebar.ext.  A modification time is discovered by passing a combined list
+# to +Hobix::BaseStorage#last_modified+.
+#
+# We then yield to the regeneration system.  Note that any hash key which
+# ends with `entries' will have its contents loaded as full Entry objects, should
+# the prefix qualify for regeneration.
 #
 class Weblog
     attr_accessor :title, :link, :authors, :contributors, :tagline,
@@ -198,8 +252,8 @@ class Weblog
         weblog
     end
 
-    # Used by regenerate to construct the vars hash by calling
-    # the appropriate +skel+ method for each page.
+    # Used by +regenerate+ to construct the vars hash by calling
+    # the appropriate skel method for each page.
     def build_pages( page_name )
         puts "[Building #{ page_name } pages]"
         vars = {}
@@ -381,8 +435,11 @@ class Weblog
         end
     end
 
+    # Handler for templates with `entry' prefix.  These templates will
+    # receive one entry for each entry in the weblog.  The handler requests
+    # entry pages to be output as `/shortName.ext'.
     def skel_entry
-        all_entries = [storage.all]
+        all_entries = [storage.find]
         all_entries += sections_ignored.collect { |ign| storage.find( :all => true, :inpath => ign ) }
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
@@ -397,6 +454,9 @@ class Weblog
         end
     end
 
+    # Returns a hash of special sorting cases.  Key is the entry path,
+    # value is the sorting method.  Storage plugins must honor these
+    # default sorts.
     def sections_sorts
         @sections.inject( {} ) do |sorts, set|
             k, v = set
@@ -405,12 +465,18 @@ class Weblog
         end
     end
 
+    # Returns an Array of entry paths ignored by general querying.
+    # Storage plugins must withhold these entries from queries, unless
+    # the :all => true setting is passed to the query.
     def sections_ignored
         @sections.collect do |k, v|
             k if v['ignore']
         end.compact
     end
 
+    # For convenience, storage queries can be made through the Weblog
+    # class.  Queries will return the full Entry data, though, so it's
+    # best to use this only when you're scripting and need data quick.
     def method_missing( methId, *args )
         if storage.respond_to? methId
             storage.method( methId ).call( *args ).collect do |e|
@@ -419,10 +485,8 @@ class Weblog
         end
     end
 
-    def to_yaml_type
-        "!hobix.com,2004/weblog"
-    end
-
+    # Prints publication information the screen.  Override this if
+    # you want to suppress output or change the display.
     def p_publish( obj )
         puts "## Page: #{ obj.link }, updated #{ obj.updated }"
     end
@@ -445,6 +509,8 @@ class Weblog
         ]
     end
 
+    # Returns the YAML type information, which expands to
+    # tag:hobix.com,2004:weblog.
     def to_yaml_type
         "!hobix.com,2004/weblog"
     end

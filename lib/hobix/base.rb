@@ -16,9 +16,16 @@
 #++
 
 module Hobix
+# The BasePlugin class is *bingo* the underlying class for
+# all Hobix plugins.  The +Class::inherited+ hook is used
+# by this class to keep track of all classes that inherit
+# from it.
 class BasePlugin
     @@plugins = {}
     @@required_from = nil
+    # Initializes all the plugins, returning
+    # an Array of plugin objects.  (Used by the
+    # +Hobix::Weblog+ class.)
     def BasePlugin.start( req, weblog )
         opts = nil
         unless req.respond_to? :to_str
@@ -49,9 +56,33 @@ class BasePlugin
     end
 end
 
+# The BaseStorage class outlines the fundamental API for
+# all storage plugins.  Storage plugins are responsible
+# for abstracting away entry queries and managing the loading
+# of Entry objects.  The goal being: cache as much as you can,
+# be efficient and tidy.
+#
+# == Query Methods
+#
+# find::    Each of the query methods below uses the +find+ method
+#           to perform its search.  This method accepts a Hash of
+#           parameters.  Please note that calling +find+ without
+#           parameters will return all entries which qualify for
+#           placement on the front page.
+#
+# all::     Returns all entries.  Searches find( :all => true )
+# lastn::   Returns the last _n_ entries which qualify for the
+#           front page.
+# inpath::  Returns entries within a path which qualify for the
+#           front page.
+# after::   Returns entries created after a given date.
+# before::  Returns entries created before a given date.
+# within::  Returns entries created between a start and
+#           end date.
+# 
 class BaseStorage < BasePlugin
     def all
-        find
+        find( :all => true )
     end
     def lastn( n = 10 )
         find( :lastn => n )
@@ -70,9 +101,15 @@ class BaseStorage < BasePlugin
     end
 end
 
+# The BaseOutput plugin is the underlying class for all output
+# plugins.  These plugins are associated to templates.  Based on
+# a template's suffix, the proper output plugin is loaded and
+# used to generate page output.
 class BaseOutput < BasePlugin
 end
 
+# The BasePublish plguin is the underlying class for all publishing
+# plugins, which are notified of updates to pages.
 class BasePublish < BasePlugin
 end
 

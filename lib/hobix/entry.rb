@@ -18,9 +18,36 @@ require 'redcloth'
 require 'yaml'
 
 module Hobix
+# The Entry class stores complete data for an entry on the site.  All
+# entry extensions should behave like this class as well.
+#
+# == Properties
+#
+# At the very least, entry data should support the following
+# accessors.
+#
+# id::               The id (or shortName) for this entry.  Includes
+#                    the basic entry path.
+# link::             The full URL to this entry from the weblog.
+# title::            The heading for this entry.
+# tagline::          The subheading for this entry.
+# author::           The author's abbreviated name.
+# contributors::     An Array of contributors' abbreviated names.
+# modified::         A modification time.
+# created::          The time the Entry was initially created.
+# summary::          A brief description of this entry.  Can be used
+#                    for an abbreviated text of a long article.
+# content::          The full text of the entry.
+#
+# The following read-only properties are also available:
+#
+# day_id::           The day ID can act as a path where other
+#                    entry, posted on the same day, are stored.
+# month_id::         A path for the month's entries.
+# year_id::          A path for the year's entries.
 class Entry
     attr_accessor :id, :link, :title, :tagline, :summary, :author,
-                  :contributors, :modified, :issued, :created,
+                  :contributors, :modified, :created,
                   :content
 
     def day_id; created.strftime( "/%Y/%m/%d/" ); end
@@ -65,7 +92,10 @@ class Entry
         YAML::load( File::open( file ) )
     end
 
+    # Accessor which returns the text processor used for untyped
+    # strings in Entry fields.  (defaults to +RedCloth+.)
     def Entry::text_processor; RedCloth; end
+    # Returns an Array of fields to which the text processor applies.
     def Entry::text_processor_fields; ['content', 'tagline', 'summary']; end
 
 end
@@ -89,7 +119,13 @@ YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0', &entry_proc )
 YAML::add_domain_type( 'hobix.com,2004', 'entry', &entry_proc )
 
 module Hobix
+# The EntryEnum class is mixed into an Array of entries just before
+# passing on to a template.  This Enumerator-like module provides some
+# common iteration of entries.
 module EntryEnum
+    # Calls the block with two arguments: (1) a Time object with
+    # the earliest date of an issued post for that day; (2) an
+    # Array of entries posted that day, in chronological order.
     def each_day
         last_day, day = nil, []
         each do |e|

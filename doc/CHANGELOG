@@ -3,7 +3,8 @@
   date: 2004-05-23
   changes:
     - install.rb: install Ri documentation automatically.
-    - lib/hobix.rb: new, great Ri documentation.
+    - ? [lib/hobix.rb, lib/hobix/weblog.rb, lib/hobix/entry.rb]
+      : new, great Ri documentation.
     - lib/hobix/commandline.rb: moved commandline options into a class.
     - lib/hobix/out/atom.rb: atom 0.3 support.
 

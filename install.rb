@@ -679,7 +679,7 @@ class Installer
 
   def install_dir_lib( rel )
     install_files targfiles, config('rb-dir') + '/' + rel, 0644
-    return unless rel == 'hobix'
+    return unless rel.empty?
     begin
         require 'rdoc/rdoc'
         ri_site = true

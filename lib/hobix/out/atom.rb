@@ -20,6 +20,14 @@ require 'uri'
 
 module Hobix
 module Out
+module XmlQuick
+    def x( title, txt, attrs = nil )
+        e = REXML::Element.new title
+        e.text = txt if txt
+        attrs.each { |a,b| e.attributes[a] = b } if attrs
+        self << e
+    end
+end
 class Atom < Hobix::BaseOutput
     def initialize( weblog )
         @path = weblog.skel_path
@@ -48,41 +56,25 @@ EOXML
         rssdoc.elements['/feed/copyright'].text = vars[:weblog].copyright || "None"
         vars[:entries].each do |e|
             ele = REXML::Element.new 'entry'
-            ele_title = REXML::Element.new 'title'
-            ele_title.text = e.title
-            ele << ele_title
-            ele_link = REXML::Element.new 'link'
-            ele_link.attributes['rel'] = 'alternate'
-            ele_link.attributes['type'] = 'text/html'
-            ele_link.attributes['href'] = e.link
-            ele << ele_link
-            ele_guid = REXML::Element.new 'id'
-            ele_guid.text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }entry/#{ e.id }"
-            ele << ele_guid
-            ele_time = REXML::Element.new 'issued'
-            ele_time.text = e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" )
-            ele << ele_time
-            ele_time = REXML::Element.new 'modified'
-            ele_time.text = e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" )
-            ele << ele_time
-            if e.summary
-                ele_summ = REXML::Element.new 'summary'
-                ele_summ.attributes['type'] = 'text/html'
-                ele_summ.attributes['mode'] = 'escaped'
-                ele_summ.text = e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" )
-                ele << ele_summ
-            end
+            ele.extend XmlQuick
+            ele.x( 'title', e.title )
+            ele.x( 'link', nil, {'rel' => 'alternate', 'type' => 'text/html', 'href' => e.link } )
+            ele.x( 'id', "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }entry/#{ e.id }" )
+            ele.x( 'issued', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
+            ele.x( 'modified', e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
+            ele.x( 'summary', 
+                e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" ),
+                {'type' => 'text/html', 'mode' => 'escaped'} ) if e.summary
             author = vars[:weblog].authors[e.author]
             ele_auth = REXML::Element.new 'author'
-            ele_name = REXML::Element.new 'name'
-            ele_name.text = author['name']
-            ele_auth << ele_name
+            ele_auth.extend XmlQuick
+            ele_auth.x( 'name', author['name'] )
+            ele_auth.x( 'url', author['url'] ) if author['url']
+            ele_auth.x( 'email', author['email'] ) if author['email']
             ele << ele_auth
-            ele_desc = REXML::Element.new 'content'
-            ele_desc.attributes['type'] = 'text/html'
-            ele_desc.attributes['mode'] = 'escaped'
-            ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" )
-            ele << ele_desc
+            ele.x( 'content',
+                e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" ),
+                {'type' => 'text/html', 'mode' => 'escaped'} )
             rssdoc.elements['/feed'].add ele
         end
         rssdoc.to_s
@@ -90,25 +82,3 @@ EOXML
 end
 end
 end
-# <entry>
-# <title><$MTEntryTitle remove_html="1" encode_xml="1"$></title>
-# <link rel="alternate" type="text/html" href="<$MTEntryPermalink encode_xml="1"$>" />
-# <modified><$MTEntryModifiedDate utc="1" format="%Y-%m-%dT%H:%M:%SZ"$></modified>
-# <issued><$MTEntryDate utc="1" format="%Y-%m-%dT%H:%M:%SZ"$></issued>
-# <id>tag:<$MTBlogHost exclude_port="1" encode_xml="1"$>,<$MTEntryDate format="%Y">:<$MTBlogRelativeURL encode_xml="1"$>/<$MTBlogID$>.<$MTEntryID$></id>
-# <created><$MTEntryDate utc="1" format="%Y-%m-%dT%H:%M:%SZ"$></created>
-# <summary type="text/plain"><$MTEntryExcerpt remove_html="1" encode_xml="1"$></summary>
-# <author>
-# <name><$MTEntryAuthor encode_xml="1"$></name>
-# <MTIfNonEmpty tag="MTEntryAuthorURL"><url><$MTEntryAuthorURL encode_xml="1"$></url></MTIfNonEmpty>
-# <MTIfNonEmpty tag="MTEntryAuthorEmail"><email><$MTEntryAuthorEmail encode_xml="1"$></email></MTIfNonEmpty>
-# </author>
-# <MTIfNonEmpty tag="MTEntryCategory"><dc:subject><$MTEntryCategory encode_xml="1"$></dc:subject></MTIfNonEmpty>
-# <content type="text/html" mode="escaped" xml:lang="en" xml:base="<$MTBlogURL encode_xml="1"$>">
-# <$MTEntryBody encode_xml="1"$>
-# <$MTEntryMore encode_xml="1"$>
-# </content>
-# </entry>
-# </MTEntries>
-# </feed>
-
