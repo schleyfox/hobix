@@ -140,8 +140,8 @@ module CommandLine
         end
 
         hobix_yaml = File.join( path, "hobix.yaml" )
-        join_as_author( name, hobix_yaml )
         edit_action( Hobix::Weblog.load( hobix_yaml ) )
+        join_as_author( name, hobix_yaml )
     end
 
 
@@ -269,13 +269,16 @@ module CommandLine
         puts
         puts "Your EDITOR environment variable is set to '#{ ENV['EDITOR'] }'."
         puts "You can edit entries with your EDITOR or you can just use hobix."
-        print "Use your EDITOR to edit entries? [y/N]: "
+        puts "** NOTE: If you don't use your own editor, then you will be using"
+        puts "   the Hobix built-in object editor, which is highly experimental"
+        puts "   and may not work on your platform.)"
+        print "Use your EDITOR to edit entries? [Y/n]: "
         editor = gets.strip.upcase
 
-        if editor == 'Y'
-            @config['use editor'] = true
-        else
+        if editor == 'N'
             @config['use editor'] = false
+        else
+            @config['use editor'] = true
         end
 
         puts

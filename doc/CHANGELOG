@@ -2,7 +2,8 @@
 - version: 0.3b
   date: 2005-01-18
   changes:
-    - lib/hobix/commandline.rb: suitable errors if user has no blogs setup.
+    - lib/hobix/commandline.rb: suitable errors if user has no blogs setup. defaulting
+        to use EDITOR, since the object editor is causing tons of confusion.
     - lib/hobix/entry.rb: new keywords, free-tagged categories for entries.
     - lib/hobix/bixwik.rb: getting WikiWords working.
     - lib/hobix/weblog.rb: expand_path always adds complete blohhg URL.  default

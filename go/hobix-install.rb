@@ -115,7 +115,7 @@ def ri_install( sucmd, libdir )
 end
 
 # Web root
-GO_HOBIX = 'http://go.hobix.com/0.3a/'
+GO_HOBIX = 'http://go.hobix.com/0.3b/'
 
 # Tempdir
 TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.strftime( 'hobix_%Y-%m-%d_%H-%M-%S' ) )
