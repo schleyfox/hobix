@@ -1,0 +1,23 @@
+--- !hobix.com,2004/weblog
+title: a bokononist asks
+link: http://bokononist.com/
+tagline: nice, nice, very nice
+period: 00:60:00
+
+authors:
+  you:
+    name: the ghost of another hobix user-to-be
+    url: http://hobix.com/
+    email: ghosty@hobixghostfriends.com
+
+sections:
+  about: &ordered
+    ignore: true
+    sort_by: id
+  reviews: *ordered
+
+requires:
+- hobix/storage/filesys
+- hobix/out/erb
+- hobix/out/rss
+- hobix/out/okaynews

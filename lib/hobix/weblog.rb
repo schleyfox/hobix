@@ -67,7 +67,7 @@ class Weblog
         puts "Building #{ page_name } pages..."
         vars = {}
         if respond_to? "skel_#{ page_name }"
-            method( "skel_#{ page_name }" ).call( page_name ) do |vars|
+            method( "skel_#{ page_name }" ).call do |vars|
                 vars[:weblog] = self
                 yield vars
             end
@@ -83,12 +83,17 @@ class Weblog
         @plugins.detect { |p| p.is_a? BaseStorage }
     end
 
+    def publishers
+        @plugins.find_all { |p| p.is_a? BasePublish }
+    end
+
     def regenerate( how = nil )
         outputs = @plugins.find_all { |p| p.is_a? BaseOutput }
+        published = []
         Find::find( @skel_path ) do |path|
-            if FileTest.directory? path
-                Find.prune if File.basename(path)[0] == ?.
-            else
+            if File.basename(path)[0] == ?.
+                Find.prune 
+            elsif not FileTest.directory? path
                 entry_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
                 output = outputs.detect { |p| if entry_path =~ /\.#{ p.extension }$/; entry_path = $`; end }
                 if output
@@ -97,26 +102,35 @@ class Weblog
                     while page_name =~ /\.\w+$/; page_name = $`; entry_ext = $& + entry_ext; end
                     next if entry_ext.empty?
                     ## Build the output pages
+                    page_name.gsub!( /\W/, '_' )
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
                         vars[:page].add_ext( entry_ext )
                         entry_path = vars[:page].link
                         full_entry_path = File.join( @output_path, entry_path )
+
                         ## If updating, skip any that are unchanged
                         next if how == :update and vars[:page].updated != nil and 
                                 File.exists?( full_entry_path ) and
+                                File.mtime( path ) < File.mtime( full_entry_path ) and
                                 vars[:page].updated < File.mtime( full_entry_path )
                         p vars[:page]
-                        if vars[:entry]
-                            vars[:entry] = storage.load_entry( vars[:entry] )
-                        elsif vars[:entries]
-                            vars[:entries].collect! do |e|
-                                storage.load_entry( e[0] )
+                        vars.keys.each do |var_name|
+                            case var_name.to_s
+                            when /entry$/
+                                vars[var_name] = storage.load_entry( vars[var_name] )
+                            when /entries$/
+                                vars[var_name].collect! do |e|
+                                    storage.load_entry( e[0] )
+                                end
                             end
                         end
-                        html = output.load( path, vars )
+
+                        ## Publish the page
+                        txt = output.load( path, vars )
                         File.makedirs( File.join( @output_path, File.dirname( entry_path ) ) )
-                        File.open( File.join( @output_path, entry_path ), 'w' ) { |f| f << html } unless html.empty?
+                        File.open( full_entry_path, 'w' ) { |f| f << txt }
+                        published << page_name
                     end
                 else
                     full_entry_path = File.join( @output_path, entry_path )
@@ -126,18 +140,24 @@ class Weblog
                 end
             end
         end
+        published.uniq!
+        publishers.each do |p|
+            if p.watch & published != []
+                p.publish( p )
+            end
+        end
     end
 
-    def skel_index( page_name )
+    def skel_index
         index_entries = storage.lastn
-        page = Page.new( 'index' )
+        page = Page.new( '/index' )
         page.prev = index_entries.last[1].strftime( "/%Y/%m/index" )
         page.timestamp = index_entries.first[1]
         page.updated = storage.last_modified( index_entries )
         yield :page => page, :entries => index_entries
     end
 
-    def skel_daily( page_name )
+    def skel_daily
         entry_range = storage.find
         first_time, last_time = entry_range.last[1], entry_range.first[1]
         start = Time.mktime( first_time.year, first_time.month, first_time.day, 0, 0, 0 ) + 1
@@ -160,7 +180,7 @@ class Weblog
         end
     end
 
-    def skel_monthly( page_name )
+    def skel_monthly
         entry_range = storage.find
         first_time, last_time = entry_range.last[1], entry_range.first[1]
         start = Time.mktime( first_time.year, first_time.month, 1 )
@@ -188,6 +208,24 @@ class Weblog
         end
     end
 
+    def skel_yearly
+        entry_range = storage.find
+        first_time, last_time = entry_range.last[1], entry_range.first[1]
+        years = (first_time.year..last_time.year).collect do |y|
+            [ Time.mktime( y, 1, 1 ), Time.mktime( y + 1, 1, 1 ) - 1 ]
+        end
+        years.extend Hobix::Enumerable
+        years.each_with_neighbors do |prev, curr, nextm| 
+            entries = storage.within( curr[0], curr[1] )
+            page = Page.new( curr[0].strftime( "/%Y/index" ) )
+            page.prev = prev[0].strftime( "/%Y/index" ) if prev
+            page.next = nextm[0].strftime( "/%Y/index" ) if nextm
+            page.timestamp = curr[1]
+            page.updated = storage.last_modified( entries )
+            yield :page => page, :entries => entries
+        end
+    end
+
     def sections_sorts
         @sections.inject( {} ) do |sorts, set|
             k, v = set
@@ -202,7 +240,7 @@ class Weblog
         end.compact
     end
 
-    def skel_entry( page_name )
+    def skel_entry
         all_entries = [storage.all]
         all_entries += sections_ignored.collect { |ign| storage.find( :all => true, :inpath => ign ) }
         all_entries.each do |entry_set|

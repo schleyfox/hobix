@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby18
+#!/usr/bin/env ruby
 require 'hobix'
 require 'yaml'
 
@@ -7,8 +7,13 @@ module CommandLine
     ##
     ## Locate RC
     ##
-    [ENV['HOME']].each do |home_dir|
-        if File.exists? home_dir
+    [
+        [ENV['HOME'], ENV['HOME']],
+        [ENV['APPDATA'], File.join( ENV['APPDATA'], 'Hobix' )]
+    ].each do |home_top, home_dir|
+        next unless home_top
+        if File.exists? home_top
+            File.makedirs( home_dir )
             HOME_DIR = home_dir
             break
         end
@@ -159,7 +164,7 @@ if __FILE__ == $0
     cmdline.extend Hobix::CommandLine
 
     def print_usage( cmdline )
-        puts "hobix #{ Hobix::VERSION } on ruby #{ ::VERSION } (#{ ::RELEASE_DATE }) [#{ ::PLATFORM }]"
+        puts "hobix #{ Hobix::VERSION } on ruby #{ ::RUBY_VERSION } (#{ ::RUBY_RELEASE_DATE }) [#{ ::RUBY_PLATFORM }]"
         puts "Usage: hobix command weblog-name [command-options]"
         puts "Commands are"
         ['weblog', 'action'].each do |cmd_type|

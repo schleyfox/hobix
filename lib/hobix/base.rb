@@ -20,6 +20,10 @@ class BasePlugin
     @@plugins = {}
     @@required_from = nil
     def BasePlugin.start( req, weblog )
+        opts = nil
+        unless req.respond_to? :to_str
+            req, opts = req.to_a.first
+        end
         @@required_from = req
         if req.tainted?
             req.untaint if req =~ /^[\w\/\\]+$/
@@ -29,7 +33,11 @@ class BasePlugin
 
         if @@plugins[req]
             @@plugins[req].collect do |p|
-                p.new( weblog )
+                if opts
+                    p.new( weblog, opts )
+                else
+                    p.new( weblog )
+                end
             end
         else
             []
@@ -63,6 +71,9 @@ class BaseStorage < BasePlugin
 end
 
 class BaseOutput < BasePlugin
+end
+
+class BasePublish < BasePlugin
 end
 
 # Enumerable::each_with_neighbors from Joel Vanderwerf's 

@@ -1,0 +1,50 @@
+--- %YAML:1.0
+- version: 0.1a
+  date: 2004-05-16
+  changes:
+    - Hobix.gemspec: for anyone who wants to make a Gem.
+    - make-go.rb: generates the go/hobix-installer.yaml, which is
+        leveraged by the go/hobix-installer.rb script.
+    - bin/hobix: stores personal config in '$HOME/Application Data/Hobix'
+        on win32.
+    - go/hobix-installer.rb: installer script from go.hobix.com.
+    - lib/hobix/base.rb: now allow plugins to have config options in
+        the hobix.yaml file.
+    - lib/hobix/entry.rb: all entries default to folded YAML.
+    - lib/hobix/weblog.rb: publisher plugins.  entry and entries are
+        now variable suffixes.  new skel_yearly and skel_methods now
+        available for templates in subdirectories.
+    - lib/hobix/out/redrum.rb: new redrum plugin is ERB + Textile.
+    - lib/hobix/publish/ping.rb: xml-rpc ping for blo.gs and such.
+    - share/default-blog: contains basic blog which is copied into
+        place upon 'create' command.
+
+- version: 0.1
+  date: 2004-04-12
+  changes:
+    - bin/hobix: post command working, no create or edit for now.
+    - lib/hobix/weblog.rb: dump as !hobix.com,2004/weblog.
+    - lib/hobix/storage/filesys.rb: save entries.
+
+- version: 0.0b
+  date: 2004-04-12
+  changes:
+    - bin/hobix: command list, RC setup and regen/upgen are working.
+    - lib/hobix.rb: requires hobix/weblog.
+
+- version: 0.0a 
+  date: 2004-04-10
+  changes:
+    - bin/hobix: moved all options to separate methods in module Hobix::CommandLine.
+    - lib/hobix/entry.rb: entry 'body' renamed 'content'.
+    - lib/hobix/weblog.rb: moved page prefixes to separate methods.
+    - lib/hobix/storage/filesys.rb: ignore list changed to path properties.
+    - lib/hobix/out/rss.rb: entry 'body' renamed 'content'.
+
+- version: 0.0
+  date: 2004-04-07
+  changes:
+    - lib/hobix/entry.rb: YAML output to !hobix.com,2004/entry.
+    - lib/hobix/weblog.rb: Daily archives.
+    - lib/hobix/out/rss.rb: Link tags.
+    - lib/hobix/storage/filesys.rb: Update entry files with timestamps.

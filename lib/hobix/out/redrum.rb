@@ -1,7 +1,7 @@
 #
-# = hobix.rb
+# = hobix/out/redrum.rb
 #
-# Hobix command-line weblog system.
+# Hobix processing of ERB + Textile templates.
 #
 # Copyright (c) 2003-2004 why the lucky stiff
 #
@@ -14,11 +14,14 @@
 #--
 # $Id$
 #++
+require 'hobix/out/erb'
 
-require 'hobix/config'
-require 'hobix/weblog'
-
-module Hobix
-    VERSION = '0.1a'
+module Hobix::Out
+class RedRum < ERB
+    def extension; "redrum"; end
+    alias erb_load load
+    def load( file_name, vars )
+        RedCloth.new( erb_load( file_name, vars ) ).to_html
+    end
 end
-
+end

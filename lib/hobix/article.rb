@@ -1,5 +1,5 @@
 #
-# = hobix.rb
+# = hobix/entry.rb
 #
 # Hobix command-line weblog system.
 #
@@ -14,11 +14,10 @@
 #--
 # $Id$
 #++
-
-require 'hobix/config'
-require 'hobix/weblog'
+require 'redcloth'
+require 'yaml'
 
 module Hobix
-    VERSION = '0.1a'
+class Article
 end
-
+end

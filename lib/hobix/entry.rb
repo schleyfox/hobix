@@ -45,6 +45,12 @@ class Entry
         "!okay/news/entry#1.0"
     end
 
+    alias to_yaml_orig to_yaml
+    def to_yaml( opts = {} )
+        opts[:UseFold] = true
+        to_yaml_orig( opts )
+    end
+
     # Load the weblog entry from a file.
     def Entry::load( file )
         YAML::load( File::open( file ) )

@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <title><%= weblog.title %></title>
+    <style type="text/css">
+    @import "/site.css";
+    </style>
+</head>
+<body>
+
+<div id="banner">
+    <h1><a href="<%= weblog.link %>"><%= weblog.title %></a></h1>
+    <span class="tagline"><%= weblog.tagline %></span>
+</div>
+
+<div id="content">
+<div id="blog">
+
+    <% entries.each do |e| %>
+    <div class="entryTitle"><%= e.title %></div>
+    <div class="entryContent"><%= e.content.to_html %></div>
+    <% end %>
+
+</div>
+</div>
+
+</body>
+</html>
