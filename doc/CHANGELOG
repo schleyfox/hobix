@@ -1,5 +1,5 @@
 --- %YAML:1.0
-- version: 0.2
+- version: 0.1e
   date: 2004-05-23
   changes:
     - install.rb: install Ri documentation automatically.
