@@ -75,15 +75,17 @@ class Page
     def initialize( link )
         @link = link
     end
-    def add_dir( dir ) #:nodoc:
-        @link = File.join( dir, @link ) if @link
-        @next = File.join( dir, @next ) if @next
-        @prev = File.join( dir, @prev ) if @prev
+    def dirj( dir, link ) #:nodoc:
+        if link[0] != ?/
+            dir = "/" + ( dir == '.' ? '' : dir )
+            link = File.join( dir, link )
+        end
+        link
     end
-    def add_ext( ext ) #:nodoc:
-        @link += ext if @link
-        @next += ext if @next
-        @prev += ext if @prev
+    def add_path( dir, ext ) #:nodoc:
+        @link = dirj( dir, @link ) + ext if @link
+        @next = dirj( dir, @next ) + ext if @next
+        @prev = dirj( dir, @prev ) + ext if @prev
     end
 end
 #
@@ -350,9 +352,8 @@ class Weblog
                     ## Build the output pages
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
-                        vars[:page].add_ext( entry_ext )
-                        entry_path = vars[:page].link
-                        full_entry_path = File.join( @output_path, entry_path )
+                        vars[:page].add_path( File.dirname( entry_path ), entry_ext )
+                        full_entry_path = File.join( @output_path, vars[:page].link[1..-1] )
 
                         ## If updating, skip any that are unchanged
                         next if how == :update and vars[:page].updated != nil and 
@@ -374,7 +375,7 @@ class Weblog
 
                         ## Publish the page
                         txt = output.load( path, vars )
-                        File.makedirs( File.join( @output_path, File.dirname( entry_path ) ) )
+                        File.makedirs( File.dirname( full_entry_path ) )
                         File.open( full_entry_path, 'w' ) { |f| f << txt }
                         published << page_name
                     end
@@ -482,7 +483,7 @@ class Weblog
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
             entry_set.each_with_neighbors do |nexte, entry, prev|
-                page = Page.new( entry[0] )
+                page = Page.new( "/#{ entry[0] }" )
                 page.prev = prev[0] if prev
                 page.next = nexte[0] if nexte
                 page.timestamp = entry[1]
@@ -506,7 +507,7 @@ class Weblog
             end
         end
         section_map.each do |section, entries|
-            page = Page.new( section + "/index" )
+            page = Page.new( "/#{ section }/index" )
             page.updated = storage.last_modified( entries )
             yield :page => page, :entries => entries
         end

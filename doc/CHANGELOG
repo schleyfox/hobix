@@ -1,4 +1,10 @@
 --- %YAML:1.0
+- version: 0.1h
+  date: 2004-08-19
+  changes:
+    - lib/hobix/weblog.rb: both relative and absolute URLs now how meaning
+        for the Page class.
+
 - version: 0.1g
   date: 2004-06-30
   changes:
