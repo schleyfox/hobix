@@ -1,283 +1,138 @@
-	body {
-		margin:0px 0px 100px 0px;
-		background:#B3B38C;		
-		}
-	A 			{ color: #003366; text-decoration: underline; }
-	A:link		{ color: #003366; text-decoration: underline; }
-	A:visited	{ color: #003366; text-decoration: underline; }
-	A:active	{ color: #999999;  }
-	A:hover		{ color: #999999;  }
+body {
+    font-family:century schoolbook, georgia, verdana, arial, sans-serif;
+    margin:40px 100px 100px 100px;
+    background:#BCACAC;
+}
 
-	h1, h2, h3 {
-		margin: 0px;
-		padding: 0px;
-	}
+A 			{ color: #003366; text-decoration: underline; }
+A:link		{ color: #003366; text-decoration: underline; }
+A:visited	{ color: #003366; text-decoration: underline; }
+A:active	{ color: #999999;  }
+A:hover		{ color: #999999;  }
 
-	#banner {
-                                position:relative;
-                                left:0px;
-		font-family:palatino,  georgia, verdana, arial, sans-serif;
-		color:#333;
-                                letter-spacing: 20px;
-		font-size:x-large;
-		font-weight:normal;	
-  		padding-top:20px;
-                                padding-left:100px;
-                                padding-bottom:0px;
-		}
+h1, h2, h3 {
+    margin: 0px;
+    padding: 0px;
+}
 
-	#banner a,
-        #banner a:link,
-        #banner a:visited,
-        #banner a:active,
-        #banner a:hover {
-		font-family: palatino,  georgia, verdana, arial, sans-serif;
-		font-size: xx-large;
-		color: #333;
-		text-decoration: none;
-		}
+#page {
+    position:absolute;
+    width:688px;
+    top:40px;
+    left:50%;
+    margin-left:-344px;
+}
 
-	.description {
-		font-family:palatino,  georgia, times new roman, serif;
-		color:#333;
-  		position:relative;
-  		top:-10px;
-		font-size:xx-small;
-                                letter-spacing: 2px;
-  		text-transform:none;	
-		}
-				
-	#content {
-                                position:absolute;
-		background:#FFF;
-		margin-right:40px;
-		margin-left:100px;
-		margin-bottom:20px;
-		border:2px solid;
-                                border-color: #FFF #44442D #44442D #FFF;
-                                border-top:1px dashed;
-                                border-left:1px dashed;
-                                border-bottom:10px;
-		width:500px;
-		}
+#banner {
+    color:#333;
+    font-size:large;
+    font-weight:normal;	
+    width:100%;
+}
 
-	#container {
-		background:#FFF;
-		border:1px solid #000000;		
-		}
+#banner h1 {
+    font-size:xx-large;
+}
 
-	#links {	
-                                position:absolute;
-                                left:600px;
-                                margin-left:10px;
-		padding:5px;				
-		border:1px solid #FFF;
-		width:150px;			
-		}
-		
-	.blog {
-  		padding:15px;
-		background:#FFF; 
-		}
+#banner a,
+    #banner a:link,
+    #banner a:visited,
+    #banner a:active,
+    #banner a:hover {
+    color: #333;
+    text-decoration: none;
+}
 
-	.blogbody {
-		font-family:palatino, georgia, verdana, arial, sans-serif;
-		color:#333;
-		font-size:small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:200%;
-		}
+#content {
+    float:left;
+    margin-bottom:40px;
+}
 
-	.blogbody a,
-	.blogbody a:link,
-	.blogbody a:visited,
-	.blogbody a:active,
-	.blogbody a:hover {
-		font-weight: normal;
-		text-decoration: underline;
-	}
+#sidebar {	
+    float:right;
+    padding:20px 5px 60px 5px;
+    width:140px;
+}
+    
+#blog {
+    border-right:solid 6px white;
+    width:500px;
+    padding:20px 5px 60px 5px;
+}
 
-	.title	{
-		font-family: palatino, georgia, times new roman, serif;
-		font-size: medium;
-		color: #666;
-		}			
+.tagline {
+    background:white;
+    padding:3px;
+}
 
-	#menu {
-  		margin-bottom:15px;
-		background:#FFF;
-		text-align:center;
-		}		
+.dayHeader {
+    color: white;
+    font-size:large;
+    padding:5px 0px;
+}
 
-	.date	{ 
-		font-family:palatino, georgia, times new roman, serif; 
-		font-size: large; 
-		color: #333; 
-		border-bottom:1px solid #999;
-		margin-bottom:10px;
-		font-weight:bold;
-		}			
-		
-	.posted	{ 
-		font-family:verdana, arial, sans-serif; 
-		font-size: x-small; 
-		color: #000000; 
-		margin-bottom:25px;
-		}
-		
-		
-	.calendar {
-		font-family:verdana, arial, sans-serif;
-		color:#666;
-		font-size:xx-small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:120%;
-  		padding:1px;
-                                text-align:left;
-  		width:100%;	
-		}
-	
-	.calendarhead {	
-		font-family:palatino, georgia, times new roman, serif;
-		color:#666600;
-		font-size:small;
-		font-weight:normal;
-  		padding:2px;
-		letter-spacing: .3em;
-  		background:#FFF;
-  		text-transform:uppercase;
-		text-align:center;	
-  		width:100%;		
-		}	
-	
-	.side {
-		font-family:verdana, arial, sans-serif;
-		color:#333;
-		font-size:x-small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:140%;
-  		padding:2px;
-  		border-bottom:1px black;
-  		width:100%;
-                                word-wrap: break-word;	
-		}	
-		
-	.sidetitle {
-		font-family:palatino, georgia, times new roman, serif;
-		color:#666600;
-		font-size:small;
-		font-weight:normal;
-  		padding:2px;
-  		margin-top:10px;
-		letter-spacing: .3em;
-  		background:#E0E0E0;
-  		text-transform:uppercase;	
-  		width:100%;
-                                word-wrap: break-word;
-		}		
-	
-	.syndicate {
-		font-family:verdana, arial, sans-serif;
-		font-size:xx-small;		
-  		line-height:140%;
-  		padding:2px;
-  		margin-top:15px;
-  		background:#FFF;
-  		width:100%;	
- 		}	
-		
-	.powered {
-		font-family:palatino, georgia, times new roman, serif;
-		color:#666;
-		font-size:xx-small;		
-		line-height:140%;
-		text-transform:uppercase; 
-		padding:2px;
-		margin-top:50px;
-		letter-spacing: .2em;
-  		background:#FFF;	
-  		width:100%;	
-		}	
-		
-	
-	.comments-body {
-		font-family:palatino, georgia, verdana, arial, sans-serif;
-		color:#666;
-		font-size:small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:140%;
- 		padding-bottom:10px;
-  		padding-top:10px;		
- 		border-bottom:1px dotted #999; 					
-		}		
+.entry {
+    border-top: solid 1px #C99;
+    border-bottom: solid 1px #C99;
+    background:#D7C7C3;
+    padding:10px 8px;
+}
 
-	.comments-post {
-		font-family:verdana, arial, sans-serif;
-		color:#666;
-		font-size:x-small;
-		font-weight:normal;
-  		background:#FFF;		
-		}	
-			
-	
-	.trackback-url {
-		font-family:palatino, georgia, verdana, arial, sans-serif;
-		color:#666;
-		font-size:small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:140%;
- 		padding:5px;		
- 		border:1px dotted #999; 					
-		}
+.entryTitle	{
+    font-size: medium;
+    color: #666;
+}			
 
+.entryContent {
+    font-family:palatino, georgia, verdana, arial, sans-serif;
+    color:#333;
+    font-size:small;
+    font-weight:normal;
+    line-height:200%;
+}
 
-	.trackback-body {
-		font-family:palatino, georgia, verdana, arial, sans-serif;
-		color:#666;
-		font-size:small;
-		font-weight:normal;
-  		background:#FFF;
-  		line-height:140%;
- 		padding-bottom:10px;
-  		padding-top:10px;		
- 		border-bottom:1px dotted #999; 					
-		}		
+.entryContent a,
+.entryContent a:link,
+.entryContent a:visited,
+.entryContent a:active,
+.entryContent a:hover {
+    font-weight: normal;
+    text-decoration: underline;
+}
 
-	.trackback-post {
-		font-family:verdana, arial, sans-serif;
-		color:#666;
-		font-size:x-small;
-		font-weight:normal;
-  		background:#FFF;		
-		}	
+.entryFooter { 
+    font-size:x-small; 
+    text-align:center;
+    padding:3px;
+}
+    
+.entryFooter a,
+.entryFooter a:link,
+.entryFooter a:visited,
+.entryFooter a:active,
+.entryFooter a:hover {
+    font-weight: normal;
+    text-decoration: underline;
+}
 
-		
-	.comments-head	{ 
-		font-family:palatino, georgia, verdana, arial, sans-serif; 
-		font-size:small; 
-		color: #666; 
-		border-bottom:1px solid #999;
-		margin-top:20px;
-		font-weight:bold;
-  		background:#FFF;		
-		}		
+.sidebarTitle {
+    color: white;
+    font-size:large;
+    padding:5px 0px;
+}
 
-	#banner-commentspop {
-		font-family:palatino, georgia, verdana, arial, sans-serif;
-		color:#000;
-		font-size:large;
-		font-weight:bold;
-		border-left:1px solid #FFF;	
-		border-right:1px solid #FFF;  		
-		border-top:1px solid #FFF;  		
-  		background:#B3B38C;
-  		padding-left:15px;
-  		padding-right:15px;
-  		padding-top:5px;
-  		padding-bottom:5px;  		  		  			 
-		}
+.sidebarBox ul {
+    margin:0px;
+    padding:0px;
+}
+
+.sidebarBox li {
+    display: block;
+    list-style-image: none;
+    list-style-type: none;
+}
+
+.sidebarBox p {
+    margin:0px;
+    padding:0px;
+}
