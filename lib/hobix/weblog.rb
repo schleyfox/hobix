@@ -353,8 +353,7 @@ class Weblog
     # Used by +regenerate+ to construct the vars hash by calling
     # the appropriate skel method for each page.
     def build_pages( page_name )
-        pages = []
-        ref_time = {}
+        vars = {}
         paths = page_name.split( '/' )
         loop do
             try_page = paths.join( '_' )
