@@ -1,260 +1,54 @@
 #!/usr/bin/env ruby
-require 'hobix'
-require 'yaml'
+require 'hobix/commandline'
 
-module Hobix
-module CommandLine
-    ##
-    ## Locate RC
-    ##
-    [
-        [ENV['HOME'], ENV['HOME']],
-        [ENV['APPDATA'], File.join( ENV['APPDATA'], 'Hobix' )]
-    ].each do |home_top, home_dir|
-        next unless home_top
-        if File.exists? home_top
-            File.makedirs( home_dir )
-            HOME_DIR = home_dir
-            break
-        end
-    end
-    RC = File.join( HOME_DIR, '.hobixrc' )
+cmdline = Class.new
+cmdline.extend Hobix::CommandLine
 
-    def login
-        @config = YAML::load( File.open( RC ) ) if File.exists? RC
-    end
-
-    def config
-        @config
-    end
-
-    def save_config
-        File.open( RC, "w" ) do |f|
-            f.write @config.to_yaml
-        end
-    end
-
-    # Create a new skeleton for a weblog
-    def create_weblog_explain; "Create a brand new weblog."; end
-    def create_weblog_args; ['weblog-name']; end
-    def create_weblog( name )
-    end
-
-
-    # Add a weblog to local config
-    def add_weblog_explain; "Adds a pre-existing hobix weblog to your list."; end
-    def add_weblog_args; ['weblog-name', '/path/to/hobix.yaml']; end
-    def add_weblog( name, path )
-        @config['weblogs'] ||= {}
-        @config['weblogs'][name] = path
-        save_config
-    end
-
-    # Edit a weblog from local config
-    def edit_action_explain; "Edit weblog's configuration"; end
-    def edit_action_args; ['weblog-name']; end
-    def edit_action( weblog )
-        webconf = aorta( weblog )
-        return if webconf.nil?
-    end
-
-    # Delete a weblog from local config
-    def del_weblog_explain; "Remove weblog from your list."; end
-    def del_weblog_args; ['weblog-name']; end
-    def del_weblog( name )
-        @config['weblogs'] ||= {}
-        @config['weblogs'].delete( name )
-        save_config
-    end
-
-    # List entries
-    def list_action_explain; "List all posts within a given path."; end
-    def list_action_args; ['weblog-name', 'search/path']; end
-    def list_action( weblog, inpath = '' )
-        entries = weblog.storage.find( :all => true, :inpath => inpath ).
-                  sort { |e1, e2| e1[0] <=> e2[0] }
-        name_width = entries.collect { |e| e[0].length }.max + 1
-        tabular( entries, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
-    end
-
-    # Post a new entry
-    def post_action_explain; "Add or edit a post with identifier 'shortName'.\n" +
-        "(You can use full paths. 'blog/weddings/anotherPatheticWedding')"; end
-    def post_action_args; ['weblog-name', 'shortName']; end
-    def post_action( weblog, entry_id )
-        begin
-            entry = weblog.storage.load_entry( entry_id )
-        rescue
-            entry = Hobix::Entry.new
-            entry.author = @config['username']
-        end
-        entry = aorta( entry )
-        return if entry.nil?
-
-        weblog.storage.save_entry( entry_id, entry )
-        weblog.regenerate( :update ) if @config['post upgen']
-    end
-
-    # Update the site
-    def upgen_action_explain; "Update site with only the latest changes."; end
-    def upgen_action_args; ['weblog-name']; end
-    def upgen_action( weblog )
-        weblog.regenerate( :update )
-    end
-
-    # Regenerate the site
-    def regen_action_explain; "Regenerate the all the pages throughout the site."; end
-    def regen_action_args; ['weblog-name']; end
-    def regen_action( weblog )
-        weblog.regenerate
-    end
-
-    ##          
-    ## Setup user's RC
-    ##
-    def setup
-        @config = {}
-
-        username = ''
-        default_user = ''
-        user_prompt = 'Your hobix username'
-        if ENV['USER']
-            default_user = ENV['USER']
-            user_prompt << " [<Enter> for #{ ENV['USER'] }]"
-        end
-        while username.empty?
-            puts
-            print "#{ user_prompt }: "
-            username = gets.strip
-            if username.empty?
-                username = default_user
+def print_usage( cmdline )
+    puts "hobix #{ Hobix::VERSION } on ruby #{ ::RUBY_VERSION } (#{ ::RUBY_RELEASE_DATE }) [#{ ::RUBY_PLATFORM }]"
+    puts "Usage: hobix command weblog-name [command-options]"
+    puts "Commands are"
+    ['weblog', 'action'].each do |cmd_type|
+        cmdline.methods.collect do |m|
+            if m =~ /^(\w+)_(#{ cmd_type })$/
+                [$1, $&]
             end
+        end.compact.sort.each do |cmd, m|
+            args = "#{ cmd } #{ cmdline.method( "#{ m }_args" ).call.join( ' ' ) }"
+            exp = cmdline.method( "#{ m }_explain" ).call.gsub( /\n/, "\n" + ( " " * 40 ) )
+            puts "  %-38s%-40s" % [args, exp]
         end
-        @config['username'] = username
-
         puts
-        puts "Your EDITOR environment variable is set to '#{ ENV['EDITOR'] }'."
-        puts "You can edit entries with your EDITOR or you can just use hobix."
-        print "Use your EDITOR to edit entries? [y/N]: "
-        editor = gets.strip.upcase
-
-        if editor == 'Y'
-            @config['use editor'] = true
-        else
-            @config['use editor'] = false
-        end
-
-        puts
-        print "When posting a new entry, would you like Hobix to automatically"
-        print "update the site? [Y/n]: "
-        post_upgen = gets.strip.upcase
-
-        if post_upgen == 'N'
-            @config['post upgen'] = false
-        else
-            @config['post upgen'] = true
-        end
-
-        # puts
-        # puts "If you want to create a new hobix weblog, we can do that now."
-        # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
-        # puts "to simply move on."
-        # @config['weblogs'] ||= {}
-        # ## XX TODO XX
-
-        # puts
-        # puts "If you want to join an existing hobix weblog, we can do that now."
-        # puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
-        # puts "to simply move on."
-        # ## XX TODO XX
-        save_config
     end
-
-    def aorta( obj )
-        tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
-        File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
-        created = File.mtime( tempfile )
-        system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-        return nil unless File.exists?( tempfile )
-
-        if created < File.mtime( tempfile )
-            obj = YAML::load( File.open( tempfile ) )
-        else
-            puts "** Edit aborted"
-            obj = nil
-        end
-        File.delete( tempfile )
-        obj
-    end
-
-    def tabular( table, fields, desc = nil )
-        client_format = fields.collect { |f| "%#{ f[0] }s" }.join( ': ' )
-        puts client_format % fields.collect { |f| f[2] }
-        puts fields.collect { |f| "-" * f[0].abs }.join( ':-' )
-        table.each do |row|
-            puts client_format % fields.collect { |f| row[ f[1] ] }
-            if desc
-                puts row[ desc ]
-                puts
-            end
-        end
-    end
-
-end
+    exit
 end
 
-if __FILE__ == $0
-    
-    cmdline = Class.new
-    cmdline.extend Hobix::CommandLine
+print_usage( cmdline ) if ARGV.length < 1 or ARGV[0] == 'help'
 
-    def print_usage( cmdline )
-        puts "hobix #{ Hobix::VERSION } on ruby #{ ::RUBY_VERSION } (#{ ::RUBY_RELEASE_DATE }) [#{ ::RUBY_PLATFORM }]"
-        puts "Usage: hobix command weblog-name [command-options]"
-        puts "Commands are"
-        ['weblog', 'action'].each do |cmd_type|
-            cmdline.methods.collect do |m|
-                if m =~ /^(\w+)_(#{ cmd_type })$/
-                    [$1, $&]
-                end
-            end.compact.sort.each do |cmd, m|
-                args = "#{ cmd } #{ cmdline.method( "#{ m }_args" ).call.join( ' ' ) }"
-                exp = cmdline.method( "#{ m }_explain" ).call.gsub( /\n/, "\n" + ( " " * 40 ) )
-                puts "  %-38s%-40s" % [args, exp]
-            end
-            puts
-        end
+cmd, *opts = ARGV
+ARGV.clear
+         
+unless cmdline.login
+    puts "Welcome to hobix (a simple weblog tool).  Looks like your \n" +
+         "first time running hobix, eh?  Time to get a bit of information \n" +
+         "from you before you start using hobix.  (All of this will be stored \n"
+         "in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
+    cmdline.setup
+    puts    
+end
+
+if cmdline.respond_to? "#{ cmd }_weblog"
+    cmdline.method( "#{ cmd }_weblog" ).call( *opts )
+elsif cmdline.respond_to? "#{ cmd }_action"
+    weblog = opts.shift
+    unless cmdline.config['weblogs'].has_key? weblog
+        puts "*** no weblog `#{ weblog }' found in your configuration."
+        puts "*** type `hobix help' and check your spelling."
         exit
     end
-
-    print_usage( cmdline ) if ARGV.length < 1 or ARGV[0] == 'help'
-
-    cmd, *opts = ARGV
-    ARGV.clear
-             
-    unless cmdline.login
-        puts "Welcome to hobix (a simple weblog tool).  Looks like your \n" +
-             "first time running hobix, eh?  Time to get a bit of information \n" +
-             "from you before you start using hobix.  (All of this will be stored \n"
-             "in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
-        cmdline.setup
-        puts    
-    end
-
-    if cmdline.respond_to? "#{ cmd }_weblog"
-        cmdline.method( "#{ cmd }_weblog" ).call( *opts )
-    elsif cmdline.respond_to? "#{ cmd }_action"
-        weblog = opts.shift
-        unless cmdline.config['weblogs'].has_key? weblog
-            puts "*** no weblog `#{ weblog }' found in your configuration."
-            puts "*** type `hobix help' and check your spelling."
-            exit
-        end
-        hobix_weblog = Hobix::Weblog.load( cmdline.config['weblogs'][ weblog ] )
-        cmdline.method( "#{ cmd }_action" ).call( hobix_weblog, *opts )
-    else
-        puts "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
-    end
-
+    hobix_weblog = Hobix::Weblog.load( cmdline.config['weblogs'][ weblog ] )
+    cmdline.method( "#{ cmd }_action" ).call( hobix_weblog, *opts )
+else
+    puts "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
 end
 

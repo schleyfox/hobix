@@ -49,6 +49,7 @@ class FileSys < Hobix::BaseStorage
             e = Hobix::Entry::load( entry_file )
             e.id = id
             e.link = @link + id + ".html"
+            e.modified = modified( id )
             unless e.created
                 e.created = @index[id]
                 YAML::dump( e, File.open( entry_file, 'w' ) )

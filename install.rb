@@ -679,6 +679,23 @@ class Installer
 
   def install_dir_lib( rel )
     install_files targfiles, config('rb-dir') + '/' + rel, 0644
+    return unless rel == 'hobix'
+    begin
+        require 'rdoc/rdoc'
+        ri_site = true
+        if RDOC_VERSION =~ /^0\./
+            require 'rdoc/options'
+            unless Options::OptionList::OPTION_LIST.assoc('--ri-site')
+                ri_site = false
+            end
+        end
+        if ri_site
+            r = RDoc::RDoc.new
+            r.document(%w{--ri-site})
+        end
+    rescue
+        puts "** Unable to install Ri documentation for Hobix **"
+    end
   end
 
   def install_dir_ext( rel )

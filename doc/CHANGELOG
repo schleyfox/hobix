@@ -1,4 +1,12 @@
 --- %YAML:1.0
+- version: 0.2
+  date: 2004-05-23
+  changes:
+    - install.rb: install Ri documentation automatically.
+    - lib/hobix.rb: new, great Ri documentation.
+    - lib/hobix/commandline.rb: moved commandline options into a class.
+    - lib/hobix/out/atom.rb: atom 0.3 support.
+
 - version: 0.1d
   date: 2004-05-22
   changes:

@@ -1,7 +1,7 @@
 #
 # = hobix/out/rss.rb
 #
-# RSS output for Hobix.
+# RSS 2.0 output for Hobix.
 #
 # Copyright (c) 2003-2004 why the lucky stiff
 #
