@@ -25,6 +25,6 @@ module Hobix
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"
     ## Share directory contains external data files
-    SHARE_PATH = ''
+    SHARE_PATH = "/usr/local/share/hobix/"
 end
 

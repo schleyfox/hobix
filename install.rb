@@ -626,7 +626,7 @@ class Installer
     end
   end
 
-  SHAREPATH_RE = /^(\s*)SHARE_PATH\s*=\s*/
+  SHAREPATH_RE = /^(\s*)SHARE_PATH\s*=.*$/
 
   def sharepath
     config('data-dir') + '/hobix/'
