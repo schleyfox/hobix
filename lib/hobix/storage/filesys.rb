@@ -34,6 +34,15 @@ class FileSys < Hobix::BaseStorage
     def extension
         'yaml'
     end
+    def save_entry( id, e )
+        entry_file = File.join( @basepath, id + "." + extension )
+        e.created = Time.now
+        YAML::dump( e, File.open( entry_file, 'w' ) )
+
+        load_index
+        @entry_cache ||= {}
+        @entry_cache[id] = e
+    end
     def load_entry( id )
         @entry_cache ||= {}
         unless @entry_cache.has_key? id

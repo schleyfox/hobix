@@ -225,6 +225,10 @@ class Weblog
             end
         end
     end
+
+    def to_yaml_type
+        "!hobix.com,2004/weblog"
+    end
 end
 end
 

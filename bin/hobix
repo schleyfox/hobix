@@ -30,10 +30,10 @@ module CommandLine
     end
 
     # Create a new skeleton for a weblog
-    def create_weblog_explain; "Create a brand new weblog."; end
-    def create_weblog_args; ['weblog-name']; end
-    def create_weblog( name )
-    end
+    # def create_weblog_explain; "Create a brand new weblog."; end
+    # def create_weblog_args; ['weblog-name']; end
+    # def create_weblog( name )
+    # end
 
 
     # Add a weblog to local config
@@ -46,13 +46,11 @@ module CommandLine
     end
 
     # Edit a weblog from local config
-    def edit_weblog_explain; "Edit weblog's configuration"; end
-    def edit_weblog_args; ['weblog-name']; end
-    def edit_weblog( name )
-        @config['weblogs'] ||= {}
-        @config['weblogs'].delete( name )
-        save_config
-    end
+    # def edit_action_explain; "Edit weblog's configuration"; end
+    # def edit_action_args; ['weblog-name']; end
+    # def edit_action( weblog )
+    #     aorta( weblog )
+    # end
 
     # Delete a weblog from local config
     def del_weblog_explain; "Remove weblog from your list."; end
@@ -68,6 +66,14 @@ module CommandLine
         "(You can use full paths. 'blog/weddings/anotherPatheticWedding')"; end
     def post_action_args; ['weblog-name', 'shortName']; end
     def post_action( weblog, entry_id )
+        begin
+            entry = weblog.storage.load_entry( entry_id )
+        rescue
+            entry = Hobix::Entry.new
+            entry.author = @config['username']
+        end
+        entry = aorta( entry )
+        weblog.storage.save_entry( entry_id, entry )
     end
 
     # Update the site
@@ -134,13 +140,13 @@ module CommandLine
         save_config
     end
 
-    def editor( str )
+    def aorta( obj )
         tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
-        File.open( tempfile, "w" ) { |f| f.write str }
+        File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
         system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-        return false unless File.exists?( tempfile )
+        return obj unless File.exists?( tempfile )
 
-        content = File.open( tempfile ).read
+        content = YAML::load( File.open( tempfile ) )
         File.delete( tempfile )
         content
     end
@@ -164,7 +170,7 @@ if __FILE__ == $0
             end.compact.sort.each do |cmd, m|
                 args = "#{ cmd } #{ cmdline.method( "#{ m }_args" ).call.join( ' ' ) }"
                 exp = cmdline.method( "#{ m }_explain" ).call.gsub( /\n/, "\n" + ( " " * 40 ) )
-                puts "    %-36s%-40s" % [args, exp]
+                puts "  %-38s%-40s" % [args, exp]
             end
             puts
         end
