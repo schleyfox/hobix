@@ -67,7 +67,7 @@ def copy_dir( sucmd, from_dir, to_dir, mode = nil )
     end
 end
 def open_try_gzip( uri, gzip_on = true )
-    opts = {}
+    opts = {'User-Agent' => "Hobix Installer on ruby #{ ::RUBY_VERSION } (#{ ::RUBY_RELEASE_DATE }) [#{ ::RUBY_PLATFORM }]"}
     opts['Accept-Encoding'] = 'gzip' if gzip_on
     URI::parse( uri ).open( opts ) do |o|
         if o.content_encoding.include?( "gzip" )
