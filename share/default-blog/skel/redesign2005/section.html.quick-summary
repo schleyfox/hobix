@@ -1,0 +1,18 @@
+title: Ruby-Lang 2005 Redesign Blog
+css <<: @import "<%= weblog.expand_path "redesign2005/redesign2005.css" %>";
+banner: |
+  <div id="buttons">
+  <dl class="tab">
+    <dt><a title="Syndicate this Site" href="/redesign2005/index.xml">RSS</a></dt>
+    <dd><a title="Syndicate this Site" href="/redesign2005/index.xml">2.0</a></dd>
+  </dl>
+  <dl class="tab xhtml">
+    <dt><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/redesign2005/">XHTML</a></dt>
+    <dd><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/redesign2005/">1.0</a></dd>
+  </dl>
+  </div>
+  <div id="top">
+  <h1 class="title"><a href="<%= weblog.link %>/redesign2005/"><img src="/redesign2005/images/redesign2005.png" /></a></h1>
+  </div>
+
+sidebar: ''

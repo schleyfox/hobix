@@ -1,0 +1,42 @@
+--- !hobix.com,2004/entry 
+title: "Klemme's Silent Hash"
+author: why
+created: 2005-01-31 00:20:38.205561 -05:00
+content: >-
+  I'm afraid the old skool weezzard Robert Klemme is trumping flgr this month on
+  Ruby-Talk.  Both are skilled prospectors, but Klemme's been dropping some
+  splendorous nuggets lately.  The extemporaneous challenge of the minute has been
+  to add a block to @Enumerable#uniq@.
+
+
+  Klemme offers @uniq_by@:
+
+
+  <pre>
+   module Enumerable
+     def uniq_by
+       h = {}; inject([]) {|a,x| h[yield(x)] ||= a << x}
+     end
+   end
+  </pre>
+
+
+  He's got a miniature Jacob's Ladder going on inside that block.  The lynch pin
+  is that perpendicular OR-SET.  He's using it like a _backwards_ conditional.
+
+
+  Here's a simpler proof:
+
+
+  <pre>
+   >> a = []; b = nil
+   >> b ||= a << 1
+   >> b ||= a << 2
+   >> a
+   => [1]
+  </pre>
+
+
+  Anyway, it's gorgeous and he's got it all linked up perfectly.  What with @a#<<@
+  returning @a@.  And then @h[]@ turns around and hands @a@ back to @inject@. 
+  (_Thanks, Glenn Parker for the tip._)

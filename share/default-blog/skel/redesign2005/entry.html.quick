@@ -1,0 +1,80 @@
+title: Ruby-Lang 2005 Redesign Blog
+css <<: @import "<%= weblog.expand_path "redesign2005/redesign2005.css" %>";
+head_tags: |
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <script type="text/javascript" src="/js/liveUpdater.js"></script>
+  <script type="text/javascript">
+      function quickRedReference() {
+          window.open( 
+              "http://hobix.com/textile/quick.html",
+              "redRef",
+              "height=600,width=550,channelmode=0,dependent=0," +
+              "directories=0,fullscreen=0,location=0,menubar=0," +
+              "resizable=0,scrollbars=1,status=1,toolbar=0"
+          );
+      }
+  </script>
+
+banner: |
+  <div id="buttons">
+  <dl class="tab">
+    <dt><a title="Syndicate this Site" href="/redesign2005/index.xml">RSS</a></dt>
+    <dd><a title="Syndicate this Site" href="/redesign2005/index.xml">2.0</a></dd>
+  </dl>
+  <dl class="tab xhtml">
+    <dt><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/redesign2005/">XHTML</a></dt>
+    <dd><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/redesign2005/">1.0</a></dd>
+  </dl>
+  </div>
+  <div id="top">
+  <h1 class="title"><a href="<%= weblog.link %>/redesign2005/"><img src="/redesign2005/images/redesign2005.png" /></a></h1>
+  </div>
+
+sidebar: ''
+
+entry: |
+  <% entry_id = entry.id %>
+  <div class="entry">
+      <+ entry_title +>
+      <+ entry_content +>
+  </div>
+  <div class="entryFooter"><+ entry_footer +></div>
+  </div>
+  <div id="comments">
+  <% comments = weblog.storage.load_attached( entry_id, "comments" ) rescue [] %>
+  <% comments.each do |entry| %>
+  <div class="entry">
+      <div class="entryAttrib">
+          <div class="entryAuthor"><h3><%= entry.author %></h3></div>
+          <div class="entryTime">said on <%= entry.created.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%I:%M %p</nobr>" ) %></div>
+      </div>
+      <div class="entryContentOuter"><div class="entryContent"><%= entry.content %></div></div>
+  </div>
+  <% end %>
+  <div class="entry">
+  <form name="userComment" method="post" action="/api/comment/<%= entry_id %>">
+    <div class="entryAttrib">
+       <div class="entryAuthor"><input name="author" type="textbox" size="15" maxlength="50" /></div>
+       <div id="liveTime" class="entryTime">said on <nobr>DD Mon YYYY</nobr> <nobr>at HH:MM AM</nobr></div>
+    </div>
+    <div class="entryContentOuter"><div class="entryContent">
+       <textarea name="content" rows="6" cols="50"></textarea>
+       <p><input type="button" name="pleasePreview" value="preview" 
+           onClick="liveTextilePreview(document.forms['userComment'].elements['content'], 'textilePreview', '/api/preview')" />
+          <input type="submit" name="submit" value="&gt;&gt;" />
+          <small>* do <a href="javascript:quickRedReference();">fancy stuff</a> in your comment.</small>
+       </p>
+       <div id="textileWrap"><!-- <h4>PREVIEW PANE</h4> -->
+       <div id="textilePreview"></div>
+       </div>
+       </div>
+    </div></div>
+     
+  </form>
+
+entry_footer: >
+  <% comments = weblog.storage.load_attached( entry.id, "comments" ) rescue [] %>
+  <%= entry.created.strftime( "%B %d, %Y at %I:%M %p" ) %> | 
+      <%= comments.length %> comments
+

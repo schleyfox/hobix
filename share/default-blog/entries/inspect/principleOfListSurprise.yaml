@@ -1,0 +1,31 @@
+--- !hobix.com,2004/entry 
+title: Principle Of List Surprise
+author: why
+created: 2005-01-09 13:22:52.537508 -05:00
+content: >
+  Two array-related behaviors that took me off-guard this week.
+
+
+  Zsban Ambrus displayed this technique for ignoring a list assignment.
+
+
+  <pre>
+   >> x, (*), z = [:x, :y, :z]
+   => [:x, :y, :z]
+   >> x
+   => :x
+   >> z
+   => :z
+  </pre>
+
+
+  And Christian Neukirchen showed the spooky split that the array constructor
+  function does.
+
+
+  <pre>
+   >> Array("foo\nbar")
+   => ["foo\n", "bar"]
+   >> $/ = ' '; Array( "i'm in your house" )
+   => ["i'm ", "in ", "your ", "house"]
+  </pre>

@@ -1,0 +1,76 @@
+--- !hobix.com,2004/entry 
+title: Holy Great CGI In Heaven!
+author: why
+created: 2005-01-01 12:49:08.484125 -05:00
+content: >
+  I know this is a dead simple library, but I've been wanting this forever and
+  just not getting around to it.  Tanaka Akira presents
+  "webapp":http://cvs.m17n.org/~akr/webapp/, a generic interface for writing
+  server-neutral CGIs.  Supports CGI, FastCGI,i WEBrick, mod_ruby and command-line
+  interface.  This goes in Hobix.
+
+
+  <pre>
+   #!/path/to/ruby
+   require 'webapp'
+
+   WebApp do |webapp|
+     webapp.puts <<_END_
+       current time: #{Time.now}
+       pid: #{$$}
+       self: #{self.inspect}
+
+       request_method: #{webapp.request_method}
+       server_name: #{webapp.server_name}
+       server_port: #{webapp.server_port}
+       script_name: #{webapp.script_name}
+       path_info: #{webapp.path_info}
+       query_string: #{webapp.query_string}
+       server_protocol: #{webapp.server_protocol}
+       remote_addr: #{webapp.remote_addr}
+       content_type: #{webapp.content_type}
+
+       --- request headers ---
+   _END_
+     webapp.each_request_header do |k, v|
+       webapp.puts "#{k}: #{v}"
+     end
+   end
+  </pre>
+
+
+  If you're wondering why the documentation is so sparse, it's because of all the
+  delegators used in the @WebApp@ class.
+
+
+  <pre>
+   extend Forwardable
+   def_delegators :@response_body, :<<, 
+     :print, :printf, :putc, :puts, :write
+
+   def_delegator :@request_header, :each, :each_request_header
+   def_delegator :@request_header, :[], :get_request_header
+
+   def_delegator :@request, :request_method, :request_method
+   def_delegator :@request, :server_name, :server_name
+   def_delegator :@request, :server_port, :server_port
+   def_delegator :@request, :script_name, :script_name
+   def_delegator :@request, :path_info, :path_info
+   def_delegator :@request, :query_string, :query_string
+   def_delegator :@request, :server_protocol, :server_protocol
+   def_delegator :@request, :remote_addr, :remote_addr
+   def_delegator :@request, :content_type, :request_content_type
+
+   def_delegator :@response_header, :set, :set_header
+   def_delegator :@response_header, :add, :add_header
+   def_delegator :@response_header, :remove, :remove_header
+   def_delegator :@response_header, :clear, :clear_header
+   def_delegator :@response_header, :has?, :has_header?
+   def_delegator :@response_header, :[], :get_header
+   def_delegator :@response_header, :each, :each_header
+  </pre>
+
+
+  WebApp doesn't require the @CGI@ module, so be sure to require it yourself if
+  you need the encoding methods and such.  (via
+  "del.icio.us":http://del.icio.us/tag/ruby/)

@@ -1,0 +1,62 @@
+--- !hobix.com,2004/entry 
+title: "CashHanded #1: Bayesian Filtering"
+author: why
+created: 2005-01-10 11:36:50.729554 -05:00
+summary: >
+  Each day this week I'm going to be pitching some ideas for "Ruby
+  codefests":http://www.rubycentral.org/grant/announce.html.  You have twenty days
+  from today to get your act together and pitch the idea.  Free money =
+  CashHanded.
+
+
+  Today's example is a %{font-size:large}generic bayesian filtering library.%
+  RedFolk could use this.  Something that could be plugged into gurgitate-mail and
+  also into Rails blogs and wikis.
+
+content: >
+  Each day this week I'm going to be pitching some ideas for  "Ruby
+  codefests":http://www.rubycentral.org/grant/announce.html.  You have twenty days
+  from today to get your act together and pitch the idea.  Free money =
+  CashHanded.
+
+
+  Before I get into today's idea, let's dispell a few myths.
+
+
+  # *You need a team in order to submit.*  No, I'm sorry, you don't need a team
+  yet. Submit your idea now.  Qualify for the grant.  After that, work on
+  assembling your crew.
+
+  # *Your has idea must be amazing.*  Uh, we need libs.  Badly.  I mean, sure, we
+  want to see a good lib come out of codefests.  But it can be a rewrite. In fact,
+  in rewriting a CPAN module or a Python lib, you might discover an unpaved Ruby
+  way and inadvertantly revolutionize.  You tripped and changed everything.
+
+  # *You can wait and submit later.*  Okay, well, you might be able to.  But
+  submit now and give us time to think about your idea and it'll have a higher
+  chance of winning simply because we'll have considered it more.
+
+
+  So, you have up to $500 to use in building a library.  Today's example is a
+  generic bayesian filtering library.  RedFolk could use this.  Something that
+  could be plugged into gurgitate-mail and also into Rails blogs and wikis.  Its
+  API would allow you to query its word lists.  You could pipe in RSS feeds and
+  let it determine which articles you'd be more likely to read.
+
+
+  In this example, we'll assume you're going to build the library with a few
+  locals.  One of you works at a company and you've spoken to your boss,
+  determined that it could be in your company's interest to host it at the office.
+  You even decide to advertise it a bit: flyers at a nearby university, a post to
+  Ruby-Talk, you notify a few local blogs or LUG sites.
+
+
+  Now, remember.  You can't use the grant money to pay participants.  And you
+  won't be travelling significantly.  But you could likely justify use of the
+  money for your advertising costs. You might be able to justify acquistion of a
+  central hard drive for development, since your company might not want you
+  developing on their machines.  And I would highly recommend renting a nice
+  projector for going through the plan together and for _The Matrix Revolutions_.
+
+
+  Soup up your codefest.  That's what the moula is for.

@@ -1,0 +1,27 @@
+--- !hobix.com,2004/entry 
+title: "RedCloth.swift?"
+author: why
+created: 2005-02-04 18:29:32.801736 -05:00
+content: >-
+  Alexey Verkhovsky, the new foreman on "Instiki":http://instiki.org/ is helping
+  pushing me from behind to get RedCloth 3.0 stable.  (The latest release is
+  within hairs!!)  And he's reporting a speed increase I didn't expect, since
+  RedCloth handles two kinds of markup now.
+
+
+  > In this test of mine, 357 wiki pages (677 kb) are converted to HTML.
+
+  >
+
+  > * 49 sec by RedCloth from CVS HEAD (3.0.2+)                                   
+
+  > * 79 seconds by RedCloth 2.0.11.
+
+  >
+
+  > ...there is a lot more than just RedCloth.to_html happening                 
+
+  in the import, so RedCloth portion itself must be more than 2 times faster.
+
+
+  My truest thanks, "Alexey":http://c2.com/cgi/wiki?AlexeyVerkhovsky!

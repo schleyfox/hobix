@@ -1,0 +1,59 @@
+--- !hobix.com,2004/entry 
+title: Why I Use Debian With Ruby
+author: daigo
+created: 2005-01-27 10:37:50.577879 -05:00
+content: >-
+  Some debian developers discussed the split of Ruby standard libraries and gave a
+  proposal to add two new packages and change the meaning of the current 'ruby'
+  package at the debian-ruby list ("not archived
+  yet":http://lists.debian.org/debian-ruby/2005/01/threads.html) (I need to modify
+  dependency lines in my tDiary packages).  I am sure that it will soon be
+  available and I'd like to say "Wait a minute, it is too early to leave Debian."
+
+
+  I like Debian's Ruby because "Ukai-san":http://ukai.org/d/ and
+  "Yamada-san":http://arika.org/diary/ are members of "its
+  maintainers":http://packages.qa.debian.org/r/ruby1.8.html. They are super
+  hackers of Debian and Ruby. Ukai-san is the leader of
+  "Debian.jp":http://www.debian.or.jp/ and the president of "Japan Linux
+  Association":http://jla.linux.or.jp/. Yamada-san seems to maintain Vine's Ruby
+  also, however, make Debian's package at first.
+
+
+  See the changelog.Debian.gz at /usr/share/doc/ruby1.8 in Debian. You can find
+  Debian's Ruby more stable than the original. I appreciate their contribution. I
+  cite a recent entry. Who else can do that?
+
+
+  <pre>
+
+  ruby1.8 (1.8.2-1) unstable; urgency=high
+
+    * akira yamada <akira@debian.org>
+    - new upstream version, 1.8.2:
+        - removed debian/patches/{100_cvs_updates.patch,801_syck_segv.patch,
+          802_syck_segv.patch}.  they ware included 1.8.2.
+        - (urgency high) fixed segv bugs:
+            - Process.groups= dumps core again.  [ruby-dev:25285]
+            - YAML::Syck::Parser#load dumps core.  [ruby-core:03973]
+            - IO.select dumps core.  [ruby-dev:25312]
+        - fixed bugs:
+            - prohibit to change access mode for special IO ports  (stdin,
+              stdout and stderr).  [ruby-dev:25225]
+    - added debian/patches/100_cvs_updates.patch:
+        - (urgency high) fixed segv bugs:
+            - String#center dumps core.  [ruby-dev:25341]
+            - require "openssl" dumps core.  [ruby-dev:25325]
+            - Zlib memory leak.  [ruby-list:39235][ruby-dev:25309]
+            - String#ljust dumps core again.  [ruby-dev:25367]
+            - bmcall() causes core dump.  [ruby-dev:25366]
+            - Module#autoload? dumps core.  [ruby-dev:25373]
+            - OpenSSL::Netscape::SPKI#challenge= dumps core.  [ruby-dev:25359]
+            - Segfault in Thread#initialize / caller  [ruby-core:04067]
+        - fixed bugs:
+            - webrick/httpauth bugs.
+              [ruby-list:40467][ruby-list:40482][ruby-dev:25336]
+            - rand uniformity  [ruby-dev:25396]
+
+   -- akira yamada <akira@debian.org>  Fri,  7 Jan 2005 11:17:10 +0900
+  </pre>

@@ -1,0 +1,24 @@
+--- !hobix.com,2004/entry 
+title: "Batsman's 5-Line Wiki"
+author: why
+created: 2004-12-21 12:00:16.262104 -05:00
+content: >-
+  Drop the code below in a file called @w7.cgi@.  You'll need to give executable
+  permission for the web server to execute the script and write permission for the
+  web server for the whole directory.
+
+  (@chmod 755 wiki/w7.cgi; chown www wiki@).
+
+
+  <pre>
+   #!/usr/bin/ruby -rcgi
+   H,B=%w'HomePage w7.cgi?n=%s';c=CGI.new'html4';n,d=c['n']!=''?c['n']:H,c['d'];t=`
+   cat #{n}`;d!=''&&`echo #{t=CGI.escapeHTML(d)} >#{n}`;c.instance_eval{out{h1{n}+
+   a(B%H){H}+pre{t.gsub(/([A-Z]\w+){2}/){a(B%$&){$&}}}+form("get"){textarea('d'){t
+   }+hidden('n',n)+submit}}}
+  </pre>
+
+
+  Basically, you have a HomePage link and you can add other pages by adding
+  WikiWords to the page.  Great use of Ruby's CGI class and the @&&@ operator. 
+  Watch batsman flaunt slim wikis "here":/ruby-talk/122787.

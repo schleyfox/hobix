@@ -1,0 +1,24 @@
+--- !hobix.com,2004/entry 
+title: MP3 Encoding From A Great Distance
+author: why
+created: 2005-01-05 14:23:20.656916 -05:00
+content: >
+  Okay, focus.  We're lookin for more real-world tutorials, 
+  "remember?":http://redhanded.hobix.com/cult/podcastingUtilsAndHomeRubyists.html#comments
+
+
+  How about "a distributed MP3 encoder":http://dark.fhtr.org/pt1_dist_lame.txt
+  which pipes data through DRb to a list of clients empowered with LAME?  Needs
+  more filler text and hand-holding, but the code is certainly adequate.
+
+
+  See this is it: someone could read this tutorial, learn Ruby, and then proceed
+  to actually *use the script they've just written*.
+
+
+  <div class="update">
+
+
+  *Update:* four parts have been finished and this tutorial is now mirrored at
+  "RubyGarden":http://rubygarden.com/ruby?DistributedPipes.  (In case you find
+  this entry in the future: Hi, future.)

@@ -1,0 +1,90 @@
+--- !hobix.com,2004/entry 
+title: Catapult Wiki Exoskeleton
+author: why
+created: 2005-02-04 16:25:17.803126 -05:00
+content: >-
+  Here's a fun library that's gone under the radar. 
+  "Catapult":http://www.jamesbritt.com/code/catapult/ lets you serve objects over
+  HTTP using over-the-counter WEBrick.  Your object simply needs two methods:
+
+
+  <pre>
+   run( path_info_string ) -> response string
+   content_type() -> HTTP content type string
+  </pre>
+
+
+  For example, here's a Wiki which uses Catapult and stores its pages in a single
+  Textile+YAML document.  It's all gluey!  If you're hankering for a custom Wiki,
+  it's a good start. 
+
+
+  <pre>
+   require 'cgi'
+   require 'redcloth'
+   require 'yaml/store'
+   class Wiki
+
+     def initialize
+       @hp = "HomePage"
+       @c = CGI.new('html4')
+       @wiki = YAML::Store.new('wiki.yml')
+     end
+
+     def content_type; "text/html"; end
+
+     def run( path_info )
+       @v = path_info.gsub!( /\?(.+)\Z/m, '' ) ? CGI::parse( $1 ) : {}
+       action, path = path_info.split( '/', 2 )
+       @wiki.transaction do
+         title, body = method( action ).call( path.to_s )
+         @c.html { @c.head { @c.title { title } } + @c.body { body } }
+       end
+     end
+
+     # Wiki actions: 'show' and 'edit'
+     def show( p )
+       p = @hp if p.empty?
+       body = @c.h1 { p }
+       body += @c.a(@hp) { @hp } unless p == @hp
+       body +=
+         if @wiki[p]
+           RedCloth.new( @wiki[p] ).to_html.
+             gsub(/([A-Z]\w+){2}/){ @c.a($&){$&} } +
+             @c.a("../edit/#{p}") { "Edit" }
+         else
+           @c.p { "No page #{ p }. " +
+             @c.a("../edit/#{p}") { "Create?" } }
+         end
+       [p, body]
+     end
+
+     def edit( p )
+       @wiki[p] = @v['c'].to_s if @v['c']
+       title = "Editing " + p
+       body = @c.h1 { title } + 
+         @c.a("../show/#{ p }" ) { "Show" } +
+         @c.form("post") { 
+           @c.textarea('c') { @wiki[p] } + @c.submit 
+         }
+       [title, body]
+     end
+   end
+  </pre>
+
+
+  To run the Wiki, put it in a directory with @catapult.rb@.  Then, run: @ruby
+  -rwiki catapult.rb 2005@.
+
+
+  Access the wiki at @http://host:2005/wiki/show@.
+
+
+  <div class="update">
+
+
+  Turns out the "Rubyforge site":http://catapult.rubyforge.org/ is the new home. 
+  That means it's better.  Truly, truly, use it duly.
+
+
+  </div>

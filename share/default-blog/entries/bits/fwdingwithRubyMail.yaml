@@ -1,0 +1,38 @@
+--- !hobix.com,2004/entry 
+title: Fwding with RubyMail
+author: why
+created: 2005-01-20 16:26:51.331725 -05:00
+content: >-
+  When it comes to e-mail manipulation,
+  "RubyMail":http://raa.ruby-lang.org/project/rubymail/ has always been my answer.
+  The fortunate thing about RubyMail is that it parses each message into
+  "RMail::Message":http://www.lickey.com/rubymail/rubymail/doc/classes/RMail/Message.html
+  objects, which can also be converted back into e-mail with @to_s@.
+
+
+  This makes for simple modification of messages.  The issue is slightly
+  complicated by stuff like multiple @From:@ fields.  So, if you're forwarding a
+  message and simply want to modify header fields, be sure to delete the fields
+  from the message first.
+
+
+  Here's an excerpt from a simple mailing list script:
+
+
+  <pre>
+   msg.header.delete('From')
+   msg.header.subject = "[#{ list_title }] #{ msg.header.subject }"
+   msg.header['From'] = "#{ from_recip } <#{ reply_to }>"
+   Net::SMTP.start( 'localhost' ) do |smtp|
+       list['recipients'].each do |recip|
+           to_email = "#{ recip['name'] } <#{ recip['email'] }>"
+           msg.header.delete('To')
+           msg.header['To'] = to_email
+           smtp.send_message( msg.to_s, msg.header['Reply-To'], to_email )
+       end
+   end
+  </pre>
+
+
+  *Note:* This code won't run from Irb unless you setup some variables and arrays.
+  The point is to simply illustrate deletion of the header fields.

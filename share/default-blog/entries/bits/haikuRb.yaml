@@ -1,0 +1,32 @@
+--- !hobix.com,2004/entry 
+title: haiku.rb
+author: why
+created: 2005-02-12 20:49:36.363811 -05:00
+content: >-
+  <pre>
+                "eyes".scan /the_darkness/
+          catch( :in_the_wind ) { ?a.round; "breath" \
+                  or "a".slice /of_moon/ }
+  </pre>
+
+
+  You don't want the program to do anything, you just want to give the parser
+  something to read.  Poetry both you and your parser can read. (See also
+  "HOWTO":http://www.toyomasu.com/haiku/#howtowritehaiku.)
+
+
+  <div class="update">
+
+
+  *Nutter.*  Chad Fowler thinks he can get his PC to do all the poetry "for
+  him":http://chadfowler.com/index.cgi/Computing/Programming/Ruby/HaikuInTheWild.rdoc,v.
+
+
+  <pre>
+   hey buddy, nice code.
+   you makin mine eyes explode --
+   but that don't count here.
+  </pre>
+
+
+  </pre>

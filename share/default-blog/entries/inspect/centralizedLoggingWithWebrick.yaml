@@ -1,0 +1,68 @@
+--- !hobix.com,2004/entry 
+title: Centralized Logging With WEBrick
+author: why
+created: 2004-12-23 14:20:49.428875 -05:00
+content: >
+  WEBrick is sittin pretty.  We owe it dearly.  For giving our Wikis the ability
+  to stand quickly on their own two feet.  For giving our web apps an instant
+  development server. And "Catapult":http://www.jamesbritt.com/code/catapult/. 
+  Instant web server, just like those little red pills that turn into foam dinosaurs when you
+  drop 'em in the sink.
+
+
+  A favorite of mine is the "Gnome's Guide to
+  WEBrick":http://shogo.homelinux.org/~ysantoso/webrickguide/pdf/pdf_webrick.pdf
+  [PDF]. A rather complete tour.  And, now, a trick to go with Chapter 5: Logging.
+  We're just going to setup an AccessLog.
+
+
+  <pre>
+   require 'webrick'
+   include WEBrick
+   def start_webrick(config = {})
+       # always listen on port 8080
+       config.update(:Port => 8080)
+       server = HTTPServer.new(config)
+       yield server if block_given?
+       ['INT', 'TERM'].each {|signal|
+           trap(signal) {server.shutdown}
+       }
+       server.start
+   end
+
+   server_logger = Log.new('webrick-server.log')
+
+   # The :AccessLog configuration takes an array.
+   # Each element of the array should be
+   # a two-element array where the first element
+   # is the stream (or anything responding to <<) and
+   # the second element is the access log format.
+   # Please see webrick/accesslog.rb for available formats.
+   access_log_stream = File.open('webrick-access.log', 'w')
+   access_log = [ [ access_log_stream, AccessLog::COMBINED_LOG_FORMAT ] ]
+   start_webrick(
+       :Logger => server_logger,
+       :AccessLog => access_log,
+       :DocumentRoot => './'
+   )
+  </pre>
+
+
+  This server keeps logs of its activity and also allows clients to access the
+  logs kept.  A simple approach to centralized logging.  Since WEBrick keeps
+  "combined" format logs, you'll get the IP address, a timestamp, the URL and
+  such. If you're distributing a software throughout your company (or group of
+  friends) and you want to track how many people install it, simply have your
+  software issue an HTTP request to your WEBrick server.
+
+
+  <pre>
+   require 'open-uri'
+   open( "http://go.hobix.com:8090/install-1.0.txt" ) do |f|
+     puts f.read
+   end rescue nil
+  </pre>
+
+  In the above, I have the server issue an acknowledgement that the server was
+  contacted.  If the connection is refused, installation continues unscathed.
+

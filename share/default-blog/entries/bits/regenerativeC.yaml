@@ -1,0 +1,55 @@
+--- !hobix.com,2004/entry 
+title: Regenerative C
+author: why
+created: 2005-01-27 14:06:00.826644 -05:00
+content: >-
+  "Fzort":http://advogato.org/person/fzort/ on Advogato has a "lovely little
+  collection":http://fuse.superglue.se/ of C magic tricks and puzzles.
+
+
+  Qouth life.c:
+
+
+  <pre>
+
+  char*b=
+
+  "        "
+
+  "        "
+
+  "    ##  "
+
+  "   ##   "
+
+  "    #   "
+
+  "        "
+
+  "        "
+
+  "        "
+
+  ,*dna[]={
+
+  "};main(){int i,j,k,n;char*p;puts(xchar*b=x);for(i=0;i<64;i++,i&7||puts(xzxx))",
+
+  "{i&7||putchar(34);for(n=-b[i],k=-8,j=0;j<9;j++,jy3||(k+=8))n+=b[(i+k&56)",
+
+  "|(i+jy3-1&7)];putchar(x #x[n==262&&b[i]==35||n==265]);}puts(x,*dna[]={x);for",
+
+  "(i=0;i<5;i++)printf(xzxyszx,znx,dna[i]);for(i=0;i<5;i++,putchar(10))for(",
+
+  "p=dna[i];*p;++p)putchar(*p==120?34:*p==121?37:*p==122?92:*p);}",
+
+  };main(){int i,j,k,n;char*p;puts("char*b=");for(i=0;i<64;i++,i&7||puts("\""))
+
+  {i&7||putchar(34);for(n=-b[i],k=-8,j=0;j<9;j++,j%3||(k+=8))n+=b[(i+k&56)
+
+  |(i+j%3-1&7)];putchar(" #"[n==262&&b[i]==35||n==265]);}puts(",*dna[]={");for
+
+  (i=0;i<5;i++)printf("\"%s\",\n",dna[i]);for(i=0;i<5;i++,putchar(10))for(
+
+  p=dna[i];*p;++p)putchar(*p==120?34:*p==121?37:*p==122?92:*p);}
+
+  </pre>

@@ -1,0 +1,28 @@
+--- !hobix.com,2004/entry 
+title: Fancy Irb Buried In The Wiki
+author: why
+created: 2005-01-05 01:27:51.906560 -05:00
+content: >
+  Windozers, give ear.  Prithee, try this lovely little app, hidden out of site,
+  which gives us a graphical face for Irb.
+  "FXIrb/Experimental":http://rubygarden.org/ruby?FXIrb/Experimental by Frailis
+  and Martin DeMello.  Get a nice, readable font.  Custom colors.
+
+
+  So, what do you use to dress up Irb in Windows?  Use any commandline GUIs that
+  don't require Cygwin or Mingw?  Rxvt for Windows is great, which comes with
+  Cygwin or MSYS.
+
+
+  <div class="update">
+
+
+  *Update:* Looks like Martin DeMello has been contacted and coerced into opening
+  a "Rubyforge project":http://rubyforge.org/projects/fxirb/ for FXIrb.  I think
+  I'm gonna hit the "feature
+  requests":http://rubyforge.org/tracker/?atid=1994&group_id=501&func=browse later
+  today and request some hotkeys, an optional toolbar, and an interactive help. 
+  It's worth submitting.
+
+
+  </div>

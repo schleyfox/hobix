@@ -1,0 +1,13 @@
+--- !hobix.com,2004/entry 
+title: Valgrind + Ruby
+author: why
+created: 2005-01-14 13:23:20.299666 -05:00
+content: "Oh, one other bit from Tanaka-san:
+  \"valgrind-ruby\":http://cvs.m17n.org/viewcvs/ruby/valgrind-ruby/. I've been
+  using valgrind to debug and de-leak Syck lately and this script masks the
+  conditional jump warning which Ruby's GC causes.  There's also a variant
+  floating around  \"by
+  matju\":http://www.artengine.ca/viewcvs/*checkout*/gridflow/extra/ruby.valgrind
+  which is supposed to suppress similiar behaviors in libc.
+
+  "

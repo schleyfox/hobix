@@ -1,0 +1,16 @@
+page: <+ sidebar +>
+
+sidebar: |
+  <div id="sidebar">
+  <+ sidebar_list +>
+  </div>
+
+sidebar_archive: |
+  <div class="sidebarBox">
+  <h2 class="sidebarTitle">Archive</h2>
+  <ul>
+  <% months.each do |month_start, month_end, month_id| %>
+      <li><a href="<%= weblog.link %>/<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
+  <% end %>
+  </ul>
+  </div>

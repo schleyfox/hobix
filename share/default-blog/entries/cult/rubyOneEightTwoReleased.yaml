@@ -1,0 +1,18 @@
+--- !hobix.com,2004/entry 
+title: Ruby 1.8.2 Released
+author: why
+created: 2004-12-25 16:39:03.171886 -05:00
+content: >
+  "Santa Matz":/cult/santaMatz.html takes his job seriously.  He has left this
+  checksum on our porch:
+
+
+  <pre>
+   8ffc79d96f336b80f2690a17601dea9b  ruby-1.8.2.tar.gz
+  </pre>
+
+
+  You can pick up your package 
+  "here":ftp://ftp.ruby-lang.org/pub/ruby/ruby-1.8.2.tar.gz. More on this release
+  in the coming days.
+

@@ -1,0 +1,26 @@
+--- !hobix.com,2004/entry 
+title: Hacking The Shakes Into Your Apple
+author: why
+created: 2005-03-09 19:47:30.101898 -05:00
+content: >-
+  !</images/apple-motion.gif(Your laptop can move in all of these directions.)!
+
+
+  Within the past week, a couple fellows around the web have started scripting the
+  accelerometer couched in Apple PowerBook hard drives, giving the effect of a
+  three-dimensional motion sensor.  The
+  "amstracker":http://www.kernelthread.com/software/ams/ commandline is really all
+  you need to get started, as evidenced by "this Python
+  script":http://interconnected.org/home/more/2005/03/bumptunes.py, which controls
+  iTunes by either "bumping" the laptop to advance a track or by rocking the
+  laptop to move around the playlist.
+
+
+  Joey DeVilla has further *challenged* the scripting world to "turn the PowerBook
+  into an
+  Etch-A-Sketch":http://farm.tucows.com/blog/_archives/2005/3/8/409019.html.  So
+  you can reboot your laptop by evoking the familiar Flip-N-Pull-A-Seizure manual
+  restart of the kiddie canvas.
+
+
+  Soon, coding will be an elaborate game of Bop-It!

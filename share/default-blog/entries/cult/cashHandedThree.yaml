@@ -1,0 +1,37 @@
+--- !hobix.com,2004/entry 
+title: "CashHanded #3: RDoc ReDo"
+author: why
+created: 2005-01-12 17:07:33.667995 -05:00
+content: >
+  If, by now, you still haven't submitted a "codefest 
+  proposal":http://www.rubycentral.org/grant/announce.html, then you are obviously
+  just trying to make me mad.  I'm taking it personal and I promise I will never
+  stop hating you.  (Mean is the new funny.)
+
+
+  !>/images/macmini.jpg(Value estimated at 1 CodeFestBucks.)!
+
+
+  Do you think it's any coincidence that the new Mac mini has been announced for
+  $499?  I'm not sure how you could justify purchase of a Mac mini with the grant
+  money, but you'll still have a dollar left over for beverages!  I dare you,
+  tricksy hobbits.
+
+
+  Today, I'm suggesting %{font-size:large}a new set of RDoc templates% be written
+  for a codefest.  Sure, it's been suggested "once
+  before":/cult/rdocWithoutFramesAConcept.html and, two weeks later, it's still a
+  totally brilliant idea.  Hey, but it's not really my idea, I've been hearing DHH
+  And The Railsers squealing about it for a month or so.
+
+
+  John Long etched out a "fledgling
+  JavaScript":http://johnwlong.com/downloads/rubyred-rdoc-template-test-1.html to
+  illustrate framelessness for us.  Point is: we need docs like PHP and Python
+  have.  I'm not talking content.  We have the content.  But we need a nice
+  appearance, simplicity, and user comments.
+
+
+  Okay, now I've beaten the hammer once today.  You can go read the
+  "iProduct":http://www.gizmodo.com/gadgets/images/iProduct.gif spoof at Gizmodo. 
+  It's chee-e-eky.

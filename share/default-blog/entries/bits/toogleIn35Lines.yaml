@@ -1,0 +1,27 @@
+--- !hobix.com,2004/entry 
+title: Toogle In 35 Lines
+author: why
+created: 2005-03-20 12:46:00.973477 -05:00
+content: >-
+  !</images/premshree-toogle.gif(We're going to start posting Ruby-Lang designs in
+  this fashion.)!:http://www.livejournal.com/users/premshree/59432.html
+
+
+  Premshree has written a
+  "Toogle-alike":http://www.livejournal.com/users/premshree/59432.html
+   in 35 lines of Ruby.  There's some very succinct PHP in the comments as well.  My heart can't take these LoC battles any more, so let's just link this one as a "oh, that's how you use GD in Ruby" sort of deal.
+
+  I'd like to see somebody take
+  "this":http://brevity.org/code/flickr/tag-o-vision/flickr_py.txt apart. 
+  "Fascinating":http://www.flickr.com/photos/brevity/sets/164195/.
+
+
+  <div class="update">
+
+
+  And so.  "Flickr for Ruby":http://www.livejournal.com/users/premshree/60333.html
+  by Premshree.  Now let's see an ASCII Flickr, huh?  Tlickr.  Naw, I'll lay off
+  now.
+
+
+  </div>

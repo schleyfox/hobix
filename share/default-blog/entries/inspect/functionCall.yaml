@@ -1,0 +1,20 @@
+--- !hobix.com,2004/entry 
+title: Function Call
+author: babie
+created: 2005-02-20 12:39:53.344249 -05:00
+content: "Translated from matz blog,
+  \"2005-02-18\":http://www.rubyist.net/~matz/20050218.html#p01:\n\n\nbq. There is
+  no breathing space because I had a deadline for periodical article.\nOn the
+  rebound, I contemplated Ruby.\nI suppose that I'm filled with pleasure in this
+  time.\n\n\nbq. Python emulates OOP by being based on Function and Record, \nbut
+  Ruby's Function is an emulation based on OOP. Therefore\nit's not cool when we
+  call lambda.\n\n\nbq. We need the \".call\".\n\n<pre>\n\tf = lambda{|x| p
+  x}\n\tf.call(12)\n</pre>\n\nbq. I wanna write it like this.\n\n<pre>\n\tf =
+  lambda{|x| p x}\n\tf(12)\n</pre>\n\n\nbq. On this new rule,\n* When the name of
+  something like function is a local variable, it apply a \"call\" to the
+  variable.\n\nbq. What do you think?\n\n\nbq. Actually, I tried it before, but I
+  failed for:\n* I used the special method \"()\" instead of \"call\".\n* I tried
+  to support that \"foo.bar(12)\" means \"foo.bar.().call(12)\".\n\n\nbq. The new
+  way's fault is that a method can't called if a local variable has a same
+  name.\nThere is no matter usually, but there's a case that it's frequently
+  duplicated like \"p\" method.\nShould I prepare the way to avoid?"

@@ -1,0 +1,25 @@
+--- !hobix.com,2004/entry 
+title: "So, Mail Attachments"
+author: why
+created: 2005-01-22 17:30:37.708760 -05:00
+content: >-
+  A couple days ago, the topic was @RubyMail@.  Dan Berger's question was: how to
+  do attachments.  I didn't look deep enough to figure out what the answer was.
+
+
+  But "here's a script":http://sonic64.hp.infoseek.co.jp/2004-10-09.html called
+  @samail@ from Japan.  The script is halfway down the page and is designed to be
+  used like so:
+
+
+  <pre>
+   $ samail -v --to "redhanded@infoseek.jp example@example.com" \
+       --from redhanded@infoseek.jp --smtp smtp.example.com \
+       --attachment "logo.png /tmp/backup.tar.bz2"
+  </pre>
+
+
+  Bit more complicated version 0.4
+  "here":http://sonic64.hp.infoseek.co.jp/2004-11-01.html.  Bunch of "GMail
+  scripts":http://sonic64.hp.infoseek.co.jp/2004-11-09.html#2004-11-09-1 to go
+  with it. (seen on "del.icio.us/eban":http://del.icio.us/eban.)

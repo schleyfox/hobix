@@ -1,0 +1,50 @@
+--- !hobix.com,2004/entry 
+title: Hash#collect!
+author: why
+created: 2005-03-18 19:35:43.398560 -05:00
+content: >-
+  It's always bugged me that @Hash#collect@ returns an Array.  And @Hash#collect!@
+  simply gags and kicks a leg.  It's another situation where we're lacking a
+  really smashing RCR.  We've had
+  "Hash#collect_to_hash":http://www.rcrchive.net/rcr/show/278 and
+  "Enumerable#make_hash":http://www.rcrchive.net/rcr/show/148 -- the latter being
+  more favorable, right??
+
+
+  Gavin Sinclair's @build_hash@ (from
+  "extensions":http://extensions.rubyforge.org/) is a newer version of
+  @make_hash@.  Like @collect@ and @map@, but designed to return a @Hash@.  Is
+  there anything wrong with using @build_hash@ as Hash's own special @collect@?
+
+
+  <pre>
+    module Enumerable
+      def build_hash
+        result = {}
+        self.each do |elt|
+          key, value = yield elt
+          result[key] = value
+        end
+        result
+      end
+    end
+
+    class Hash
+      alias collect build_hash
+    end
+  </pre>
+
+
+  And I'm also going to throw in @Hash#collect!@ for your money.  This method
+  should be!!  And, for the first time in years, I'm citing PoLS.  I say we each
+  get a "Go Directly To PoLS" card every @age.modulo(7).zero?@.
+
+
+  <pre>
+    class Hash
+      def collect!( &blk )
+        self.replace( build_hash( &blk ) )
+      end
+      alias map! collect!
+    end
+  </pre>

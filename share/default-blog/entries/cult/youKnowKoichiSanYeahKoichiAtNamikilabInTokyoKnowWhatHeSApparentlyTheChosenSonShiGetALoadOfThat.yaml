@@ -1,0 +1,51 @@
+--- !hobix.com,2004/entry 
+title: "You Know Sasada-san?  Yeah, Koichi Sasada at NamikiLab in Tokyo?  Know What? 
+  He's Apparently the Chosen Son-Shi.  Get a Load of That!"
+author: why
+created: 2005-03-30 14:21:17.497617 -05:00
+content: >-
+  Huge, exciting news.  But stay calm.  Keep your vitamins in your pocket.  Try
+  your hardest not to yank the ejection lever.  This is all hearsay from IRC.
+
+
+  <pre>
+    <vruz> matz: any news about Ruby 2.0 ? Rite ? whatever comes next ?
+    <matz> vruz: I have talked with Koichi Sasada, and he agreed to merge
+           his YARV in the current interpreter.
+    <matz> I _hope_ VARV will be core engine before the end of this year.
+  </pre>
+
+
+  p=. !/images/koichi-sonshi.jpg!:http://www.namikilab.tuat.ac.jp/~sasada/
+
+
+  Matz called this coming leader by the name "son-shi":":/ruby-talk/76603.  I'd
+  call him son-shi just for assembling the "instruction
+  table":http://www.atdot.net/yarv/insnstbl.html.  This table comes from the
+  bleeding-edge in "his svn":http://www.atdot.net/svn/yarv/trunk/.  I'm totally
+  amazed at the diary he keeps on his progress.
+
+
+  More on building YARV in "an earlier
+  post":http://redhanded.hobix.com/inspect/buildingYarvOhOneOh.html.  (The
+  instructions still work for 0.2.0.)
+
+
+  <div class="update">
+
+
+  *A note:* Daigo has been recommending that we use another word rather than
+  "son-shi" when addressing Koichi (since the title has been used when referring
+  to the terrorist cult leader "Shoukou
+  ASAHARA":http://en.wikipedia.org/wiki/Shoukou_Asahara.)  He recommends
+  _tai-tyou_ or _mei-zin_ as possible nicer "good guy" subsitutes.  Cheers, Daigo!
+
+
+  *Furthermore:* Matz "did
+  identify":http://rubyforge.org/pipermail/yarv-devel/2004-October/000171.html the
+  impending title of _son-shi_ to Sasada-san in October 2004.  In the postscript,
+  he equates _son-shi_ with another Japanese word, but Mailman has the encoding
+  messed up.
+
+
+  </div>

@@ -1,0 +1,29 @@
+--- !hobix.com,2004/entry 
+title: "Re: haiku.rb"
+author: babie
+created: 2005-02-16 12:26:29.095813 -05:00
+content: >-
+  We, Rubyist Magazine editors, chatted on IRC about a next article.
+
+  By a mere accident, we talked about Haiku.
+
+
+  "U Nakamura said:":http://www.dm4lab.to/~usa/ruby/d/200502b.html#id20050217_P1
+
+
+  bq. @$ruby.is_a?(Object){|oriented| language}@
+
+
+  It's perfect on the point of original Haiku that is composed of 5-7-5
+  syllables(in Japanese). The result value is good, too. Gimme a break that there
+  is no word means season.
+
+
+  He also said that:
+
+  bq. What's a week-kneed is "this":http://redhanded.hobix.com/bits/haikuRb.html!
+  Don't escape by using literal.
+
+
+  But he knows that the one by using non-execute block is not much defferent than
+  those ;-)

@@ -1,0 +1,24 @@
+--- !hobix.com,2004/entry 
+title: Merged Ruby Packages Of Debian Are Now Available
+author: daigo
+created: 2005-03-28 11:10:21.637717 -05:00
+content: >-
+  Merged Ruby packages of Debian [Version:
+  "1.8.2-3":http://packages.qa.debian.org/r/ruby1.8/news/1.html] has come to the
+  testing release after some
+  "discussions":http://redhanded.hobix.com/cult/whyIUseDebianWithRuby.html [1].
+  Many Ruby libraries are now included in libruby1.8, which ruby1.8 depends on. So
+  you can install most Ruby environment (the interpreter and the most libraries)
+  by sudo apt-get install ruby1.8. Most users will be happy with this single
+  command!
+
+
+  It makes it easier to install Ruby in Debian, however, the upstream -- original,
+  standard -- Ruby are still separated into a few packages because of maintenance
+  and so forth. If you need Tcl/Tk you need to install libtcltk-ruby1.8; if you
+  need openssl you have to install libopenssl-ruby1.8 one by one. You can see the
+  other packages "here":http://packages.qa.debian.org/r/ruby1.8.html.
+
+
+  fn1. A new package like ruby1.8-bundle that contains all Ruby environment seems
+  to be planned but is not available yet.

@@ -1,0 +1,45 @@
+--- !hobix.com,2004/entry 
+title: "Method Check: Param Hacks"
+author: why
+created: 2005-02-14 15:34:23.432424 -05:00
+content: >-
+  It's all about finding out where Ruby's syntax is flexible, isn't it?  So, did
+  you know you can use instance variables or arbitrary code to set the defaults in
+  your method parameters?  All executed in the same context as your method.
+
+
+  <pre>
+   class LineArtist
+     attr_accessor :distance, :thickness
+     def draw( dist = @distance, thick = self.thickness ); end
+  end
+
+  </pre> 
+
+
+  And, check this out -- you can refer to earlier parameters when setting
+  defaults!
+
+
+  <pre>
+   class BlogEntry
+     attr_accessor :author, :title, :created_at, :content
+     def initialize( blog, title, content,
+                     created_at = Time.now,
+                     author = blog.default_author )
+     end
+   end
+  </pre>
+
+
+  This is especially useful for methods where you're passing in a set of paths. 
+  If some of the paths are deleted, you want to default to an earlier path (or a
+  new path based on an earlier path.)
+
+
+  <pre>
+   class Blog
+     def setup( path, template_path = File.join( path, "skel" ) )
+     end
+   end
+  </pre>

@@ -1,0 +1,14 @@
+--- !hobix.com,2004/entry 
+title: Ruby Gets Temp Job As Maid For Tapestry And Hivemind
+author: why
+created: 2005-01-06 11:23:42.408256 -05:00
+content: "Howard Lewis Ship, the father of the Jakarta Tapestry and Hivemind frameworks,
+  was given a PickAxe II by Dave Thomas last year and has been \"tinkering with
+  Ruby ever
+  since\":http://howardlewisship.com/blog/2005/01/playing-with-ruby.html.  His
+  first checkin has appeared: \"a script which updates Hivemind and Tapestry
+  copyright statements for the new
+  year\":http://cvs.apache.org/viewcvs.cgi/jakarta-hivemind/support/update-copyrights.rb?rev=1.3&view=markup.
+  Welcome to Ruby, Howard! (_seen on #ruby-lang._)
+
+  "

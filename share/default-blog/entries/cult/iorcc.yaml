@@ -1,0 +1,28 @@
+--- !hobix.com,2004/entry 
+title: "`ruby -h`.unpack(%w[x558 155ax95 277 1a].join('aX')).join"
+author: why
+created: 2005-02-22 11:19:01.926732 -05:00
+content: >-
+  p=. !/images/iorcc-2005.png!:http://iorcc.dyndns.org/
+
+
+  The obfuscated code in the advert is a "tiny ETA
+  interpreter":http://www.stephensykes.com/tinyeta.html wizarded by Stephen Sykes
+  in 2004 -- it took him two years to refactor off the last 81 bytes!
+
+
+  Here's the code nicely printed:
+
+
+  <pre>
+   i=*$<;_=a=$==-1;i[_].scan(/\w/){!p='htaoinse'=~$&or
+   a<0?i<<eval(%w^,>0?i.slice!(a-p):i[p+a] ,,==0||(_=c-2;break), _+2
+   ,utc(p), getc||a a=0, ,,-c ,,;i<<p/c;p%c^[p].gsub',',';c,p=p,i.pop
+   p'):a=p>6?i<<a&&~0:a*7+p}until(_+=1)/$.!=0
+  </pre>
+
+
+  Look for the ensuing flamewar over the wrongness of this all on ruby-talk. 
+  Obfuscation still pops up as a controversy.  If you let stuff like obfuscated
+  Ruby get under your bonnet, uh.. well.. why is it that you're wearing a bonnet
+  again?? (whoops, via "~matz":http://www.rubyist.net/~matz/.)

@@ -1,0 +1,37 @@
+--- !hobix.com,2004/entry 
+title: Railz0r3d!!
+author: why
+created: 2005-01-10 08:58:58.599729 -05:00
+content: >
+  Gosh, guys.  More people gettin
+  "railz0r3d":http://www.mornography.de/2005/01/04/rails-is-teh-sup0r/.
+
+
+  "Antonio
+  Canigiano":http://tonyonsoftware.blogspot.com/2005/01/in-love-with-ruby.html
+  goes _off_ in Dublin:
+
+
+  bq. No, no I am not betraying my wife... Ruby is simply one of the greatest
+  languages on earth! ;-) ... I am also doing security consultation work for a
+  prominent search engine, translating a few documents  from English to Italian
+  for Open Source projects and I have started a new rather ambitious, large  scale
+  project using Ruby, Rails and PostgreSQL, which I can't provide details about at
+  this stage.
+
+
+  "Jason
+  Perkins":http://sneer.org/archives/2005/01/02/active_record_in_php_5_part_1/
+  lusts after ActiveRecord:
+
+
+  bq. I had the opportunity to see David Hansson's Ruby on Rails in action 
+  ("quicktime demo here":http://media.nextangle.com/rails/rails_setup.mov)  and
+  really had my eyes opened as to the possibilities that a full implementation  of
+  the pattern affords.
+
+
+  He then proceeds to implement an ActiveRecord-a-like in PHP.  Then, a week
+  later, he's writing a "meta tag
+  scraper":http://sneer.org/archives/2005/01/10/scraping_in_ruby/ in Ruby.  (_Cue
+  sounds of infiltration!_)

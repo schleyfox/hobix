@@ -1,0 +1,56 @@
+--- !hobix.com,2004/entry 
+title: Scripting Portupgrade with Ruby
+author: why
+created: 2005-03-18 18:49:02.745796 -05:00
+content: >-
+  I guess it's hard to top "RubyX":http://www.rubyx.org/ when it comes to an OS
+  alliance with Ruby.  However, FreeBSD's
+  "portupgrade":http://www.onlamp.com/pub/a/bsd/2003/08/28/FreeBSD_Basics.html
+  long ago heaved the bar up -- it's a scriptable application for updating ports. 
+  I've always considered it to be neck-and-neck with tDiary for being Ruby's first
+  killer app.  And portupgrade has got tDiary beat on worldwide adoption.  tDiary
+  is hot snakes in Japan -- and only.
+
+
+  The primary means of scripting portupgrade is with the @pkgtools.conf@, which is
+  a Ruby script full of constants.  For example, should you want to give make
+  arguments for certain packages, @MAKE_ARGS@ is a hash:
+
+
+  <pre>
+    MAKE_ARGS = {
+      'editors/vim' => 'NO_GUI=yes WITH_RUBY=yes',
+      'shells/scponly' => 'WITH_SCPONLY_SCP=yes WITH_SCPONLY_GFTP=yes 
+         WITH_SCPONLY_WINSCP=yes WITH_SCPONLY_CHROOT=yes',
+      'sysutils/gkrellm2' => 'GKRELLM_SERVER_ONLY=yes'
+    }
+  </pre>
+
+
+  If you know Ruby, scripting portupgrade becomes really trivial.  In fact, one of
+  the first Ruby programs I wrote kept the long and winding PHP make flags I had
+  and abstracted them into a simple array.
+
+
+  Like so:
+
+
+  <pre>
+    PHP_OPTS = %w[bz2 ctype imap MySQL overload pcre
+      posix session sockets standard tokenizer xml 
+      xmlrpc zlib]
+    MAKE_ARGS = {
+      'lang/php4' => "BATCH=yes WITH_APACHE2=yes " +
+          PHP_OPTS.collect { |o| "WITH_#{o.upcase}=yes" }.join( ' ' )
+    }
+  </pre>
+
+
+  Imagine if you could script your web server in this manner.  See and it seems
+  like the budding courtship between "lighttpd":http://www.lighttpd.net/ and Ruby
+  would yield such scripting.  (_*VHosts in a YAML file, anyone??*_)
+
+
+  The author of portupgrade (and portsdb), "knu":http://akinori.org/, has been the
+  Ruby CVS chieftain since 2000.  He has been nothing but judicious and kind.  And
+  we've all benefited from cvsmailer at one time or another, wouldn't you say??

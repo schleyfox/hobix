@@ -1,0 +1,26 @@
+--- !hobix.com,2004/entry 
+title: Daemonize
+author: why
+created: 2005-02-02 12:42:33.705782 -05:00
+content: >-
+  Here's one from an RAA dig a few weeks ago.  Wanting to turn some of my Ruby
+  jobs into daemons, I went looking for anything slightly formal.  And
+  "Daemonize":http://grub.ath.cx/daemonize/ is 59 lines of Ruby that fits just
+  right.
+
+
+  <pre>
+   require 'daemonize'
+   include Daemonize
+
+   daemonize()
+   loop do
+     # Your code cycles here
+   end
+  </pre>
+
+
+  @Daemonize@ will safely fork, retrying if the maximum process limit has been
+  reached.  It detaches from the controlling terminal, resets the cwd and umask,
+  then closes all file descriptors.  And so my little scripts buzz around
+  noiselessly.

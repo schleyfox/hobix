@@ -1,0 +1,36 @@
+--- !hobix.com,2004/entry 
+title: Great Soks!! AutomaticSummary Is Cool!!
+author: why
+created: 2005-01-11 17:13:30.926012 -05:00
+content: >
+  Hey, imagine if you could do this with your wiki:  Create new
+  RecentChanges-style pages with custom criteria.  Something like:
+
+
+  <pre>
+   # Automatically generated summary of new 
+   # pages whose title starts with 'blog'
+   AutomaticSummary.new( wiki,
+     :regexp_for_pages => /^NBlog/i,
+     :max_pages_to_show => 10,
+     :pagename => 'Recent Blog Entries',
+     :only_new_pages => true
+   )
+  </pre>
+
+
+  Yeah, well, this works in
+  "Soks":http://soks.rubyforge.org/wiki/wiki.pl?HowToInstall.  I tried to hack
+  this into Instiki and it exploded and flew outta my hands.  (_Bonus: there's a
+  gross exaggeration in this paragraph.  See if you can find it!_)
+
+
+  <pre>
+   gem install soks
+   cd /var/www
+   soks-create-wiki.rb  # runs WEBrick
+  </pre>
+
+
+  You can then edit the settings of @soks-wiki/start.rb@ to your hostname and
+  authentication scheme. Then, run @soks-wiki/start.rb@ and be off.

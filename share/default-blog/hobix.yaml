@@ -1,28 +1,140 @@
---- !hobix.com,2004/^weblog
-title: a bokononist asks
-link: http://bokononist.hobix.com/
-tagline: nice, nice, very nice
+--- !hobix.com,2004/weblog 
+title: RedHanded
+link: http://redhanded.hobix.com/
+tagline: sneaking Ruby through the system
 period: 00:60:00
+lastn: 20
 
-authors:
-  you:
-    name: the ghost of another hobix user-to-be
-    url: http://hobix.com/
-    email: ghosty@hobixghostfriends.com
+authors: 
+  why: 
+    name: why the lucky stiff
+    url: http://whytheluckystiff.net/
+    email: why@whytheluckystiff.net
+  daigo:
+    name: Daigo Moriwaki
+    url: http://www.sgtpepper.net/hyspro/diary/
+    email: beatles@sgtpepper.net
+  babie:
+    name: Michiaki Baba
+    url: http://www.bloglines.com/blog/babie
+    email: babie7a0@ybb.ne.jp
 
-sections:
-  about:
+linklist: 
+- "@technorati": http://technorati.com/tags/ruby
+- "@del.icio.us": http://del.icio.us/tag/ruby
+- "@flickr": http://www.flickr.com/photos/tags/ruby
+- "@artima": http://www.artima.com/articles/index.jsp?topic=ruby
+- ruby home: http://ruby-lang.org/
+- ruby-doc: http://ruby-doc.org/
+- rubyforge: http://rubyforge.org/
+- rubyforum: http://www.ruby-forum.org/bb/
+- rubygarden: http://rubygarden.org/
+- "-> wiki": http://rubygarden.org/ruby/
+- rubyquiz*: http://www.rubyquiz.com/
+- rubyweeklynews: http://www.rubyweeklynews.org/
+- rubyxml: http://rubyxml.com/
+- rails blog: http://weblog.rubyonrails.com/
+- rails planet: http://www.planetrubyonrails.org/
+- ~buck: http://www.jamisbuck.org/jamis/
+# - ~fowler: http://www.chadfowler.com/
+- ~hwang: http://fhwang.net/
+- ~loudthinking: http://www.loudthinking.com/
+- ~luetke: http://blog.leetsoft.com/
+- ~matz: http://www.worldlingo.com/wl/translate?wl_lp=JA-en&wl_glossary=gl1&wl_fl=3&wl_rurl=http%3A%2F%2Fwww.rubyist.net%2F%7Ematz%2F&wl_url=http%3A%2F%2Fwww.rubyist.net%2F%7Ematz%2F&wl_g_table=-3
+- ~pragdave: http://pragprog.com/pragdave
+- ~premshree: http://www.livejournal.com/users/premshree/
+# - ~neumann: http://www.ntecs.de/blog/
+- ~neukirchen: http://kronavita.de/chris/blog/
+- ~rousette: http://www.rousette.org.uk/
+# - ~weirich: http://onestepback.org/
+- ~zenspider: http://blog.zenspider.com/
+
+sections: 
+  about: &ignored
     ignore: true
     sort_by: id
+  drafts: *ignored
+  redesign2005:
+    ignore: true
 
-linklist:
-- hobix: http://hobix.com/
-- del.icio.us: http://del.icio.us/
- 
-requires:
+requires: 
 - hobix/storage/filesys
-- hobix/out/quick
+- hobix/out/quick:
+
+    title: <%= weblog.title %> &raquo; <%= weblog.tagline %>
+
+    head_tags: |
+      <link rel="alternate" type="application/rss+xml" title="RSS" href="http://redhanded.hobix.com/index.xml" />
+
+    banner: |
+      <div id="buttons">
+      <dl class="tab">
+        <dt><a title="Syndicate this Site" href="/index.xml">RSS</a></dt>
+        <dd><a title="Syndicate this Site" href="/index.xml">2.0</a></dd>
+      </dl>
+      <dl class="tab xhtml">
+        <dt><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/">XHTML</a></dt>
+        <dd><a title="Validate this Site" href="http://validator.w3.org/check?uri=http://redhanded.hobix.com/">1.0</a></dd>
+      </dl>
+      </div>
+      <h1 class="title"><a href="<%= weblog.link %>"><img src="/images/redhanded.gif" alt="RedHanded" /></a></h1>
+      <div id="banner">
+        <div class="tagline"><%= weblog.tagline %></div>
+        <div class="nav"><a href="/5.gets/">5.gets</a> | <a href="/bits/">bits</a> | 
+          <a href="/inspect/">inspect</a> | <a href="/cult/">the cult</a> | <a href="/-h/">-h</a></div>
+      </div>
+
+    sidebar: <!--#include virtual='<%= weblog.expand_path( 'sidebar.html' ) %>'-->
+
+    # See skel/sidebar.html.quick.
+    sidebar_list: [sidebar_about, sidebar_archive, sidebar_pickaxe, sidebar_links, sidebar_syndicate, sidebar_hobix, sidebar_duck]
+
+    sidebar_about: >
+      <p>New to RedHanded? <a href="/-h/pardonAndWelcome.html">About our sections.</a></p>
+
+    sidebar_pickaxe: |
+      <p><a href="http://www.pragmaticprogrammer.com/titles/ruby/index.html"><img src="/images/prag-ruby-book.jpg" alt="PickAxe II" /></a><br />
+      <a href="http://www.pragmaticprogrammer.com/titles/ruby/index.html">Get your copy of <i>Programming Ruby</i>!</a></p>
+
+    sidebar_duck: |
+      <img src="/images/redhanded-duck.gif" alt="Type the Duck" />
+      <div class="email">Got a story for us? <a href="mailto:redhanded@hobix.com">E-mail it!</a></div>
+      <div class='technorati'><p><a href='http://www.technorati.com/profile/whytheluckystiff'>Technorati Profile</a>
+      <a href='http://www.technorati.com/cosmos/search.html?url=http&#37;3A&#37;2F&#37;2Fredhanded&#46;hobix&#46;com'><br />
+      <img src='/images/bubble_icon.gif' height='20' width='24' alt='Get Conversations about RedHanded &#187; sneaking Ruby through the system' /></a>
+      </p>
+      </div>
+
+    day_header: |
+      <div class="dayHeader">
+      <div class="dayBox">
+        <h2><%= day.strftime( "%A" ) %></h2>
+        <h3><a href="/<%= day.year %>/"><%= day.year %></a>.<a href="<%= day.strftime( "/%Y/%m/" ) %>"><%= day.strftime( "%m" ) %></a>.<a href="<%= day.strftime( "/%Y/%m/%d.html" ) %>"><%= day.strftime( "%d" ) %></a></h3>
+      </div>
+      </div>
+
+    entry_title: |
+      <h2 class="entryTitle"><%= entry.title %>
+        <span class="entryPermalink"><a href="<%= entry.link %>" 
+          title="Permanent link to &#8220;<%= entry.title %>&#8221;">#</a></span>
+      </h2>
+      <% if entry.tagline %><div class="entryTagline"><%= entry.tagline %></div><% end %>
+      <div class="entrySection">by <a href="<%= weblog.authors[entry.author]['url'] %>" 
+        title="Visit <%= entry.author %>'s homepage"><%= entry.author %></a> 
+        in <a href="/<%= entry.section_id %>" title="List of entries in the &#8220;<%= entry.section_id %>&#8221; category"><%= entry.section_id %></a>
+      </div>
+
+    entry_footer: >
+      <% comments = weblog.storage.load_attached( entry.id, "comments" ) rescue [] %>
+      <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> | 
+          <a href="<%= entry.link %>#comments">Comments (<%= comments.length %>)</a>
+
 - hobix/out/erb
 - hobix/out/rss
 - hobix/out/okaynews
 - hobix/out/atom
+- hobix/publish/ping:
+  - http://ping.blo.gs:80/
+  - http://rpc.weblogs.com:80/RPC2
+  # - http://rpc.technorati.com:80/rpc/ping: http://redhanded.hobix.com/index.xml
+- local

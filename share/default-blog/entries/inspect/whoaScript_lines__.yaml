@@ -1,0 +1,31 @@
+--- !hobix.com,2004/entry 
+title: "Whoa, SCRIPT_LINES__?!"
+author: why
+created: 2005-02-24 00:36:20.290462 -05:00
+content: >-
+  Did you know this?  I had no idea.  If you define @SCRIPT_LINES__@ constant as a
+  Hash, then the source code for all @load@'d or @require@'d files will be stored
+  in the Hash!  The key is the path to the source file and the value is an array
+  of strings, each a line of source code.
+
+
+  <pre>
+   >> SCRIPT_LINES__ = {}
+   >> require 'drb'
+   >> SCRIPT_LINES__.keys
+   => ["/usr/local/lib/ruby/1.8/drb/drb.rb", 
+       "/usr/local/lib/ruby/1.8/drb/eq.rb", 
+       "/usr/local/lib/ruby/1.8/drb/invokemethod.rb", 
+       "/usr/local/lib/ruby/1.8/thread.rb", 
+       "/usr/local/lib/ruby/1.8/drb.rb"]
+   >> SCRIPT_LINES__['/usr/local/lib/ruby/1.8/drb.rb']
+   => ["require 'drb/drb'\n", "\n"]
+  </pre>
+
+
+  WEIRD.  What gives with the trailing underscores?  It's such a big constant that
+  it leaves a two-character shadow!!
+
+
+  Note that @$SAFE@ must be zero.  See yycompile() in parse.y for details.  But,
+  yes, I saw this in PickAxe the Second.

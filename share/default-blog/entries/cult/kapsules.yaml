@@ -1,0 +1,40 @@
+--- !hobix.com,2004/entry 
+title: Kapsules 0.9.8
+author: why
+created: 2005-01-27 02:04:12.353821 -05:00
+content: >-
+  A couple of weeks ago, Curt Hibbs brought up
+  "Kapsules":http://kapsules.shellscape.org/, desktop widgets for Windows, which
+  can be scripted with Ruby.  At the time, the site was down for an upgrade. And,
+  now it's back.
+
+
+  !>/images/kapmeteorology.jpg(Meteorology widget in Ruby.)!
+
+
+  Looks like there are about "five
+  widgets":http://kapsules.shellscape.org/forge.aspx?a=5 written in Ruby,
+  including KapMeteorology (pictured to the right.)  You'll need
+  "ActiveRuby":http://arton.hp.infoseek.co.jp/ to make use of them.
+
+
+  The scripting resembles a lot of other GUI libraries like FOX.  A bit simpler I
+  guess.
+
+
+  <pre>
+   # Draw forecast.
+   Graphics.Font.Size = 8
+   forecast_drawables.each do |part, drawable|
+       if weather_image = drawable[ "icon" ]
+           Graphics.DrawImage( weather_image, drawable[ "start" ], 
+             40, weather_image.Width / 2, weather_image.Height / 2 )
+           weather_image.Dispose
+       end
+       Graphics.DrawString( drawable[ "text" ],
+         drawable[ "start" ], text_start_y,
+         Settings.GetSettingAttribute( "widgetroot/forecast", 
+                                       "width" ).to_i,
+         Widget.Height - text_start_y )
+   end
+  </pre>

@@ -1,0 +1,29 @@
+--- !hobix.com,2004/entry 
+title: Rails as an Automation Archetype
+author: why
+created: 2005-01-27 19:13:38.716130 -05:00
+content: >-
+  I know you guys can't get enough of this Rails thing.  _It's teh pop0lar href!!_
+  Follow that train.  Mike Clark has
+  "interviewed":http://www.pragmaticautomation.com/cgi-bin/pragauto.cgi/Tools/RailsAutomation.rdoc
+  David Heinemeier Hansson on automation in Rails.
+
+
+  bq. *Mike:* Sounds like you’ve tried to automate everything that will be the
+  same on most projects.
+
+
+  bq. *David:* We basically try to make it so that the only thing you need to
+  create is application-specific functionality. All the infrastructure is already
+  configured and ready to run. That means it’s much, much easier to get off to a
+  good start with testing, revision control (we backup your DB schema for you),
+  and the like.
+
+
+  bq. So even though we call it a Rails skeleton, when you create a new empty
+  application, it’s actually more a fully fleshed, but undressed body you’re
+  dealing with (yeah, Rails is that sexy :)).
+
+
+  I'm positive you Railsickos get off on this kind of stuff.  (Listen close and
+  hear the sound of #rubyonrails collectively issuing _/me swoons_.)

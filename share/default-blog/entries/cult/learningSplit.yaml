@@ -1,0 +1,23 @@
+--- !hobix.com,2004/entry 
+title: "Learning? Read Split-s."
+author: why
+created: 2005-02-02 11:42:56.286518 -05:00
+content: >-
+  "Split-s":http://split-s.blogspot.com/, a nice blog for getting down some basic
+  Ruby concepts.  The code here on RedHanded can be pretty heavy handed sometimes
+  -- I'm completely out of touch with each of your pressing needs -- so I'll defer
+  to split-s when it comes to topics such as "conditional
+  initialization":http://split-s.blogspot.com/2005/01/conditional-initialization-in-ruby.html.
+  Which culminates in an explanation of this snip:
+
+
+  <pre>
+   def addToList(key, value)
+     (@map[key] ||= []) << value
+   end
+  </pre>
+
+
+  Martin also codes in Java -- expect some comparisons.  If you lack know-how on
+  duck typing, take a gander at yesterday's "Quack,
+  Quack":http://split-s.blogspot.com/2005/02/quack-quack.html.

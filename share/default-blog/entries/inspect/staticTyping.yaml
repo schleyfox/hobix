@@ -1,0 +1,66 @@
+--- !hobix.com,2004/entry 
+title: Static Typing
+author: babie
+created: 2005-01-23 15:16:32.176127 -05:00
+content: >-
+  From Matz blog
+
+  (
+
+  "2005-01-04":http://www.rubyist.net/~matz/20050104.html#p01,
+
+  "2005-01-07":http://www.rubyist.net/~matz/20050107.html#p01,
+
+  "2005-01-20":http://www.rubyist.net/~matz/20050120.html#p01
+
+  ).
+
+
+  Matz introduced and commented on Guido's blog articles
+
+  about Optional Static Typing on Python
+
+  (
+
+  "1":http://www.artima.com/weblogs/viewpost.jsp?thread=85551,
+
+  "2":http://www.artima.com/weblogs/viewpost.jsp?thread=86641,
+
+  "3":http://www.artima.com/weblogs/viewpost.jsp?thread=87182,
+
+  "4":http://www.artima.com/weblogs/viewpost.jsp?thread=89161
+
+  )
+
+  in these days.
+
+  He talked up the early idea than latest one.
+
+
+  On Ruby, he made up his mind NOT to add Static Typing.
+
+  Because he thinks
+
+  the "optional" one is down by half
+
+  and
+
+  the "full" one lead to losing Ruby's identity by dynamic language,
+
+  even if it's friendly for dynamic language.
+
+  Besides, He concerned about its complexity, implements and performance as
+  against its effect.
+
+
+  But he is ready to add Type Checking System if there is a good idea.
+
+  He thinks that it'll be the one like current C Extention's type checking.
+
+  He has an interest in friendly Duck-Typing, 
+
+  "Object
+  Adaptation":http://www.artima.com/weblogs/viewpost.jsp?thread=87182#a-note-on-adaptation,
+
+  "Design by
+  Contract":http://www.artima.com/weblogs/viewpost.jsp?thread=87182#design-by-contract-maybe.

@@ -1,0 +1,28 @@
+--- !hobix.com,2004/entry 
+title: Dynamic VHosts One-liner for Rails
+author: why
+created: 2005-01-31 15:42:29.957282 -05:00
+content: >-
+  So, how do Tada and Basecamp do dynamic virtual hosts to give each user their
+  own subdomain?  Drop this in @ApplicationController@:
+
+
+  <pre>
+   before_filter { |c| c.account =
+     Account.find_by_subdomain(c.request.subdomains.first) }
+  </pre>
+
+
+  Bravo.  Requires a @ServerName *.tadalist.com@ in the Apache VHost configuration
+  and an @accounts@ table with a @subdomain@ field. (seen among "#rubyonrails
+  quotes":http://www.loglibrary.com/channels/preview/62.)
+
+
+  <div class="update">
+
+
+  *Update:* If you're struggling to get this to work, mpet45 "has
+  more":http://www.mpet45.co.uk/posts/list.  Configuring DNS and all that.
+
+
+  </div>

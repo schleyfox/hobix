@@ -1,0 +1,39 @@
+--- !hobix.com,2004/entry 
+title: Five Codefests Get Grants
+author: why
+created: 2005-03-08 21:15:37.192199 -05:00
+content: >-
+  Okay, great.  So we have five recipients of RubyCentral's codefest grant program
+  (a contest featured in January's CashHanded "#1":/cult/cashHandedOne.html,
+  "#2":/cult/cashHandedTwo.html, "#3":/cult/cashHandedThree.html,
+  "#4":/cult/cashHandedFour.html and "#5":/cult/cashHandedFive.html.)  The five
+  recipients will receive up to $500 in grant money, to be used towards hosting a
+  gathering of Rubyists, all united in building libraries for Ruby.
+
+
+  Here are the winners and their locations.  So, if you live in any of these
+  areas, think about contacting the host listed below and offering your services. 
+  (You won't get paid, so.)  If you're not sure how to contact them, go ahead and
+  use the comments for this entry to express your willfulness.
+
+
+  * *Dave Tiu* (Boston, MA): Displaytag, a port to Ruby/Rails of a popular
+  Java/Struts library for displaying and interacting with HTML table
+  presentations.
+
+  * *Andrey Melnik* (Ukraine): Ruby/AGG and Ruby/View, a wrapper library for
+  "AGG":http://antigrain.com, allowing users to draw high-quality graphics.  Later
+  this will be a base for Ruby-centric GUI toolkit similar to Rebol/view which is
+  also based on AGG.
+
+  * *James Edward Gray II* (Oklahoma City, OK): a pure Ruby framework for building
+  multiplayer Web games offering two key services: Game management and design
+  tools.  Gambit can manage player's accounts, game hosting and joining, player
+  histories, in-game communication systems and out-of-game notifications for
+  in-game activities. 
+
+  * *Brian McCallister* (Delaware): bindings to the
+  "Lucene":http://jakarta.apache.org/lucene/ search engine via SWIG and GCJ.
+
+  * *Ryan Davis* (Seattle, WA): RubyGems cleanup and enhancements.   A team of 12
+  has already prepared to attend this!

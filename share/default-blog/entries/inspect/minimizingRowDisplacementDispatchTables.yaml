@@ -1,0 +1,55 @@
+--- !hobix.com,2004/entry 
+title: Minimizing Row Displacement Dispatch Tables
+author: babie
+created: 2005-02-28 13:41:06.400098 -05:00
+content: >-
+  Translated from matz blog,
+  "2005-02-21":http://www.rubyist.net/~matz/20050221.html#p01:
+
+
+
+  bq. "This report":http://www.cs.ucsb.edu/labs/oocsb/papers/TRCS95-05.html is
+  old, but I didn't know.
+
+
+
+  bq. For implementing Dynamic Dispatch, the technique that uses the dispatch
+  table like Virtual Table(VTABLE) of C++ is often used in statically-typed
+  language. This is because a statically-typed language has properties such as
+  "fast" and "abundant infomation on compile".
+
+
+
+  bq. The above-mentihoned report are written about applying such a dispatch table
+  technique to a dynamically-typed language like Smalltalk. It's considered about
+  the point how it deals when a class or method is dynamically added.
+
+
+
+  bq. Novel points are:
+
+  * It compress two dimensional tables(class x selector) to one dimensional one.
+  It sorts a sparse table, and it stores elements in desc order. It uses the
+  offset to get.
+
+  * When compressing the table, though it is usually splitted by class, this
+  report recommends to split by selector. Therefore, the efficiency when updating
+  is up because adding a selector ends only adding a line.
+
+  * When a class is added, it deals by using two or more dispatch tables
+  (fall-back the 2nd table by method_missing). Though a new class is a little
+  slow, it's possible to gain a whole perfomance. In an idle moment, it
+  restructures dispatch tables.
+
+
+
+  bq. The effeciency seems to be quite good.
+
+  However, it may be that this technique is inefficient
+
+  on like Ruby that has a open class, an existing class can be added the method,
+  by increasing table-restructuring.
+
+
+
+  bq. I think how to solve it.

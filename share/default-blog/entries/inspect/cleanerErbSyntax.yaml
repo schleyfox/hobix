@@ -1,0 +1,40 @@
+--- !hobix.com,2004/entry 
+title: Cleaner Erb Syntax
+author: why
+created: 2005-03-08 22:47:23.743095 -05:00
+content: >-
+  I know alot of you out there are using Erb syntax for your @rthtml@ files in
+  Rails.  Erb is also used in Hobix and Soks.  Well, did you know that you can
+  mark Erb lines with an initial percent symbol, saving yourself the messiness of
+  open and close brackets?
+
+
+  This:
+
+
+  <pre>
+   <% entries.each do |e| %>
+     <div class="entryTitle"><%= e.title %></div>
+     <div class="entryBody">
+       <%= e.content.to_html %>
+     </div>
+   <% end %>
+  </pre>
+
+
+  Can also be expressed as:
+
+
+  <pre>
+   % entries.each do |e|
+     <div class="entryTitle"><%= e.title %></div>
+     <div class="entryBody">
+       <%= e.content.to_html %>
+     </div>
+   % end
+  </pre>
+
+
+  I find it especially nice for loops, since I can easily browse the file for
+  those marked lines. (More on Erb syntax in "the
+  docs":http://www.ruby-doc.org/stdlib/libdoc/erb/rdoc/classes/ERB.html.)

@@ -1,0 +1,61 @@
+--- !hobix.com,2004/entry 
+title: The Best of method_missing
+author: why
+created: 2005-02-03 16:05:05.566025 -05:00
+content: >-
+  I never use @method_missing@.  Maybe twice.  And both times I didn't use it,
+  regretted it, forcefully ejected the code from a moving vehicle, shed nary a
+  tear.
+
+
+  And yet, there's so many great uses for @method_missing@ out there.  If I may, a
+  few of my favorite.  And if you will, please, a few of yours?
+
+
+  *
+  "XMLRPC::Client::Proxy":http://www.ntecs.de/projects/xmlrpc4r/client.html#label-17
+  will pass its method calls directly onto the service.  You can even specific a
+  prefix, which makes the whole thing a little more psuedo-OO.<pre>
+
+  >> require 'xmlrpc/client'
+
+  >> system = XMLRPC::Client.
+       new2( "http://www.oreillynet.com/meerkat/xml-rpc/server.php" ).
+       proxy( "system" )
+  >> system.listMethods
+
+  => ["meerkat.getChannels", "meerkat.getCategories", ...]
+
+  </pre>
+
+  Naturally, DRb "does
+  similarly":http://www.eng.cse.dmu.ac.uk/~hgs/ruby/RUBY_SNAPSHOT_RDOC/classes/DRb/DRbObject.html#M003555.
+
+  * "Builder::XmlBase":http://builder.rubyforge.org/classes/Builder/XmlBase.html
+  translates method calls into XML tags.<pre>
+   >> require 'rubygems'
+   >> require_gem 'builder'
+
+   >> builder = Builder::XmlMarkup.new(:target=>STDOUT, :indent=>2)
+   >> builder.person { |b| b.name("Jim"); b.phone("555-1234") }
+   <person>
+     <name>Jim</name>
+     <phone>555-1234</phone>
+   </person>
+  </pre>
+
+  * "Hash with Attrs":http://www.rubygarden.org/ruby?RubyIdioms (halfway down the
+  page) is kind of neat.  Make your Hashes act like JavaScript objects.<pre>
+   class Hash
+     def method_missing(meth,*args)
+       if /=$/=~(meth=meth.id2name) then
+         self[meth[0...-1]] = (args.length<2 ? args[0] : args)
+       else
+         self[meth]
+       end
+     end
+   end
+  </pre>
+
+
+  How do you use @method_missing@?  Blow our minds post-haste.

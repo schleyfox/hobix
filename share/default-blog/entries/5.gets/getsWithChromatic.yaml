@@ -1,0 +1,158 @@
+--- !hobix.com,2004/entry 
+title: 5.gets chromatic
+author: why
+created: 2005-01-26 10:56:44.626265 -05:00
+content: >-
+  p(intro). With all the ta-da over the "Rails tutorial at
+  ONLamp":http://www.onlamp.com/pub/a/onlamp/2005/01/20/rails.html, I thought I'd
+  interview a pertinent outsider.  chromatic, the editor of ONLamp, took a moment
+  to speak directly into our omnidirectional mic.  Five, our strict policy.
+
+
+  p(gets). 1. So, how well did the Rolling on Rails tutorial really do?  Was its
+  success comparable to your PHP or Python articles?
+
+
+  p(puts). So far, it's doing really well, far far above all the other Ruby
+  articles we've published (I recommend Garrett Rooney's "Extending Ruby with
+  C":http://www.onlamp.com/pub/a/onlamp/2004/11/18/extending_ruby.html from a
+  couple of months ago.)
+
+
+  p(puts). Remember, it's only been public for five days now.  I have statistics
+  for four of those days.  It's difficult to compare it in its first week to many
+  other articles, but because you asked so nicely, the only PHP or Python article
+  in recent memory that did better was Adam Trachtenberg's                        
+
+  "Why PHP 5 Rocks!":http://www.onlamp.com/pub/a/php/2004/07/15/UpgradePHP5.html
+  article.
+
+
+  p(puts). So far, "Rolling..." compares favorably to Python articles on Plone and
+  mod_python's PSP.  ONLamp seems to attract a lot of web programmers for some
+  reason.
+
+
+  p(gets). 2. Ruby doesn't have much of a proper presence at ONLamp.  How exactly
+  can Rubyists help this change?
+
+
+  p(puts). I like to think I publish good articles on Ruby when I can.  One of the
+  difficulties of juggling the various subjects I do on the site is appealing to
+  an appropriately wide audience.  For example, Garrett's article had an
+  additional appeal of showing off the GenX library. There's a draw there for
+  people who don't do Ruby yet and Garrett's a clear enough writer and writing
+  Ruby extensions is easy enough that a decent programmer of another language
+  should be able to follow along.
+
+
+  p(puts). It's a sneaky, subversive glue concept, and I like it.  I try to apply
+  it to all sorts of articles.  Maybe there's no room on the Internet anymore for
+  showing someone how to compile and install Postfix, for example, but show me how
+  you automated it into a one step process using Ruby and now you can deploy it to
+  a farm of dedicated mail servers and you're golden.                             
+
+
+  p(puts). Also, being able to point to a sharp upswing in Ruby book sales and
+  Ruby tutorial registrations at conferences would be nice.  From the publishing
+  point of view, there are dozens of great projects every year that never achieve
+  a critical mass of popularity to justify a serious investment of time and
+  resources.  If PickAxe 2 does well, if there's a Ruby track at OSCON this year
+  beyond people saying "Hm, I'd like to play with Ruby because I hear it's
+  interesting!" and "Wow, I'd really like to hear Dave Thomas speak!" to "Learning
+  Ruby is important to my professional future!", it'll be easier to cover Ruby as
+  Ruby and not Ruby as Enabling Technology.                                       
+
+
+  p(puts). Lest your readers think I'm giving an official O'Reilly Media policy
+  here, let me point to Jack Herrington's "Code Generation in
+  Action":http://www.manning.com/herrington as another example of RaET.           
+
+
+  p(puts). Personally, I'd like to see Cardinal too.  I can't exactly commit to
+  saying "Expect lots more Ruby articles when I can write Ruby code that uses
+  Parrot extensions", but I can make vague hints in that direction.
+
+
+  p(gets). 3. Things are happening in Ruby.  Rails, Instiki, the (Poignant) Guide,
+  RubyForge.  Alot of us are thinking this is our year.  Is this anticipation
+  audible outside the Ruby kingdom?
+
+
+  p(puts). I'm not sure to answer this question.  Is it "Is this our year?" or "Do
+  you think other people are noticing Ruby more?"                                 
+
+
+  p(puts). The latter question is easy.  Yes.  Every year since I "first
+  heard":http://slashdot.org/article.pl?sid=01/03/25/1624239&mode=thread about
+  Ruby, I hear more and more people talking about it.  Everything you've mentioned
+  so far seems to improve Ruby's reputation and fame, and deservedly so.
+
+
+  p(puts). With that said, my impression is that the development process is
+  hitting some limitations.  I've heard a few dedicated Ruby fans (so don't go out
+  questioning new users to see who talks crazy talk to me) worry about the Windows
+  platform falling out of popularity, which'd be a shame in some ways, and there
+  seem to be some ongoing questions about a Ruby VM.  I've talked to people at at
+  least one company who had questions about the Ruby license a couple of years
+  ago.  Now again, these are impressions and they don't particularly affect me, so
+  I haven't dug into them in much detail (not running Windows, writing code where
+  I care more about                                              
+
+  clarity and ease of development than the maximum possible performance, and not
+  modifying or redistributing Ruby itself), so if I'm wrong here (or things have
+  changed), please feel free to set me straight.                                  
+
+
+  p(puts). To return to the actual question, though, I'm not sure what would mark
+  2005 as the Year of Ruby, besides replacing the flame in the Statue of Liberty
+  with red gems and putting PickAxe 2 in her left hand.                           
+
+
+  p(puts). I expect more and more people to hear about it and more and more people
+  to use it.  I don't expect it to replace Perl, Python, PHP, Java, C, C++,
+  C#/Mono, or Lua in those niches where they are successful, but it definitely has
+  advantages over all of those languages in certain ways. (Lest any non-Ruby fans
+  read this, let me explain that some of them have advantages over Ruby too.  See
+  "What I Hate About Your Programming
+  Language":http://www.oreillynet.com/pub/a/onlamp/2003/05/12/languagephilosophy.html
+  for stronger polemics.)
+
+
+  p(gets). 4. Are you as colorful as your name suggests?  By which I mean:
+  tie-dyed.
+
+
+  p(puts). For Christmas several years ago, my mother gave me a tie-dying kit.
+  I've never used it and, after four moves, I'm not sure where it is. "chromatic"
+  comes from the 12-tone scale in Western music mostly because no one else I could
+  find used it as an alias in 1996.
+
+
+  p(gets). 5. "Google Image search":http://www.google.com/imghp?hl=en. Find us
+  something good.                                                                 
+
+
+  p(puts). That reminds me of Mark-Jason Dominus explaining that a picture he
+  attached to one of his slides in a presentation was the first result of a search
+  for the phrase "Dork
+  Party":http://images.google.com/images?hl=en&lr=&safe=off&c2coff=1&q=Dork+Party&btnG=Search.
+  I can't compete with that.
+
+
+  p(puts). On the other hand, "chromatic
+  camel":http://images.google.com/images?hl=en&lr=&safe=off&c2coff=1&q=chromatic+camel&btnG=Search
+  is interesting in that I don't know any other Perl hackers who've written Perl
+  while riding a camel in the Sahara.  (I almost fell off.)                       
+
+
+  p(puts). My favorite odd GIS is "think revolution,
+  octopus":http://images.google.com/images?hl=en&lr=&safe=off&c2coff=1&q=think+revolution%2C+octopus&btnG=Search
+  from downtown Portland in 2002.
+
+
+  p=. !/images/revolt_seafood.jpg(Think revolution, octopus.)!
+
+
+  p(puts). Does it count if I already knew about these pictures                   
+  and phrases?

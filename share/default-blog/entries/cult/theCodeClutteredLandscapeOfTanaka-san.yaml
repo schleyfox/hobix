@@ -1,0 +1,28 @@
+--- !hobix.com,2004/entry 
+title: The Code Cluttered Landscape Of Tanaka-san
+author: why
+created: 2005-01-14 12:00:01.513240 -05:00
+content: >
+  I can hardly see anything else right now.  My vision is so obscured by the works
+  of Akira Tanaka, who is gradually becoming deified in my perspective.  Since
+  revisiting "webapp":/bits/holyGreatCgiInHeaven.html and
+  "amarshal":/inspect/serializingToRubyCode.html, I have been mining the "personal
+  CVS repository":http://cvs.m17n.org/viewcvs/ruby/ of Tanaka-san and walking away
+  each time with pomegranate juices freely flowing down my chin.  I've already
+  ruined five sailor outfits that way.
+
+
+  Simple scripts, such as *project-name*, which checks SourceForge and Savannah
+  for name clash in your ideas for project name (as well as returning a Google
+  count.)  His succinct *regen* library which creates RegExp from a BNF-like
+  syntax.  In fact, both his *abnf* and *lr* libraries really show his fondness
+  for grammars.  He's got some great lexers in there.
+
+
+  Also, more expansive libraries like *htree* which lazily parses HTML, builds a
+  sensible tree, and outputs XHTML or can convert to a REXML structure. And his
+  rethinking of standard libs, such as *tzfile*, a timezone-centric library for
+  storing timestamps. And we're all by now familiar with *open-uri* and *pp*. 
+
+
+  Fantastic.  It's a whole countryside.

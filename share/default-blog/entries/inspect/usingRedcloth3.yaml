@@ -1,0 +1,181 @@
+--- !hobix.com,2004/entry 
+title: Using RedCloth 3
+author: why
+created: 2005-02-18 16:21:09.105243 -05:00
+summary: >-
+  Yeah, I get a lot of e-mail about problems with RedCloth.  I think the main
+  problem is that I've neglected to explain things.  I've only just recently
+  update the "documentation":http://redcloth.rubyforge.org/ and it can be a bit
+  much to sort through.  Especially when you really only need to know a couple of
+  things about RedCloth 3.
+
+
+  I'm going to take a second and thoroughly discuss using Textile and Markdown
+  together and how to customize RedCloth's processor.
+
+content: >-
+  Yeah, I get a lot of e-mail about problems with RedCloth.  I think the main
+  problem is that I've neglected to explain things.  I've only just recently
+  update the "documentation":http://redcloth.rubyforge.org/ and it can be a bit
+  much to sort through.  Especially when you really only need to know a couple of
+  things about RedCloth 3.
+
+
+  h2. Getting Textile and Markdown to Hold Hands
+
+
+  RedCloth 3 supports both Textile and Markdown.  Well, there's a few Markdown
+  items that haven't been implemented. I believe lists, backticked code fragments,
+  and images still need to be finished.
+
+
+  By default, these are supported in tandem, with preference given to *Textile*
+  markup.  This is only because RedCloth is historically a Textile library.
+
+
+  However, preference can be given to Markdown.
+
+
+  <pre>
+    RedCloth::DEFAULT_RULES.replace [:markdown, :textile]
+  </pre>
+
+
+  You can also use only one of the processors, if you prefer.
+
+
+  This can also be done when you go to output:
+
+
+  <pre>
+   >> r = RedCloth( <<RED ).to_html
+   >> # testing
+   >> RED
+   => "<ol>\n\t<li>testing</li>\n\t</ol>"
+
+   >> r = RedCloth( <<RED ).to_html( :markdown )
+   >> # testing
+   >> RED
+   => "<h1>testing</h1>"
+  </pre>
+
+
+  Furthermore, you can mix-and-match rules from either processor to form your own
+  custom markups.
+
+
+  <pre>
+   >> r = RedCloth( <<RED ).to_html \
+   ?>       :block_markdown_atx, :inline_textile_link 
+  </pre>
+
+
+  The complete list of rules is available in the RDoc for the @RedCloth#rules@
+  accessor.
+
+  h2. Line Breaking with a Sledgehammer
+
+
+  Since RedCloth 3 supports both Textile and Markdown, there's a bit of clash in
+  some subtle rules.  For example, the string @4 > 5@ is handled differently.
+
+
+  Textile outputs @<p>4 > 5</p>@.
+
+
+  Markdown outputs @<p>4 &gt; 5</p>@.
+
+
+  Generally, I side with Textile on these subtelties.  Eventually, I hope that
+  these behaviors can be placed in rules like the above.  But I end up sort of
+  stumbling across them inadvertantly, you know?
+
+
+  With line breaks, I decided to side with Markdown.  I got so many complaints
+  with line breaks converting to @<br />@ tags in RedCloth 2.  People just didn't
+  expect it.
+
+
+  Heh, well, now people are used to it and they're pretty disoriented using
+  RedCloth 3!  Anyway, this is an easy one.
+
+
+  <pre>
+   class RedCloth
+     def hard_breaks; true; end
+   end
+  </pre>
+
+
+  This will activate classic hard-breaking globally, like in the days of RedCloth
+  2's salad days.
+
+
+  Again, can be done on a per-document basis.
+
+
+  <pre>
+   >> RedCloth.new( <<RED ).to_html
+   >> A short little paragraph
+   >> of no consequence whatsoever.
+   >> RED
+   #=> <p>A short, little paragraph
+       of no consequence whatsoever.</p>
+
+   >> RedCloth.new( <<RED, [:hard_breaks] ).to_html
+   >> A short little paragraph
+   >> of no consequence whatsoever.
+   >> RED
+   #=> <p>A short, little paragraph<br />
+       of no consequence whatsoever.</p>
+  </pre>
+
+
+  And, hey, I'm just doin what one guy thinks is best.  If this stuff drives you
+  nuts, I'm open to a reversal.
+
+
+  h2. Adding Yer Custom Blocks
+
+
+  Everyone's always asking for custom markup.  The most common form being
+  additional Textile prefixes.
+
+
+  Yo, that's easy!!
+
+
+  <pre>
+   class CustomRedCloth < RedCloth
+     def textile_code( tag, atts, cite, content )
+      == "\t&lt;pre>&lt;code#{ atts }>#{ content }&lt;/code>&lt;/pre>" ==
+     end
+   end
+  </pre>
+
+
+  Creating textile block prefixes is simply a matter of adding a @textile_#{
+  prefix }@ method.  We now have a @code@ tag.
+
+
+  <pre>
+   >> CustomRedCloth.new( <<RED ).to_html
+   >> code. # testing
+   >>   a = 1
+   >>   b = 2
+   >>   c = 3
+   >> RED
+   <notextile>
+   => &lt;pre>&lt;code># testing
+        a = 1
+        b = 2
+        c = 3&lt;/code>&lt;/pre>
+   </notextile>
+  </pre>
+
+
+  You can add your own markup rules as well, but it gets a bit more complicated
+  and I'd encourage reading the source.  It's a matter of adding a method and a
+  rule of the same name.  Take a look at the @block_markdown_setext@ or
+  @block_textile_prefix@.  Short six- or seven-line methods for adding more
+  complex markup.

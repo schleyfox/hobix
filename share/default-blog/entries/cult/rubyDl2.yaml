@@ -1,0 +1,32 @@
+--- !hobix.com,2004/entry 
+title: Ruby/DL 2
+author: why
+created: 2005-01-04 15:59:56.842430 -05:00
+content: >
+  Incident to some inadequacies in Ruby/DL, problems which kept Jamis Buck's pure
+  Ruby SQLite3 libs from happening, concerns were brought to Ruby-Core.  Despite a
+  day or so of silence, this afternoon yielded word from Takaaki Tateishi, the
+  author of Ruby/DL.
+
+
+  He says: 
+
+
+  bq. Now I'm developing Ruby/DL2 to replace Ruby/DL with it. It will support
+  'long long' type and remove restictions on callback function. But I'm not sure
+  when it will be available.
+
+
+  The Rubyforge project for Ruby/DL2 is
+  "here":http://rubyforge.org/projects/ruby-dl2/.
+
+
+  Yes, Japan is far away and, yes, the language barrier can seem insurmountable. 
+  Ruby-Core is the gateway and I've never had anything go unnoticed there.  Be
+  patient.  For example, Akira reported a "Syck
+  bug":http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-core/4052 last week.
+  I've just now got a fix that will go in with my next set of patches.
+
+
+  Bug reports are just as important as bug fixes.  No, wait.  Strike that.  Bug
+  reports are definitely more important.

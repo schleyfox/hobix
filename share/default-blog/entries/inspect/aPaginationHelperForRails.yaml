@@ -1,0 +1,70 @@
+--- !hobix.com,2004/entry 
+title: A Pagination Helper For Rails
+author: why
+created: 2004-12-20 19:06:23.076089 -05:00
+summary: >
+  Looking for some quick pagination for your Rails application?  
+  "PaginationHelper":http://rubyonrails.org/show/PaginatorHelper just about
+  fits the bill.  Sam Stephenson's class interacts with @ActiveRecord@ to
+  ensure only a single page of data is loaded from the database and handles
+  links to the other hidden pages.
+
+content: >
+  Sam Stephenson's "PaginationHelper":http://rubyonrails.org/show/PaginatorHelper
+  for Rails interacts with @ActiveRecord@ to
+  ensure only a single page of data is loaded from the database and handles
+  links to the other hidden pages.  It's a helper script that I've been using
+  everywhere.
+
+
+  Helpers are mixins which add methods to the Rails controller and templates.
+  Install a helper by copying it into @/app/helpers/@ in your Rails application.
+  Here's an updated @PaginationHelper@ I've updated for Rails 0.90:
+  "pagination_helper.rb":http://www.whytheluckystiff.net/rails/pagination_helper.rb.
+
+
+  Load the helper at the beginning of a controller like this:
+
+
+  <pre>
+   class BlogPostsController < ApplicationController
+     helper :pagination
+     include PaginationHelper
+   end
+  </pre>
+
+
+  Not all helpers require the @include@ statement.  We'll be using the Paginator class
+  inside the helper, so it's necessary in this case.
+
+
+  Now, you'll need to use the @Paginator@ in tandem with @ActiveRecord#find@ to grab
+  a single page of data for display:
+
+
+  <pre>
+   @pages = Paginator.new self, BlogPosts.count, 30, @params['page'].to_i
+   @posts = BlogPosts.find nil, "post_time DESC", @pages.current.to_sql
+  </pre>
+
+
+  My remix of the PaginationHelper (linked above) also features a simple method
+  for generating a window of page links.  The @Paginator#window_links@ method accepts
+  your template's view object and a window size.
+
+
+  I've stored my paginator links in a partial called @/app/views/partial/_pager.rb@:
+
+
+  <pre>
+   <div id="counter">
+     Displaying <%= @pages.current.first_item %>
+     - <%= @pages.current.last_item %>
+     of <%= @pages.item_count %> &nbsp; &nbsp;
+
+     <%= link_to( h('< Previous'), @pages.current.previous.to_link ) + " | " if
+       @pages.current.previous %>
+     <%= @pages.window_links( self, 4 ) %>
+     <%= " | " + link_to( h('Next >'), @pages.current.next.to_link ) if
+       @pages.current.next %>
+   </div>

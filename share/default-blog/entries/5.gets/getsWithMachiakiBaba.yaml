@@ -1,0 +1,80 @@
+--- !hobix.com,2004/entry 
+title: 5.gets MichiakiBaba
+author: why
+created: 2005-01-19 11:28:37.372103 -05:00
+content: >-
+  p(intro). Here we are again with another new staff interview.  Let's welcome
+  Babie, a fellow Ruby denizen from Kyoto, Japan.  He's an editor of the "Rubyist
+  Magazine":http://jp.rubyist.net/magazine/ (aka _Rubima_) and is working on the
+  Ruby Library Report.
+
+
+  p(gets). 1. What are your favorite Ruby libraries?
+
+
+  p(puts). Hmm... Error.pm is a must, Data::Dumper is a must too... Hey, it's
+  Perl's :)
+
+
+  p(puts). I venture an opinion for all the faults. My all-time favorite library
+  is open-uri.
+
+
+  <pre> $ ruby -ropen-uri -e 'open("http://jarp.jin.gr.jp/diary/") {  |f| \
+   print f.read.match("<title>(.*)</title>").to_a[1].sub("port", "hack") }'
+  </pre>
+
+
+  p(gets). 2. Have you bought any cool gadgets lately?
+
+
+  p(puts). Yes, Yes! I'm grad you said that. I bought a mini PC "Be Silent
+  M6000":http://www.e-lets.co.jp/product/pc-m60l/index.htm at the end of the last
+  year. It's a silent, little and bright-white beautiful box. I'll set up my site
+  till the end of the month...
+
+
+  p(puts). But... Mac mini was released...orz... I'm biting my lips now. I'll buy
+  iPod shuffle to carry out revenge.
+
+
+  p(gets). 3. Have you travelled outside of Japan much?
+
+
+  p(puts). No, absolutely not. I want to go, if anything, I wanna live in an other
+  country. Why don't you employ me? :-)                                           
+
+
+  p(puts). I wish I could go RubyConf2005. If in Hawaii, I'll go.
+
+
+  p(gets). 4. Daigo likes the Beatles.  I like the Beatles.  Do you like the
+  Beatles?  Have a favorite song?
+
+
+  p(puts). Oh, sorry. I don't know the Beatles particularly. Instead, I love the
+  Wildhearts.  A long time ago, they were likened to "METALLICA meets The
+  Beatles". I went as far as to be in the inferior copy band.                     
+
+                                                                
+  p(puts). I love "bjork", "in flames" and many more, in foreign musicians, too.
+
+
+  p(gets). 5. (Since I left out the fifth question, Babie added his own fifth
+  question!) Why did you join the RedHanded?
+
+
+  p(puts). Because,
+
+
+  # English studying.
+
+  # RedHanded is funny, stylin' and very readable.
+
+  # I wanna contribute to Ruby, cuz I'm grateful to Ruby for daily help. I think
+  that you are happy if I will introduce the hot topic about Ruby on matz blog.
+  The reason of joining the Rubyist Magzine editors and the study meeting in
+  Kansai supporter is the same.
+
+
+  p(puts). The other reason is "I Wanna Go Where The People Go".

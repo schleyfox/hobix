@@ -1,0 +1,34 @@
+--- !hobix.com,2004/entry 
+title: Undocumented Macro DATA_PTR
+author: why
+created: 2005-02-09 11:04:12.205635 -05:00
+content: >-
+  I've really got to remember this one.  Tim Hunter on ruby-talk "brought
+  up":/ruby-talk/130238 this macro for replacing the pointer associated with a
+  Ruby VALUE.  Available "since 1.7":/ruby-talk/56573.
+
+
+  <pre>
+   VALUE my_obj;
+   MyStruct my_struct;
+
+   my_struct = ALLOC(MyStruct);
+   DATA_PTR(my_obj) = my_struct;
+  </pre>
+
+
+  Use this after initially assigning a pointer with @Data_Wrap_Struct@ or
+  @Data_Make_Struct@.  Which means the same free and mark function pointers will
+  still apply.
+
+
+  <div class="update">
+
+
+  *Note:* While the @DATA_PTR@ macro isn't touched in the PickAxe II, I've found
+  its coverage of the Ruby API to be indispensable.  Nuances such as proper use of
+  @StringValue@ and the difference between 1.6 and 1.8 object allocation are
+  essential.
+
+
+  </div>

@@ -1,0 +1,79 @@
+--- !hobix.com,2004/entry 
+title: "Method Check: defined?"
+author: why
+created: 2004-12-29 14:51:27.541812 -05:00
+content: >
+  How would it be if, today, I blew you away with a Ruby keyword, huh?  At any rate,
+  I've decided to.  Ga-shoom!  (The wizard descends.)
+
+
+  So, @defined?@ actually isn't a method, as I normally uncover in a chilling
+  episde of Method Check.  But it does look like one, so no one
+  will blame you if you've nailed it as a method in days of yore, what with the
+  question mark and all.  And you can dress it like a method, because Ruby's parser
+  allows its argument to be surrounded with parens.
+
+
+  <pre>
+   >> x = 1     
+   => 1
+   >> defined? x
+   => "local-variable"
+   >> defined?( y )
+   => nil
+  </pre>
+
+
+  At heart, the @defined?@ keyword is something of a hack, a rather rare anomaly
+  in Ruby's syntax.  Since an undefined variable is a perfectly legal argument,
+  the @defined?@ keyword couldn't be implemented as a method.  Which means that
+  this keyword is left out of Ri documentation.  The Pickaxe groups it with
+  operators. So, it often gets overlooked.
+
+
+  From @eval.c@, here's a list of possible returns from @defined?@:
+
+
+  bq. "expression", "super", "assignment", "method", "yield", "self", "nil",
+  "true", "false", "assignment", "local-variable", "local-variable(in-block)",
+  "global-variable", "instance-variable", "constant", "class variable" and a few
+  other assorted keywords and global variables (such as "@$'@").
+
+
+  As it happens, @defined?@ takes its argument and simply queries the symbol
+  table to see if it is defined.  If it is, you get a simple string of identification
+  (as listed above.)
+
+
+  However, the Ruby parser handles the parens variation of @defined?@ a bit differently. 
+  Simply because it allows for complex expressions to be evaluated.  But this
+  makes for madly syruprous mayhem!
+
+
+  Everything contained in the parens is parsed, a node tree is built, and all
+  nodes are scanned for the validity of their "definition" within Ruby.
+
+
+  <pre>
+   >> defined?( class << String; def n; 18; end; end )
+   => "expression"
+   >> String.n
+   => 18
+   >> defined?( class << NonExistent; def n; 18; end; end )
+   => nil
+  </pre>
+
+
+  Check that out.  The first call to @defined?@ parses the code, establishes that
+  its a valid expression, then executes the code and returns @"expression"@.  The
+  second call parses the code, finds an undefined class name of @NonExistent@ and
+  returns @nil@ -- meaning "undefined".
+
+
+  So, @defined?@ is a great way to perform some parser sanity without triggering a
+  myriad of exceptions.  My one gripe with @defined?@ is that it will throw a
+  @SyntaxError@ if the expression in the parens is malformed.  But, wouldn't it be
+  cool if that could be sniffed out as well??
+
+
+  Now, go.  Play with it.  I'll bet you can come up with some crazy recipes.

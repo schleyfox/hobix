@@ -1,0 +1,33 @@
+--- !hobix.com,2004/entry 
+title: New year party among Tokyo Rubyists
+author: daigo
+created: 2005-01-18 09:50:15.266380 -05:00
+content: >-
+  Last Saturday, Tokyo Rubyists held a new year party after a private seminar once
+  a month where they read Ruby Hacking Guide[1].  Takahashi-san[2] hosted it
+  and other 16 folks including Aoki-san, Sasada-san and Tanaka-san, gathered
+  and talked each other for four hours at the cold, rainy night.
+
+
+  They chatted about the renewal plan of www.ruby-lang.org, Ruby 1.9 and 2.0, why
+  no girl came and so forth.
+
+
+  I discussed with Takahashi-san what Ruby's design patterns will look like. I'd
+  like to know whether they are different from Java/C++'s that are grouped by GoF
+  into three categories; creational, structural and behavioral patterns. I think
+  structure and behavior of Duck Typing might be quite different --  however, DI
+  container approach in Ruby may work as well as Java because creation is similar.
+  He recommended "The Design Patterns Smalltalk
+  Companion":http://www.amazon.com/exec/obidos/tg/detail/-/0201184621/qid=1106057945/sr=8-1/ref=sr_8_xs_ap_i1_xgl14/103-8313131-0523056?v=glance&s=books&n=507846.
+
+
+
+  fn1.
+  "RHG":http://www.amazon.co.jp/exec/obidos/ASIN/4844317210/qid%3D1106059404/250-3696771-8683419
+  was written by Aoki-san, which describes Ruby interpreter programming (i.e. C
+  not Ruby).
+
+
+  fn2. Takahashi-san is the leader of "RubyNoKai":http://jp.rubyist.net/, which
+  means the Association of Ruby, and also the editor of Rubyist Magazine of Japan.

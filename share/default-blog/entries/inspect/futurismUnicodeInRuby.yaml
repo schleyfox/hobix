@@ -1,0 +1,25 @@
+--- !hobix.com,2004/entry 
+title: "Futurism: Unicode In Ruby"
+author: why
+created: 2005-01-07 14:54:02.645837 -05:00
+content: >
+  When asked about the future of Unicode in Ruby 1.9/2.0, Matz replied to
+  Ruby-Core with the following laundry list of features he expects in Ruby's
+  multibyte character support:
+
+
+  * characters are represented by single character strings.
+
+  * so that @"abc"[0]@ returns @"a"@ instead of fixnum 97.  
+
+  * all string methods are aware of multibyte characters.
+
+  * new method @String#encoding@ gives character encoding name (e.g. @"utf-8"@).
+
+  * new method @IO#encoding@ gives character encoding name for reading data.
+
+  * new method @IO#encoding=@ sets the character encoding for reading data.
+
+
+  A library which emulates this could be built, based on Ruby's current @iconv@
+  lib. Anybody want to take a stab at it?

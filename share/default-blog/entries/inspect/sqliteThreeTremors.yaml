@@ -1,0 +1,20 @@
+--- !hobix.com,2004/entry 
+title: SQLite3 Tremors
+author: why
+created: 2004-12-25 16:57:33.318875 -05:00
+content: >
+  SQLite3 is fast upon us.  This little database engine leverages single database
+  files (like @dbm@ or @bdb@ modules), but allows use of a large portion of SQL92
+  syntax.
+
+
+  Just look at the recent SQLite3 happenings:
+
+
+  * "SQLite3 Tutorial":http://freshmeat.net/articles/view/1428/, an exhaustive,
+  code-drenched tour.  Talks about triggers, embedding, virtual tables, custom
+  functions.
+
+  * "SQLite3 for
+  Ruby":http://www.jamisbuck.org/jamis/blog.cgi/programming/ruby/SQLite3%20Bindings%20for%20Ruby_20041219215155.tx, an alpha-level binding by Jamis Buck.
+

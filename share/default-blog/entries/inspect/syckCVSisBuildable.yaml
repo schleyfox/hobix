@@ -1,0 +1,39 @@
+--- !hobix.com,2004/entry 
+title: Syck CVS is Buildable
+author: why
+created: 2005-01-24 21:05:22.499310 -05:00
+content: >-
+  Allo, friends.  Great news.  The new "Syck":http://rubyforge.org/projects/syck/
+  is buildable.  Yes, it has some problems.  The emitter in particular is really,
+  really unstable.  Still, it represents several months worth of work rethinking
+  and redesigning parts of the extension.
+
+
+  Here's what you can look forward to:
+
+
+  * Huge speed improvements when outputting YAML.
+
+  * Automatic use of YAML shortcuts, better looking output.
+
+  * Simplified custom types.  You basically just add @tag_as
+  "tag:example.com,2005:myWikiPage"@ to your class definition.  YAML will then
+  load and dump the class using the type.
+
+  * Hooks for loading YAML into custom types.  Add @yaml_new@ and
+  @yaml_initialize@ methods to your class if you want to override the default
+  behavior.
+
+  * Unit tests in C for the core.  This is a huge help, since I'm able to track
+  down memory leaks and segfaults much easier.
+
+
+  Again, this extension is _really unstable_.  If you're going to use it, install
+  it into a temporary directory using @ruby install.rb config --prefix=$HOME@. 
+  Then, in @irb@, use @$LOAD_PATH.unshift File.expand_path( "~/lib" )@ before
+  @require 'yaml'@.
+
+
+  If you want to help debug, come join
+  "Yaml-Core":http://lists.sourceforge.net/mailman/listinfo/yaml-core.  It's the
+  homebase.

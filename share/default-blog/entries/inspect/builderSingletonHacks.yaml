@@ -1,0 +1,75 @@
+--- !hobix.com,2004/entry 
+title: Builder Singleton Hacks
+author: why
+created: 2005-02-17 14:51:35.419931 -05:00
+content: >-
+  Those tinkling chimes you hear mean it's time on RedHanded for special thanks to
+  Jim Weirich for his "Builder":http://builder.rubyforge.org.  You see that organ
+  grinder down on the corner who takes those rolls of Ruby and out plays elegant
+  XML?  That's @Builder@.
+
+
+  Previously mentioned in "The Best of
+  method_missing":/inspect/theBestOfMethod_missing.html.  At present, I'm going to
+  hand out a few singletons, which are the only additions I've ever needed to
+  plain Builder.
+
+
+  h2. Hack #1: Custom Tag Methods
+
+
+  I've been following Jim's lead on adding helpful methods to Builder.  I'm adding
+  custom tag methods with a bang at the end.  This way, I can still access the
+  @method_missing@ hook and the bang indicate _"your attention to this
+  customization, please"_ rather than _"invade + decimate"_ as commonly thought.
+
+
+  <pre>
+   xm = Builder::XmlMarkup.new( :target => STDOUT, :indent => 2 )
+   class << xm
+     def date!( t )
+       date :month => t.month, :day => t.day, :year => t.year
+     end
+   end
+  </pre>
+
+
+  The above receives a timestamp and builds a @date@ tag based on the timestamp.
+
+
+  <pre>
+   xm.entry do
+     xm.author "_why"
+     xm.date! Time.now
+     xm.title "Builder Singleton Hacks"
+   end
+  </pre>
+
+
+  h2. Hack #2: Encoding Non-printables
+
+
+  The only major feature lacking in @Builder@ is encoding on non-printable
+  characters.  Well, encoding in general.  Here's a quick fix for LATIN-1 ASCII.
+
+
+  <pre>
+   class << xm
+     ELIMINATE = /[\x00-\x08\x0e-\x1f]/
+     UNPRINTABLE = /[\x7f-\xff]/
+     def _escape(text)
+       text.
+       gsub(%r{&}, '&amp;').
+       gsub(%r{<}, '&lt;').
+       gsub(%r{>}, '&gt;').
+       gsub(ELIMINATE, '').
+       gsub(UNPRINTABLE) do |str|
+         "&\##{ str[0] };" 
+       end
+     end
+   end
+  </pre>
+
+
+  I'll be needing a UTF-8 version soon, so I'll update this entry when the time
+  comes.

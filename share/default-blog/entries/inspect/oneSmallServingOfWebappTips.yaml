@@ -1,0 +1,43 @@
+--- !hobix.com,2004/entry 
+title: One Small Serving of WebApp Tips
+author: why
+created: 2005-02-01 22:50:46.951213 -05:00
+content: >-
+  Maybe you remember Tanaka-san's "WebApp":/bits/holyGreatCgiInHeaven.html from a
+  few weeks back.  I've been using it here on the site to power our posting CGIs. 
+  It acts as a very simple wrapper for Hobix, which does the work of refreshing
+  this site's static HTML efficiently.
+
+
+  Time for a few undocumented tips I've picked up while sifting through the
+  source.
+
+
+  * Set @ENV['WEBAPP_DEVELOP_HOST']@ to your IP before you @require 'webapp'@. 
+  When exceptions are thrown, you'll see the exception.  Other users will get an
+  error page.
+
+
+  * Customize the debug and error pages by overriding
+  @WebApp::Manager#generate_debug_page@ and @WebApp::Manager#generate_error_page@.
+
+
+  * WebApp works best when paths are addressed after the CGI's path.  Here's a set
+  of rewrite rules: <pre>
+   RewriteEngine   On
+   RewriteCond %{REQUEST_URI} !webapp.cgi
+   RewriteRule ^(.*)$         /posts/webapp.cgi/$1
+  </pre>
+
+
+  * If using the above, you can generate links relative to the CGI path by using
+  @web.reluri( :path_info => '/posts/list' )@.
+
+
+  * You might want to alias the verbose accessors for GET and POST variables.
+  <pre>
+   class WebApp
+     alias _get  query_html_get_application_x_www_form_urlencoded
+     alias _post query_html_post_application_x_www_form_urlencoded
+   end
+  </pre>

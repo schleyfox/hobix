@@ -1,0 +1,25 @@
+--- !hobix.com,2004/entry 
+title: "Rewriting the Web with Greasemonkey, Rails and WEBrick"
+author: why
+created: 2005-03-31 14:59:38.884052 -05:00
+content: >-
+  Here's a bountiful wellspring of hot chowdery ideas.  Simon Willison is using a
+  local web server (Ruby's own WEBrick and Rails) and some JavaScript to "annotate
+  the web":http://simon.incutio.com/archive/2005/03/30/lightweight and share his
+  additions as a feed.  Now think about how this could be used to hack the web at
+  will:
+
+
+  bq. This architecture could be easily adapted to add private bookmarks to
+  del.icio.us - or to add any number of cool features to any number of other
+  sites. Here's another example: Google's Desktop Search integrates results from
+  your local drive with the search results page on Google. Using greasemonkey and
+  a local web server tied in to OS X Tiger's Spotlight indexer, you could add this
+  functionality to any search site you wanted to. Just be sure to lock down the
+  web server to only serve requests from localhost, to avoid sharing search
+  results for your data with anyone on the network who can see your machine.
+
+
+  Lots of great GreaseMonkey scripts over on "the
+  wiki":http://dunck.us/collab/GreaseMonkeyUserScripts.  I wonder if I can use
+  this stuff to get comments (optionally) showing up in the RSS feed.

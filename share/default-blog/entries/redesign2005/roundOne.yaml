@@ -1,0 +1,53 @@
+--- !hobix.com,2004/entry 
+title: Round One
+author: why
+created: 2005-03-11 01:26:23.602185 -05:00
+content: >
+  Hi!  Welcome to the redesign blog.  The Vit-Core team -- the four of us working
+  together to build a better Ruby-Lang -- have had a great time over the last two
+  weeks.  If you happened across this page by accident, we are working to give
+  "ruby-lang.org":http://ruby-lang.org a new face. 
+
+
+  And, if you've been following closely, I think you'll agree that we've come
+  along way since "this":/cult/rubyorgMockup.html.
+
+
+  Our team has been through a dizzying array of designs and today we present our
+  two favorites.  Be advised that there are variations of these designs that we
+  are still considering.  But these two represent the bounding edges of our work. 
+  The designs share some similarities -- those are the things we've agreed upon.
+  The designs differ in places were we are still experimenting.  And there are
+  omissions.
+
+
+  In this blog, each design will receive its own blog post, to allow specific
+  comments.  If you have general comments, leave them here in this post.  Or head
+  over to the "vit-discuss list":http://rubyforge.org/mailman/listinfo/vit-discuss
+  for more exhaustive commentary.
+
+
+  Here are questions we'd like you to keep in mind (and hopefully answer) in
+  relation to these two designs:
+
+
+  * What logo should we use?  Is it important to choose one that would also work
+  embroidered / printed on a T-shirt, or is one that is designed for a computer
+  screen ok?
+
+  * What intro text should we use?
+
+  * Should we have sample code, or not?  If so, what would be a good sample?
+
+  * Package management is in flux right now.  Should we link any or all of RAA,
+  Rubyforge, RubyGems and RPA?
+
+  * Are there any really high priority links or other content that are missing
+  from the site? 
+
+  * What information on the current Ruby-Lang site do you find yourself coming
+  back for presently?
+
+
+  Thanks to Curt Hibbs for his help and input.  And mucking around with the
+  mailing list, o' course.

@@ -1,0 +1,22 @@
+--- !hobix.com,2004/entry 
+title: Ruby + e17
+author: why
+created: 2005-01-27 12:35:49.880636 -05:00
+content: >-
+  !</images/e17-cvs.jpg(bleeding e.)!
+
+
+  Forget Kapsules.  I mean Kapsules is neat and I don't regret posting about it--
+  absolutely not-- how could I?  I uphold the original decision to do so.  But
+  imagine my paleness, the powerfright, when I saw the "Ruby-EFL
+  bindings":http://code-monkey.de/?ruby-efl.  My allegiance to enlightenment is
+  truer.
+
+
+  I've been compiling e17 from CVS weekly.  It's lookin sly.  If you want to give
+  it a try, I'd highly suggest the "Unofficial DR17 docs":http://lude.net/edocs/.
+
+
+  The Ruby-EFL bindings give you hooks into e's internals.  Meaning you can write
+  little apps and widgets for e.  Over the next few weeks, I'm gonna drop some
+  Ruby scripts I've been using with e16 and e17.

@@ -1,0 +1,121 @@
+--- !hobix.com,2004/entry 
+title: YAML 1.1 Working Draft
+author: why
+created: 2004-12-31 14:11:12.877848 -05:00
+content: >
+  Hey, look what you didn't know was coming: "YAML
+  1.1":http://yaml.org/spec/current.html. Since the specification is pretty thick,
+  I shall act as summarizer.  (Please note that none of these changes will make it
+  into Ruby/Syck until the fall, considering that our 1.0 support still needs
+  work.)
+
+
+  The most significant and useful change for YAML 1.1 is the new tag shortcut
+  syntax.  This was heavily debated on Yaml-Core in September of this year.  Trust
+  me when I say it was beaten and hammered like an orchid folded katana blade.  We
+  went back and forth, smoothing the syntax into an appealing middle ground.
+
+
+  Here's a taste from example 2.24:
+
+
+  <pre>
+   %TAG ! tag:clarkevans.com,2002:
+   --- !shape
+     # Use the ! handle for presenting
+     # tag:clarkevans.com,2002:circle
+   - !circle
+     center: &ORIGIN {x: 73, y: 129}
+     radius: 7
+   - !line
+     start: *ORIGIN
+     finish: { x: 89, y: 102 }
+   - !label
+     start: *ORIGIN
+     color: 0xFFEEBB
+     text: Pretty vector drawing.
+  </pre>
+
+
+  Normally, in YAML documents, the type system defaults to yaml.org types.  This
+  means that when you use @!int@ as a tag, the full URI for the tag is actually
+  @tag:yaml.org,2002:int@.  The @!int@ is merely a shorthand.
+
+
+  The document above illustrates how the @%TAG@ directive can be used to redefine
+  the global namespace for a document.  If we used @!int@ in the above document,
+  the URI would now be @tag:clarkevans.com,2002:int@.  This is terribly handy if
+  you want complete control over resolving the tags in a document.
+
+
+  Here's some other things you can do with @%TAG@, courtesy of example 4.31:
+
+
+  <pre>
+   # Explicitly specify default settings:
+   %TAG !     !
+   %TAG !!    tag:yaml.org,2002:
+   # Named handles have no default:
+   %TAG !o! tag:ben-kiki.org,2000:
+   ---
+   - !foo "bar"
+   - !!str "string"
+   - !o!type "baz"
+  </pre>
+
+
+  The first two @%TAG@ directives are redundant.  These are merely the default
+  settings. As you can see: *private types and builtin types have switched
+  shortcut syntax.*  The team felt that explicit use of private types was seen
+  more often than explicit use of builtin types.  People don't use an explicit
+  @!str@ that often.
+
+
+  The third @%TAG@ directive shows the new prefixing notation.  Previously, if you
+  wanted to simplify tags in your YAML document, you might use:
+
+
+  <pre>
+   --- !hobix.com,2004/^weblog
+   title: RedHanded
+   link: http://redhanded.hobix.com/
+   tagline: sneaking Ruby through the system
+   period: 00:60:00
+
+   linklist: !^linklist
+   - ruby home: http://ruby-lang.org/
+   - ruby-doc: http://ruby-doc.org/
+   - rubyforge: http://rubyforge.org/
+  </pre>
+
+
+  The above is the old YAML 1.0 prefixing notation.  The carat works like a
+  bookmark. The string @!hobix.com,2004/@ is saved by the carat in its use on the
+  first line. Later, it's pasted into the @!^linklist@ tag, which the loader sees
+  as  @!hobix.com,2004/linklist@.
+
+
+  Done with the new prefixing:
+
+
+  <pre>
+   %TAG !hx! tag:hobix.com,2004:
+   --- !hx!weblog
+   title: RedHanded
+   link: http://redhanded.hobix.com/
+   tagline: sneaking Ruby through the system
+   period: 00:60:00
+
+   linklist: !hx!linklist
+   - ruby home: http://ruby-lang.org/
+   - ruby-doc: http://ruby-doc.org/
+   - rubyforge: http://rubyforge.org/
+  </pre>
+
+
+  This syntax is much better for interleaved types, in which namespaces cross as
+  they share data.
+
+
+  And, remember, that if you're please with YAML 1.0 and wish to use it forever,
+  you can do that with the @%YAML 1.0@ directive.

@@ -1,0 +1,35 @@
+--- !hobix.com,2004/entry 
+title: "CashHanded #4: RTrac"
+author: why
+created: 2005-01-13 21:52:48.118560 -05:00
+content: >
+  People love codefests.  Many things change over time, but a few things are
+  always the same.  People _have_ always and _will_ always love codefests.  In
+  fact, everyone does.  But, in particular, you love codefests.  It is a basic
+  human need.  
+
+
+  Scientists estimate that a human being can only survive for about four hours
+  without codefests.  But I probably shouldn't mention such deprivation.  My point
+  isn't to be gorey.
+
+
+  Two of my colleagues have mentioned building a %{font-size:large}bug tracker
+  application in Rails%. 
+  "Here.":http://weblog.rubyonrails.com/archives/2005/01/08/have-a-codefest-and-collect-cash-from-rubycentral/
+  "Here.":http://chadfowler.com/index.cgi/Computing/Programming/Ruby/FreeMoney.rdoc,v
+   At first, I thought, "No."  It seemed too great an endeavor for a codefest.
+
+
+  But I started thinking about it and perhaps, just by tying together a number of
+  elements, you finish a Trac clone.  It would require a decent team: an
+  individual who knows Instiki or Ruwiki internals, a Railser who can assemble the
+  ticketing system, and an HTTP magician who can start by simply wrapping the
+  Subversion web access.
+
+
+  Yeah, it's possible.
+
+
+  Now, you want to see how Ruby-Core tracks bugs?  See
+  "mput.dip.jp":http://mput.dip.jp/rubybugs/.

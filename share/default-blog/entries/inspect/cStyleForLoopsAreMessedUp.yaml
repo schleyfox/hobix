@@ -1,0 +1,30 @@
+--- !hobix.com,2004/entry 
+title: C-Style For Loops Are Messed Up!
+author: why
+created: 2005-03-03 17:51:16.802501 -05:00
+content: >-
+  After coding in Ruby for four years now, it's finally beginning to dawn on me
+  how syntactically awful some traditional control structures are.  The worst of
+  which is the @for@ loop!!
+
+
+  I mean look at this!
+
+
+  <pre>
+   for ( i = 0; i < strlen( poem ); i++ ) {
+     printf( "%d", poem[i] );
+   }
+  </pre>
+
+
+  I have used this structure almost daily--and I'm sure it ultimately averages out
+  to daily--for like a decade.  Which is definitely evidence of its usefulness. 
+  But the triple expression, consisting of initiator, terminator, and incrementor,
+  is truly hideous.
+
+
+  What blows my mind is that, though some of C's legacy doesn't carry on, this
+  structure pervades PHP, Perl, Java and other C offspring.  On the other hand, I
+  wonder how I would feel about the syntax if more control structures used this
+  kind of multiple expression setup.
