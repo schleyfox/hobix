@@ -71,10 +71,10 @@ class FileSys < Hobix::BaseStorage
         return false if @index
         index_path = File.join( @basepath, 'index.hobix' )
         index = if File.exists? index_path
-                     YAML::load( File.open( index_path ) )
-                 else
-                     YAML::Omap::new
-                 end
+                    YAML::load( File.open( index_path ) )
+                else
+                    YAML::Omap::new
+                end
         @index = YAML::Omap::new
         Find::find( @basepath ) do |path|
             if FileTest.directory? path
@@ -124,6 +124,11 @@ class FileSys < Hobix::BaseStorage
     def last_modified( entries )
         entries.collect do |entry|
             @modified[entry[0]]
+        end.max
+    end
+    def last_created( entries )
+        entries.collect do |entry|
+            entry[1]
         end.max
     end
     def modified( entry_id )

@@ -27,7 +27,8 @@ class Weblog
                 ].each { |m|
                     map.add( m[1..-1], instance_eval( m ) )
                 }
-                entries = entries.dup.collect do |e|
+                entries = entries.collect do |e|
+                    e = e.dup
                     e.author = @authors[e.author]
                     def e.to_yaml_type
                         "!^entry"

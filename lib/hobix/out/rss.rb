@@ -52,7 +52,7 @@ EOXML
         rssdoc.elements['/rss/channel/link'].text = vars[:weblog].link
         rssdoc.elements['/rss/channel/description'].text = vars[:weblog].tagline
         rssdoc.elements['/rss/channel/dc:date'].text = Time.now.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
-        vars[:entries].each do |e|
+        ( vars[:entries] || [vars[:entry]] ).each do |e|
             ele = REXML::Element.new 'item'
             ele_title = REXML::Element.new 'title'
             ele_title.text = e.title

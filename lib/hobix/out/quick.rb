@@ -21,6 +21,7 @@ require 'erb'
 module Hobix
 module Out
 class QuickError < StandardError; end
+
 class Quick < Hobix::BaseOutput
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
@@ -87,84 +88,85 @@ class Quick < Hobix::BaseOutput
     #
     # Default quick templates
     #
-    def title_erb; "<%= weblog.title %>"; end
+    def title_erb; '<%= weblog.title %>'; end
     def banner_erb
-        <<-QUICK
+     %{ <div id="banner">
         <h1 class="title"><a href="<%= weblog.link %>"><%= weblog.title %></a></h1>
-        <div class="tagline"><%= weblog.tagline %></span>
-        QUICK
+        <div class="tagline"><%= weblog.tagline %></div>
+        </div> }
     end
     def sidebar_erb
+     %{ <div id="sidebar">
+        <+ sidebar_list +>
+        </div> }
+    end
+    def sidebar_list_erb
         ['sidebar_archive', 'sidebar_links', 'sidebar_syndicate', 'sidebar_hobix']
     end
     def sidebar_archive_erb
-        <<-QUICK
-        <div id="sidebarBox">
+     %{ <div id="sidebarBox">
         <h2 class="sidebarTitle">Archive</h2>
         <% months = weblog.storage.get_months( weblog.storage.find ) %>
         <% months.each do |month_start, month_end, month_id| %>
             <a href="<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a><br />
         <% end %>
-        </div>
-        QUICK
+        </div> }
     end
     def sidebar_links_erb
-        <<-QUICK
-        <div id="sidebarBox">
+     %{ <div id="sidebarBox">
         <h2 class="sidebarTitle">Links</h2>
         <%# weblog.links.to_html %>
-        </div>
-        QUICK
+        </div> }
     end
     def sidebar_syndicate_erb
-        <<-QUICK
-        <div id="sidebarBox">
+     %{ <div id="sidebarBox">
         <h2 class="sidebarTitle">Syndicate</h2>
         <a href="/index.xml">RSS 2.0</a>
-        </div>
-        QUICK
+        </div> }
     end
     def sidebar_hobix_erb
-        <<-QUICK
-        <div id="sidebarBox">
+     %{ <div id="sidebarBox">
         Built upon <a href="http://hobix.com">Hobix</a>
-        </div>
-        QUICK
+        </div> }
     end
     def entries_erb
-        <<-QUICK
+     %{ <div id="blog">
         <% entries.each_day do |day, day_entries| %>
-            <h2 class="dayHeader"><+ day_header +></h2>
+            <+ day_header +>
             <% day_entries.each do |entry| %>
                 <+ entry +>
             <% end %>
         <% end %>
-        QUICK
+        </div> }
     end
-    def day_header_erb; "<%= day.strftime( '%A, %B %d, %Y' ) %>"; end
+    def day_header_erb; %{ <h2 class="dayHeader"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; end
     def entry_erb
-        <<-QUICK
-        <div class="entry">
-            <h3 class="entryTitle"><+ entry_title +></h3>
-            <div class="entryContent"><+ entry_content +></div>
+     %{ <div class="entry">
+            <+ entry_title +>
+            <+ entry_content +>
         </div>
         <div class="entryFooter"><+ entry_footer +></a>
-        </div> 
-        QUICK
+        </div> }
     end
-    def entry_title_erb; '<%= entry.title %></h3>'; end
-    def entry_content_erb; '<%= entry.content.to_html %>'; end
+    def entry_title_erb
+     %{ <h3 class="entryTitle"><%= entry.title %></h3>
+        <% if entry.tagline %><div class="entryTagline"><%= entry.tagline %></div><% end %> }
+    end
+    def entry_content_erb
+        %{ <div class="entryContent"><%= entry.content.to_html %></div> }
+    end
     def entry_footer_erb
-        'posted by <%= entry.author %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %>'
+     %{ posted by <%= entry.author %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %> }
     end
-    def css_erb; '@import "/site.css";'; end
+    def css_erb; %{ @import "/site.css"; }; end
     def doctype_erb
-        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
+     %{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">}
     end
     def page_erb
-        <<QUICK
-<+ doctype +>
-<html>
+     %{<+ doctype +>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><+ title +></title>
 <style type="text/css">
 <+ css +>
@@ -174,26 +176,62 @@ class Quick < Hobix::BaseOutput
 
 <div id="page">
 
-<div id="banner">
 <+ banner +>
-</div>
 
 <div id="content">
-<div id="sidebar">
 <+ sidebar +>
-</div>
 
-<div id="blog">
 <+ entries +>
-</div>
 
 </div>
 </div>
 
 </body>
-</html>
-QUICK
+</html>}
     end
 end
+
+class QuickSummary < Quick
+    def extension
+        "quick-summary"
+    end
+    def entry_content_erb
+     %{ <div class="entryContent">
+        <% if entry.summary %>
+        <%= entry.summary.to_html %>
+        <p><a href="<%= entry.link %>">Continue to full post.</a></p>
+        <% else %>
+        <%= entry.content.to_html %>
+        <% end %>
+        </div> }
+    end
+end
+
+class QuickArchive < Quick
+    def extension
+        "quick-archive"
+    end
+    def entry_erb
+     %{ <h3 class="entryTitle"><a href="<%= entry.link %>"><%= entry.title %></a></h3> }
+    end
+    def entries_erb
+     %{ <div id="blog">
+        <div id="archives">
+        <ul>
+        <% entries.each_day do |day, day_entries| %>
+            <li><+ day_header +></li>
+            <ul>
+            <% day_entries.each do |entry| %>
+                <li><+ entry +></li>
+            <% end %>
+            </ul>
+            </li>
+        <% end %>
+        </ul>
+        </div>
+        </div> }
+    end
+end
+
 end
 end

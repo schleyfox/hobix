@@ -269,15 +269,13 @@ class Weblog
     def build_pages( page_name )
         puts "[Building #{ page_name } pages]"
         vars = {}
-        paths = File.split( page_name )
-        page_dir = File.dirname( page_name )
+        paths = page_name.split( '/' )
         loop do
             try_page = paths.join( '_' )
             if respond_to? "skel_#{ try_page }"
                 method( "skel_#{ try_page }" ).call do |vars|
                     vars[:weblog] = self
                     raise TypeError, "No `page' variable returned from skel_#{ try_page }." unless vars[:page]
-                    vars[:page].add_dir( "/#{ page_dir if page_dir != '.' }" )
                     yield vars
                 end
                 return

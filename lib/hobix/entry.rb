@@ -53,7 +53,7 @@ class Entry
     def day_id; created.strftime( "/%Y/%m/%d/" ); end
     def month_id; created.strftime( "/%Y/%m/" ); end
     def year_id; created.strftime( "/%Y/" ); end
-    def section_id; id.gsub( /(^|\/)[^\/]+$/, '' ); end
+    def section_id; File.basename( id ); end
 
     include ToYamlExtras
     def to_yaml_property_map

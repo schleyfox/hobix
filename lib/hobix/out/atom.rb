@@ -54,7 +54,7 @@ EOXML
         rssdoc.elements['/feed/modified'].text = vars[:page].updated.strftime( "%Y-%m-%dT%H:%M:%SZ" )
         rssdoc.elements['/feed/id'].text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }"
         rssdoc.elements['/feed/copyright'].text = vars[:weblog].copyright || "None"
-        vars[:entries].each do |e|
+        ( vars[:entries] || [vars[:entry]] ).each do |e|
             ele = REXML::Element.new 'entry'
             ele.extend XmlQuick
             ele.x( 'title', e.title )

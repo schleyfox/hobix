@@ -47,9 +47,11 @@ def copy_dir( sucmd, from_dir, to_dir, mode = nil )
         FileUtils.cp_r Dir.glob( "#{ from_dir }/*" ), to_dir
     end
 end
-def open_try_gzip( uri )
-    URI::parse( uri ).open( "Accept-Encoding" => "gzip" ) do |o|
-        if o.content_encoding.include? "gzip"
+def open_try_gzip( uri, gzip_on = true )
+    opts = {}
+    opts['Accept-Encoding'] = 'gzip' if gzip_on
+    URI::parse( uri ).open( opts ) do |o|
+        if o.content_encoding.include?( "gzip" )
             puts "# Beginning gzip transmission."
             Zlib::GzipReader.wrap( o ) do |ogz|
                 yield ogz
@@ -69,7 +71,7 @@ TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.str
 
 # Move through intro screens
 puts "# Readying install..."
-stream = open_try_gzip( GO_HOBIX + "hobix-install.yaml" ) do |yml| 
+stream = open_try_gzip( GO_HOBIX + "hobix-install.yaml", c['host'] !~ /mswin32/ ) do |yml| 
     YAML::load_stream( yml )
 end
 den, attached = stream.documents
