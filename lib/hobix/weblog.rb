@@ -73,6 +73,11 @@ class Page
     def initialize( link )
         @link = link
     end
+    def add_dir( dir ) #:nodoc:
+        @link = File.join( dir, @link ) if @link
+        @next = File.join( dir, @next ) if @next
+        @prev = File.join( dir, @prev ) if @prev
+    end
     def add_ext( ext ) #:nodoc:
         @link += ext if @link
         @next += ext if @next
@@ -134,7 +139,7 @@ end
 #
 #   def skel_index
 #       index_entries = storage.lastn
-#       page = Page.new( '/index' )
+#       page = Page.new( 'index' )
 #       page.prev = index_entries.last[1].strftime( "/%Y/%m/index" )
 #       page.timestamp = index_entries.first[1]
 #       page.updated = storage.last_modified( index_entries )
@@ -187,7 +192,7 @@ end
 #           learns = storage.find( :all => true, :inpath => 'learn' ).reverse
 #   
 #           ## Create page data
-#           page = Page.new( '/sidebar' )
+#           page = Page.new( 'sidebar' )
 #           page.updated = storage.last_modified( abouts + learns )
 #           yield :page => page, 
 #                 :about_entries => abouts, :learn_entries => learns
@@ -257,17 +262,25 @@ class Weblog
     def build_pages( page_name )
         puts "[Building #{ page_name } pages]"
         vars = {}
-        if respond_to? "skel_#{ page_name }"
-            method( "skel_#{ page_name }" ).call do |vars|
-                vars[:weblog] = self
-                yield vars
+        paths = File.split( page_name )
+        page_dir = File.dirname( page_name )
+        loop do
+            try_page = paths.join( '_' )
+            if respond_to? "skel_#{ try_page }"
+                method( "skel_#{ try_page }" ).call do |vars|
+                    vars[:weblog] = self
+                    raise TypeError, "No `page' variable returned from skel_#{ try_page }." unless vars[:page]
+                    vars[:page].add_dir( "/#{ page_dir if page_dir != '.' }" )
+                    yield vars
+                end
+                return
             end
-        else
-            vars[:weblog] = self
-            vars[:page] = Page.new( "/" + page_name )
-            vars[:page].timestamp = Time.now
-            yield vars
+            break unless paths.slice!( -2 )  ## go up a directory
         end
+        vars[:weblog] = self
+        vars[:page] = Page.new( page_name )
+        vars[:page].timestamp = Time.now
+        yield vars
     end
 
     # Returns the storage plugin currently in use.  (There
@@ -309,7 +322,6 @@ class Weblog
                     while page_name =~ /\.\w+$/; page_name = $`; entry_ext = $& + entry_ext; end
                     next if entry_ext.empty?
                     ## Build the output pages
-                    page_name.gsub!( /\W/, '_' )
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
                         vars[:page].add_ext( entry_ext )
@@ -361,8 +373,8 @@ class Weblog
     # index page is requested by this handler.
     def skel_index
         index_entries = storage.lastn
-        page = Page.new( '/index' )
-        page.prev = index_entries.last[1].strftime( "/%Y/%m/index" )
+        page = Page.new( 'index' )
+        page.prev = index_entries.last[1].strftime( "%Y/%m/index" )
         page.timestamp = index_entries.first[1]
         page.updated = storage.last_modified( index_entries )
         yield :page => page, :entries => index_entries
@@ -386,9 +398,9 @@ class Weblog
         end
         days.extend Hobix::Enumerable
         days.each_with_neighbors do |prev, curr, nextd| 
-            page = Page.new( curr[0].strftime( "/%Y/%m/%d" ) )
-            page.prev = prev[0].strftime( "/%Y/%m/%d" ) if prev
-            page.next = nextd[0].strftime( "/%Y/%m/%d" ) if nextd
+            page = Page.new( curr[0].strftime( "%Y/%m/%d" ) )
+            page.prev = prev[0].strftime( "%Y/%m/%d" ) if prev
+            page.next = nextd[0].strftime( "%Y/%m/%d" ) if nextd
             page.timestamp = curr[0]
             page.updated = storage.last_modified( curr[1] )
             yield :page => page, :entries => curr[1]
@@ -404,9 +416,9 @@ class Weblog
         months.extend Hobix::Enumerable
         months.each_with_neighbors do |prev, curr, nextm| 
             entries = storage.within( curr[0], curr[1] )
-            page = Page.new( curr[0].strftime( "/%Y/%m/index" ) )
-            page.prev = prev[0].strftime( "/%Y/%m/index" ) if prev
-            page.next = nextm[0].strftime( "/%Y/%m/index" ) if nextm
+            page = Page.new( curr[0].strftime( "%Y/%m/index" ) )
+            page.prev = prev[0].strftime( "%Y/%m/index" ) if prev
+            page.next = nextm[0].strftime( "%Y/%m/index" ) if nextm
             page.timestamp = curr[1]
             page.updated = storage.last_modified( entries )
             yield :page => page, :entries => entries
@@ -426,9 +438,9 @@ class Weblog
         years.extend Hobix::Enumerable
         years.each_with_neighbors do |prev, curr, nextm| 
             entries = storage.within( curr[0], curr[1] )
-            page = Page.new( curr[0].strftime( "/%Y/index" ) )
-            page.prev = prev[0].strftime( "/%Y/index" ) if prev
-            page.next = nextm[0].strftime( "/%Y/index" ) if nextm
+            page = Page.new( curr[0].strftime( "%Y/index" ) )
+            page.prev = prev[0].strftime( "%Y/index" ) if prev
+            page.next = nextm[0].strftime( "%Y/index" ) if nextm
             page.timestamp = curr[1]
             page.updated = storage.last_modified( entries )
             yield :page => page, :entries => entries
@@ -444,13 +456,34 @@ class Weblog
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
             entry_set.each_with_neighbors do |nexte, entry, prev|
-                page = Page.new( "/" + entry[0] )
-                page.prev = "/" + prev[0] if prev
-                page.next = "/" + nexte[0] if nexte
+                page = Page.new( entry[0] )
+                page.prev = prev[0] if prev
+                page.next = nexte[0] if nexte
                 page.timestamp = entry[1]
                 page.updated = storage.modified( entry[0] )
                 yield :page => page, :entry => entry[0]
             end
+        end
+    end
+
+    # Handler for templates with `section' prefix.  These templates
+    # will receive all entries below a given directory.  The handler
+    # requests will be output as `/section/index.ext'.
+    def skel_section
+        section_map = {}
+        storage.all.each do |entry|
+            dirs = entry[0].split( '/' )
+            while ( dirs.pop; dirs.first )
+                section = dirs.join( '/' )
+                section_map[ section ] ||= []
+                section_map[ section ] << entry
+            end
+        end
+        section_map.each do |section, entries|
+            page = Page.new( section + "/index" )
+            page.timestamp = storage.modified( entries )
+            page.updated = storage.modified( entries )
+            yield :page => page, :entries => entries
         end
     end
 

@@ -33,23 +33,30 @@ class ERB < Hobix::BaseOutput
             eval( "#{ k } = vars[#{ k.inspect }]", @bind )
         end
         @relpath = File.dirname( file_name )
-        load_erb = import_erb( file_name )
+        @load_erb = import_erb( file_name )
         begin
-            load_erb.result( @bind )
+            @load_erb.result( @bind )
         rescue Exception => e
             raise ERBError, "Error `#{ e.message }' in erb #{ file_name }."
         end
     end
-    def import( fname )
-        fname = if fname =~ /^\//
-                    File.join( @path, fname )
-                else
-                    File.join( @relpath, fname )
-                end
-        import_erb( fname ).result( @bind )
+    def expand( fname )
+        if fname =~ /^\//
+            File.join( @path, fname )
+        else
+            File.join( @relpath, fname )
+        end
+    end
+    def import( fname, bindto = @bind )
+        import_erb( expand( fname ) ).result( bindto )
     end
     def import_erb(fname)
-        File.open(fname) { |fp| ::ERB.new(fp.read, nil, nil, "_hobixout#{ rand( 9999999 ) }" ) }
+        File.open(fname) do |fp| 
+            src = fp.read.gsub( /<\+\s*([\w\.\/\\\-]+)\s*\+>/ ) do
+                File.read( expand( $1 ) )
+            end
+            ::ERB.new( src, nil, nil, "_hobixout#{ rand( 9999999 ) }" )
+        end
     end
 end
 end

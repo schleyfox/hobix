@@ -1,4 +1,13 @@
 --- %YAML:1.0
+- version: 0.1f
+  date: 2004-06-07
+  changes:
+    - lib/hobix/weblog.rb: new `section' prefix.
+    - lib/hobix/storage/filesys.rb: all entry ids should use forward slashes.
+    - lib/hobix/entry.rb: section_id gives the URL path the entry lies in.
+    - lib/hobix/out/quick.rb: new quick templates are the true treasure and all
+        will default to them!!
+
 - version: 0.1e
   date: 2004-05-23
   changes:

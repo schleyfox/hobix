@@ -33,10 +33,12 @@ class FileSys < Hobix::BaseStorage
     def extension
         'yaml'
     end
+    def entry_path( id )
+        File.join( @basepath, id.split( '/' ) ) + "." + extension
+    end
     def save_entry( id, e )
-        entry_file = File.join( @basepath, id + "." + extension )
         e.created = Time.now
-        YAML::dump( e, File.open( entry_file, 'w' ) )
+        YAML::dump( e, File.open( entry_path( id ), 'w' ) )
 
         load_index
         @entry_cache ||= {}
@@ -45,7 +47,7 @@ class FileSys < Hobix::BaseStorage
     def load_entry( id )
         @entry_cache ||= {}
         unless @entry_cache.has_key? id
-            entry_file = File.join( @basepath, id + "." + extension )
+            entry_file = entry_path( id )
             e = Hobix::Entry::load( entry_file )
             e.id = id
             e.link = @link + id + ".html"
@@ -74,7 +76,7 @@ class FileSys < Hobix::BaseStorage
             else
                 entry_path = path.gsub( /^#{ Regexp::quote( @basepath ) }\/?/, '' )
                 next if entry_path !~ /\.#{ Regexp::quote( extension ) }$/
-                entry_id = $`
+                entry_id = File.split( $` ).join( '/' )
                 @modified[entry_id] = File.mtime( path )
                 unless index.has_key? entry_id
                     @index[entry_id] = @modified[entry_id]
