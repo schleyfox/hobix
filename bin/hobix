@@ -25,7 +25,10 @@ end
 
 print_usage( cmdline ) if ARGV.length < 1 or ARGV[0] == 'help'
 
-cmd, *opts = ARGV
+# unfreeze the arguments
+cmd, *opts = ARGV.collect do |arg|
+    arg.dup
+end
 ARGV.clear
          
 unless cmdline.login

@@ -55,7 +55,7 @@ class LinkList < Entry
     def to_yaml_property_map
         [
             ['@title', :opt], 
-            ['@author', :req], 
+            ['@author', :opt], 
             ['@contributors', :opt], 
             ['@created', :opt], 
             ['@tagline', :opt], 

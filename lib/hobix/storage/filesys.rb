@@ -33,24 +33,33 @@ class FileSys < Hobix::BaseStorage
     def extension
         'yaml'
     end
-    def entry_path( id )
-        File.join( @basepath, id.split( '/' ) ) + "." + extension
+    def check_id( id )
+        id.untaint if id.tainted? and id =~ /^[\w\/\\]+$/
+    end
+    def entry_path( id, ext = extension )
+        File.join( @basepath, id.split( '/' ) ) + "." + ext
     end
     def save_entry( id, e )
-        e.created = Time.now
+        load_index
+        check_id( id )
+        e.created ||= @index[id] || Time.now
         path = entry_path( id )
         YAML::dump( e, File.open( path, 'w' ) )
 
         @entry_cache ||= {}
         e.id = id
         e.link = @link + id + ".html"
-        e.created = e.modified = File.mtime( path )
+        e.modified = Time.now
         @entry_cache[id] = e
 
-        return unless @index
-        @index[id] = @modified[id] = e.modified
+        @index[id] = e.created
+        @modified[id] = e.modified
+        sort_index
+        e
     end
     def load_entry( id )
+        load_index
+        check_id( id )
         @entry_cache ||= {}
         unless @entry_cache.has_key? id
             entry_file = entry_path( id )
@@ -77,12 +86,15 @@ class FileSys < Hobix::BaseStorage
                 end
         @index = YAML::Omap::new
         Find::find( @basepath ) do |path|
+            path.untaint
             if FileTest.directory? path
                 Find.prune if File.basename(path)[0] == ?.
             else
                 entry_path = path.gsub( /^#{ Regexp::quote( @basepath ) }\/?/, '' )
                 next if entry_path !~ /\.#{ Regexp::quote( extension ) }$/
-                entry_id = File.split( $` ).join( '/' )
+                entry_paths = File.split( $` )
+                entry_paths.shift if entry_paths.first == '.'
+                entry_id = entry_paths.join( '/' )
                 @modified[entry_id] = File.mtime( path )
                 unless index.has_key? entry_id
                     @index[entry_id] = @modified[entry_id]
@@ -92,9 +104,12 @@ class FileSys < Hobix::BaseStorage
                 end
             end
         end
-        @index.sort! { |x,y| y[1] <=> x[1] }
-        YAML::dump( @index, File.open( index_path, 'w' ) )
+        sort_index
         true
+    end
+    def sort_index
+        @index.sort! { |x,y| y[1] <=> x[1] }
+        YAML::dump( @index, File.open( index_path, 'w' ) ) rescue nil
     end
     def path_storage( p )
         return self if ['', '.'].include? p
@@ -165,6 +180,29 @@ class FileSys < Hobix::BaseStorage
             start = month_end + 1
         end
         months
+    end
+
+    # basic entry attachment functions
+    def load_attached( id, ext )
+        check_id( id )
+        @attach_cache ||= {}
+        file_id = "#{ id }.#{ ext }"
+        unless @attach_cache.has_key? file_id
+            @attach_cache[id] = File.open( entry_path( id, ext ) ) do |f| 
+                YAML::load( f )
+            end
+        else
+            @attach_cache[id]
+        end
+    end
+    def save_attached( id, ext, e )
+        check_id( id )
+        File.open( entry_path( id, ext ), 'w' ) do |f|
+            YAML::dump( e, f )
+        end
+
+        @attach_cache ||= {}
+        @attach_cache[id] = e
     end
 end
 end

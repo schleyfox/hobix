@@ -25,7 +25,7 @@ class Weblog
                  '@created', '@issued', '@modified',
                  '@authors', '@contributors'
                 ].each { |m|
-                    map.add( m[1..-1], instance_eval( m ) )
+                    map.add( m[1..-1], instance_variable_get( m ) )
                 }
                 entries = entries.collect do |e|
                     e = e.dup

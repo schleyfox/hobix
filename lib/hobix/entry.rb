@@ -50,6 +50,7 @@ class Entry
                   :contributors, :modified, :created,
                   :content
 
+    def initialize; yield self if block_given?; end
     def day_id; created.strftime( "/%Y/%m/%d/" ); end
     def month_id; created.strftime( "/%Y/%m/" ); end
     def year_id; created.strftime( "/%Y/" ); end
@@ -90,7 +91,7 @@ class Entry
 
     # Load the weblog entry from a file.
     def Entry::load( file )
-        YAML::load( File::open( file ) )
+        File.open( file ) { |f| YAML::load( f ) }
     end
 
     # Accessor which returns the text processor used for untyped

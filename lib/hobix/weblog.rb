@@ -249,7 +249,8 @@ end
 class Weblog
     attr_accessor :title, :link, :authors, :contributors, :tagline,
                   :copyright, :period, :path, :sections, :requires,
-                  :entry_path, :skel_path, :output_path, :lib_path
+                  :entry_path, :skel_path, :output_path, :lib_path,
+                  :linklist, :lastn
 
     # After the weblog is initialize, the +start+ method is called
     # with the full system path to the directory containing the configuration.
@@ -260,12 +261,16 @@ class Weblog
         @sections ||= {}
         @entry_path ||= "entries"
         @entry_path = File.join( path, @entry_path ) if @entry_path !~ /^\//
+        @entry_path.untaint
         @skel_path ||= "skel"
         @skel_path = File.join( path, @skel_path ) if @skel_path !~ /^\//
+        @skel_path.untaint
         @output_path ||= "htdocs"
         @output_path = File.join( path, @output_path ) if @output_path !~ /^\//
+        @output_path.untaint
         @lib_path ||= "lib"
         @lib_path = File.join( path, @lib_path ) if @lib_path !~ /^\//
+        @lib_path.untaint
         if File.exists?( @lib_path )
             $LOAD_PATH << @lib_path
         end
@@ -354,8 +359,12 @@ class Weblog
     # of the Page object to the latest date of the content's modification.
     #
     def regenerate( how = nil )
+        retouch nil, how
+    end
+    def retouch( only_path = nil, how = nil )
         published = {}
         Find::find( @skel_path ) do |path|
+            path.untaint
             if File.basename(path)[0] == ?.
                 Find.prune 
             elsif not FileTest.directory? path
@@ -371,6 +380,9 @@ class Weblog
                         ## Extension and Path
                         vars[:page].add_path( File.dirname( entry_path ), entry_ext )
                         full_entry_path = File.join( @output_path, vars[:page].link[1..-1] )
+
+                        ## If retouching, skip pages outside of path
+                        next if only_path and vars[:page].link.index( "/" + only_path ) != 0
 
                         ## If updating, skip any that are unchanged
                         next if how == :update and vars[:page].updated != nil and 
@@ -398,7 +410,10 @@ class Weblog
                         ## Publish the page
                         txt = output.load( path, vars )
                         File.makedirs( File.dirname( full_entry_path ) )
-                        File.open( full_entry_path, 'w' ) { |f| f << txt }
+                        File.open( full_entry_path, 'w' ) do |f| 
+                            f << txt
+                            f.chmod 0664 rescue nil
+                        end
                         published[vars[:page].link] = page_name
                     end
                 else
@@ -409,7 +424,7 @@ class Weblog
                 end
             end
         end
-        published = published.values.uniq!
+        published = published.values.uniq
         publishers.each do |p|
             if p.watch & published != []
                 p.publish( p )
@@ -421,7 +436,7 @@ class Weblog
     # receive entries loaded by +Hobix::BaseStorage#lastn+.  Only one
     # index page is requested by this handler.
     def skel_index( path_storage )
-        index_entries = path_storage.lastn
+        index_entries = path_storage.lastn( @lastn )
         page = Page.new( 'index' )
         page.prev = index_entries.last[1].strftime( "%Y/%m/index" )
         page.timestamp = index_entries.first[1]

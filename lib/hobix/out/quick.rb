@@ -27,11 +27,12 @@ class Quick < Hobix::BaseOutput
         @path = weblog.skel_path
         defaults.each do |k, v|
             if respond_to? "#{ k }_erb"
+                k.untaint
+                v = v.inspect
+                v.untaint
                 instance_eval %{
                     def #{ k }_erb
-                        <<-QUICK
                         #{ v }
-                        QUICK
                     end
                 }
             end
@@ -44,7 +45,9 @@ class Quick < Hobix::BaseOutput
         @bind = binding
         @relpath = File.dirname( file_name )
         vars.each do |k, v|
-            eval( "#{ k } = vars[#{ k.inspect }]", @bind )
+            k.untaint
+            k_inspect = k.inspect.untaint
+            eval( "#{ k } = vars[#{ k_inspect }]", @bind )
         end
         quick_file = File.read( file_name )
         quick_data = if quick_file.strip.empty?
@@ -53,6 +56,7 @@ class Quick < Hobix::BaseOutput
                          YAML::load( quick_file )
                      end
         erb_src = make( 'page', quick_data, vars.has_key?( :entries ) )
+        erb_src.untaint
         erb = ::ERB.new( erb_src )
         begin
             erb.result( @bind )
@@ -115,7 +119,7 @@ class Quick < Hobix::BaseOutput
     def sidebar_links_erb
      %{ <div id="sidebarBox">
         <h2 class="sidebarTitle">Links</h2>
-        <%# weblog.links.to_html %>
+        <%= weblog.linklist.content.to_html %>
         </div> }
     end
     def sidebar_syndicate_erb
@@ -129,15 +133,18 @@ class Quick < Hobix::BaseOutput
         Built upon <a href="http://hobix.com">Hobix</a>
         </div> }
     end
-    def entries_erb
+    def blog_erb
      %{ <div id="blog">
-        <% entries.each_day do |day, day_entries| %>
+        <+ entries +>
+        </div> }
+    end
+    def entries_erb
+     %{ <% entries.each_day do |day, day_entries| %>
             <+ day_header +>
             <% day_entries.each do |entry| %>
                 <+ entry +>
             <% end %>
-        <% end %>
-        </div> }
+        <% end %> }
     end
     def day_header_erb; %{ <h2 class="dayHeader"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; end
     def entry_erb
@@ -145,8 +152,7 @@ class Quick < Hobix::BaseOutput
             <+ entry_title +>
             <+ entry_content +>
         </div>
-        <div class="entryFooter"><+ entry_footer +></a>
-        </div> }
+        <div class="entryFooter"><+ entry_footer +></div> }
     end
     def entry_title_erb
      %{ <h3 class="entryTitle"><%= entry.title %></h3>
@@ -156,8 +162,9 @@ class Quick < Hobix::BaseOutput
         %{ <div class="entryContent"><%= entry.content.to_html %></div> }
     end
     def entry_footer_erb
-     %{ posted by <%= entry.author %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %> }
+     %{ posted by <%= weblog.authors[entry.author]['name'] %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
     end
+    def head_tags_erb; end
     def css_erb; %{ @import "/site.css"; }; end
     def doctype_erb
      %{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">}
@@ -168,6 +175,7 @@ class Quick < Hobix::BaseOutput
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><+ title +></title>
+<+ head_tags +>
 <style type="text/css">
 <+ css +>
 </style>
@@ -181,7 +189,7 @@ class Quick < Hobix::BaseOutput
 <div id="content">
 <+ sidebar +>
 
-<+ entries +>
+<+ blog +>
 
 </div>
 </div>
@@ -215,8 +223,7 @@ class QuickArchive < Quick
      %{ <h3 class="entryTitle"><a href="<%= entry.link %>"><%= entry.title %></a></h3> }
     end
     def entries_erb
-     %{ <div id="blog">
-        <div id="archives">
+     %{ <div id="archives">
         <ul>
         <% entries.each_day do |day, day_entries| %>
             <li><+ day_header +></li>
@@ -228,7 +235,6 @@ class QuickArchive < Quick
             </li>
         <% end %>
         </ul>
-        </div>
         </div> }
     end
 end

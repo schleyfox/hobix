@@ -30,7 +30,9 @@ class ERB < Hobix::BaseOutput
     def load( file_name, vars )
         @bind = binding
         vars.each do |k, v|
-            eval( "#{ k } = vars[#{ k.inspect }]", @bind )
+            k.untaint
+            k_inspect = k.inspect.untaint
+            eval( "#{ k } = vars[#{ k_inspect }]", @bind )
         end
         @relpath = File.dirname( file_name )
         @load_erb = import_erb( file_name )

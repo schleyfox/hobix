@@ -84,8 +84,8 @@ class BaseStorage < BasePlugin
     def all
         find( :all => true )
     end
-    def lastn( n = 10 )
-        find( :lastn => n )
+    def lastn( n )
+        find( :lastn => ( n || 10 ) )
     end
     def inpath( path, n = nil )
         find( :inpath => path, :lastn => n )

@@ -1,4 +1,18 @@
 --- %YAML:1.0
+- version: 0.1i
+  date: 2004-08-24
+  changes:
+    - lib/hobix/commandline.rb: don't hide permission errors when posting.
+    - lib/hobix/entry.rb: allow initialize to take a block.
+    - lib/hobix/weblog.rb: linklist and lastn settings.  Weblog#retouch for
+        regenerating a single path.  use group permissions on output content.
+    - lib/hobix/out/erb.rb: tainting.
+    - lib/hobix/out/quick.rb: tainting. added `head_tags' and `blog' templates.
+    - lib/hobix/out/rss.rb: UH-OH! Time#utc is destructive!  Added dc:creator tag.
+    - lib/hobix/storage/filesys.rb: tainting. file editing, `touch'ing and removal
+        of the `created' field have less an affect on the index.  attachments now
+        allow per entry!  (first incarnation of comments.)
+
 - version: 0.1h
   date: 2004-08-19
   changes:

@@ -98,7 +98,7 @@ module CommandLine
     def post_action( weblog, entry_id )
         begin
             entry = weblog.storage.load_entry( entry_id )
-        rescue
+        rescue Errno::ENOENT
             entry = Hobix::Entry.new
             entry.author = @config['username']
             entry.title = entry_id.split( '/' ).
