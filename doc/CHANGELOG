@@ -1,4 +1,14 @@
 --- %YAML:1.0
+- version: 0.1g
+  date: 2004-06-30
+  changes:
+    - go/hobix-install.rb: skip gzip on win32.
+    - lib/hobix/out/okaynews.rb: bug was overwriting an Entry's author
+        property with the full author Hash.  bad news.
+    - lib/hobix/out/atom.rb: single entry Atom files ok.
+    - lib/hobix/out/quick.rb: added quick-summary and quick-archive templates.
+    - lib/hobix/storage/filesys.rb: new last_created method.
+
 - version: 0.1f
   date: 2004-06-07
   changes:
