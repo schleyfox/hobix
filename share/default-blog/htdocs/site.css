@@ -1,0 +1,174 @@
+body {
+    font-family: georgia, serif;
+    margin: 20px 60px 60px 60px;
+    background: #F1F8FF;
+}
+
+A 			{ color: #003366; text-decoration: underline; }
+A:link		{ color: #003366; text-decoration: underline; }
+A:visited	{ color: #003366; text-decoration: underline; }
+A:active	{ color: #999999;  }
+A:hover		{ color: #999999;  }
+
+h1, h2, h3 {
+    margin: 0px;
+    padding: 0px;
+}
+
+#page {
+    width: 680px;
+    background: #F8F1FF;
+    border: solid 2px #333;
+    margin: 0 auto;
+}
+
+#page:after {
+    content: "."; 
+    display: block; 
+    height: 0; 
+    clear: both; 
+    visibility: hidden;
+}
+
+#banner h1 {
+    font-size: 32pt;
+    text-align: center;
+}
+
+#banner a,
+    #banner a:link,
+    #banner a:visited,
+    #banner a:active,
+    #banner a:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+#sidebar {	
+    float:right;
+    font-family: arial, sans-serif;
+    font-size: 10pt;
+    padding:5px 5px 20px 5px;
+    width:90px;
+}
+    
+#blog {
+    border-right: dotted 1px black;
+    width:560px;
+    padding:20px 5px 20px 10px;
+}
+
+.tagline {
+    border-top: dotted 1px black;
+    border-bottom: dotted 1px black;
+    font-size: 11pt;
+    padding:3px;
+    text-align: center;
+}
+
+.dayHeader {
+    border: dotted 1px #888;
+    background: #FFFFF1;
+    color: #333;
+    float: left;
+    width: 70px;
+    font-size: 8pt;
+    font-family: arial, sans-serif;
+    margin-top: 4px;
+    padding:5px;
+    text-align: center;
+}
+
+.entry {
+    float: right;
+    width: 460px;
+    padding:0px 8px;
+}
+
+.entryTitle	{
+    font-size: 16pt;
+    line-height:120%;
+    color: #345;
+}			
+
+.entryTagline {
+    font-size: 9pt;
+    line-height:200%;
+    color: #345;
+}
+
+.entryContent {
+    font-family:arial, sans-serif;
+    color:#333;
+    font-size: 10pt;
+    font-weight:normal;
+    line-height:200%;
+    padding: 10px 0px;
+}
+
+.entryContent p {
+    padding: 0px;
+    margin: 0px;
+}
+
+.entryContent a,
+.entryContent a:link,
+.entryContent a:visited,
+.entryContent a:active,
+.entryContent a:hover {
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+.entryFooter { 
+    margin-left:100px;
+    width:430px;
+    color:#334455;
+    font-family:arial, sans-serif;
+    font-size:8pt; 
+    text-align:right;
+    padding:3px;
+    padding:20px;
+}
+    
+.entryFooter a,
+.entryFooter a:link,
+.entryFooter a:visited,
+.entryFooter a:active,
+.entryFooter a:hover {
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+.sidebarTitle {
+    color: #534;
+    font-size: 10pt;
+    padding:5px 0px;
+}
+
+.sidebarBox {
+    font-size: 8pt;
+    padding-top: 6px;
+}
+
+.sidebarBox ul, #archives ul {
+    margin:0px;
+    padding:0px;
+}
+
+.sidebarBox li, #archives li {
+    display: block;
+    list-style-image: none;
+    list-style-type: none;
+    padding-bottom: 3px;
+}
+
+#archives .entryTitle {
+    font-weight: normal;
+    padding: 0px 10px 10px 10px;
+}
+
+.sidebarBox p {
+    margin:0px;
+    padding:0px;
+}

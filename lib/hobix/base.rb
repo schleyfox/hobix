@@ -30,7 +30,7 @@ class BasePlugin
         unless req.respond_to? :to_str
             req, opts = req.to_a.first
         end
-        @@required_from = req
+        @@required_from = req = req.dup
         if req.tainted?
             req.untaint if req =~ /^[\w\/\\]+$/
         end
@@ -80,6 +80,17 @@ end
 #           end date.
 # 
 class BaseStorage < BasePlugin
+    def default_entry_id; "hobix-default-entry"; end
+    def default_entry( author )
+        Hobix::Entry.new do |e|
+            e.created = Time.now
+            e.modified = Time.now
+            e.title = "This Ghostly Message From the Slime Will Soon Vanish!"
+            e.tagline = "A temporary message, a tingling sensation, Hobix is up!!"
+            e.author = author
+            e.content = Hobix::Entry.text_processor.new( "Welcome to Hobix!  Once you make your first blog post, this entry will disappear.  However, in the meantime, you can tweak the CSS of your blog until it suits your satisfaction and you have this bit of words to act as a place holder." )
+        end
+    end
     def all
         find( :all => true )
     end

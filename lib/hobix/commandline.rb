@@ -14,9 +14,12 @@
 # $Id$
 #++
 require 'hobix'
+require 'hobix/api'
 
 module Hobix
 module CommandLine
+    include APIMethods
+
     ##
     ## Locate RC
     ##
@@ -33,8 +36,9 @@ module CommandLine
     end
     RC = File.join( HOME_DIR, '.hobixrc' )
 
-    def login
-        @config = YAML::load( File.open( RC ) ) if File.exists? RC
+    def login( config = nil )
+        config ||= RC
+        @config = File.open( config ) { |f| YAML::load( f ) } if File.exists? RC
         setup unless @config
         setup_personal unless @config['personal']
     end
@@ -139,9 +143,9 @@ module CommandLine
             patcher.apply( path )
         end
 
+        join_as_author( name, hobix_yaml )
         hobix_yaml = File.join( path, "hobix.yaml" )
         edit_action( Hobix::Weblog.load( hobix_yaml ) )
-        join_as_author( name, hobix_yaml )
     end
 
 
@@ -173,9 +177,6 @@ module CommandLine
         save_config
     end
 
-    # Edit a weblog from local config
-    def edit_action_explain; "Edit weblog's configuration"; end
-    def edit_action_args; ['weblog-name']; end
     def edit_action( weblog )
         path = weblog.hobix_yaml
         weblog = aorta( weblog )
@@ -190,6 +191,28 @@ module CommandLine
         @config['weblogs'] ||= {}
         @config['weblogs'].delete( name )
         save_config
+    end
+
+    # Run a DRuby daemon for blogs in your configuration
+    def druby_weblog_explain; "Start the DRuby daemon for weblogs in your config."; end
+    def druby_weblog_args; []; end
+    def druby_weblog
+        if @config['weblogs']
+            unless @config['druby']
+                @config['druby'] = 'druby://:4081'
+                puts "** No drb url found, using #{ @config['druby'] }"
+            end
+            require 'drb'
+            blogs = {}
+            @config['weblogs'].each do |name, path|
+                blogs[name] = Hobix::Weblog.load path
+            end
+            api = Hobix::API.new blogs
+            DRb.start_service @config['druby'], api
+            DRb.thread.join
+        else
+            puts "** No blogs found in the configuration."
+        end
     end
 
     # List entries
@@ -222,20 +245,6 @@ module CommandLine
 
         weblog.storage.save_entry( entry_id, entry )
         weblog.regenerate( :update ) if @config['post upgen']
-    end
-
-    # Update the site
-    def upgen_action_explain; "Update site with only the latest changes."; end
-    def upgen_action_args; ['weblog-name']; end
-    def upgen_action( weblog )
-        weblog.regenerate( :update )
-    end
-
-    # Regenerate the site
-    def regen_action_explain; "Regenerate the all the pages throughout the site."; end
-    def regen_action_args; ['weblog-name']; end
-    def regen_action( weblog )
-        weblog.regenerate
     end
 
     ##          

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'hobix/commandline'
+require 'optparse'
 
 cmdline = Class.new
 cmdline.extend Hobix::CommandLine
@@ -23,15 +24,20 @@ def print_usage( cmdline )
     exit
 end
 
-print_usage( cmdline ) if ARGV.length < 1 or ARGV[0] == 'help'
+config = nil
+opts = OptionParser.new
+opts.on( "-c", "--config FILE", String ) { |val| config = val }
+
+args = opts.parse( *ARGV )
+print_usage( cmdline ) if args.length < 1 or args[0] == 'help'
 
 # unfreeze the arguments
-cmd, *opts = ARGV.collect do |arg|
+cmd, *opts = args.collect do |arg|
     arg.dup
 end
-ARGV.clear
-         
-cmdline.login
+args.clear
+
+cmdline.login( config )
 
 mname = nil
 if cmd == 'setup_blogs'
@@ -57,7 +63,7 @@ elsif cmdline.respond_to? "#{ cmd }_action"
     mname = "#{ cmd }_action"
 end
 unless mname
-    puts "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
+    abort "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
 end
 m = cmdline.method( mname )
 begin

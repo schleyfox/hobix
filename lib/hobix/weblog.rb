@@ -32,7 +32,7 @@ module UriStr
         self.to_s.to_yaml( opts )
     end
     def rooturi
-        rooturi = vars[:weblog].link.dup
+        rooturi = dup
         rooturi.path = ''
         rooturi
     end
@@ -44,10 +44,13 @@ end
 #
 # == Introduction
 #
-# The +link+, +next+ and +prev+ accessors
-# provide complete URLs for the current page and its neighbors
+# The +id+, +next+ and +prev+ accessors
+# provide ids for the current page and its neighbors
 # (for example, in the case of monthly archives, which may have
 # surrounding months.)
+#
+# To get complete URLs for each of the above, use: +link+,
+# +next_link+, and +prev_link+.
 #
 # The +timestamp+ accessor contains the earliest date pertinent to
 # the page.  For example, in the case of a monthly archive, it
@@ -83,8 +86,8 @@ end
 # If we're using RedRum templates, we could do the following
 # in entry.html.redrum:
 #
-#   <% if page.prev %>"last":<%= page.prev %><% end %>
-#   <% if page.next %>"next":<%= page.next %><% end %>
+#   <% if page.prev %>"last":<%= page.prev_link %><% end %>
+#   <% if page.next %>"next":<%= page.next_link %><% end %>
 #
 class Page
     attr_accessor :link, :next, :prev, :timestamp, :updated
@@ -93,8 +96,8 @@ class Page
     end
     def id; dirj( @dir, @id ).gsub( /^\/+/, '' ); end
     def link; dirj( @dir, @id ) + @ext; end
-    def next; dirj( @dir, @next ) + @ext if @next; end
-    def prev; dirj( @dir, @prev ) + @ext if @prev; end
+    def next_link; dirj( @dir, @next ) + @ext if @next; end
+    def prev_link; dirj( @dir, @prev ) + @ext if @prev; end
     def dirj( dir, link ) #:nodoc:
         if link[0] != ?/ and link != '.' 
             link = File.join( dir == '.' ? "/" : dir, link )
@@ -315,6 +318,12 @@ class Weblog
         URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr
     end
 
+    def linklist
+        if @linklist.class == ::Array
+            YAML::transfer( 'hobix.com,2004/linklist', {'links' => @linklist} )
+        end
+    end
+
     # Translate paths relative to the weblahhg's URL.  This is especially important
     # if a weblog isn't at the root directory for a domain.
     def expand_path( path )
@@ -351,29 +360,9 @@ class Weblog
             try_page = paths.join( '_' )
             if respond_to? "skel_#{ try_page }"
                 path_storage = storage.path_storage( File.dirname( page_name ) )
-
-                ## Simply collect all the pages, keeping track of the max reference time of each (if any)
                 method( "skel_#{ try_page }" ).call( path_storage ) do |vars|
                     vars[:weblog] = self
                     raise TypeError, "No `page' variable returned from skel_#{ try_page }." unless vars[:page]
-                    pages.push vars
-
-                    vars[:page].references.each do |ref|
-                        ref_time[ref] = if ref_time[ref].nil?
-                                            vars[:page].updated
-                                        elsif vars[:page].updated.nil?
-                                            ref_time[ref]
-                                        else
-                                            [ vars[:page].updated, ref_time[ref] ].max
-                                        end
-                    end
-                end
-
-                ## Now yield the pages, modifying the update time if necessary
-                pages.each do |vars|
-                    if ref_time[vars[:page].link]
-                        vars[:page].updated = [ vars[:page].updated || Time.at(0), ref_time[vars[:page].link] ].max
-                    end
                     yield vars
                 end
                 return
@@ -756,9 +745,6 @@ end
 end
 
 YAML::add_domain_type( 'hobix.com,2004', 'weblog' ) do |type, val|
-    if val['linklist'].class == ::Array
-        val['linklist'] = YAML::transfer( 'hobix.com,2004/linklist', {'links' => val['linklist']} )
-    end
     YAML::object_maker( Hobix::Weblog, val )
 end
 

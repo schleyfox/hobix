@@ -1,7 +1,7 @@
 diff -wurP bokononist/hobix.yaml boko.ssi/hobix.yaml
 --- bokononist/hobix.yaml	Sat Aug 28 14:02:00 2004
 +++ boko.ssi/hobix.yaml	Sat Aug 28 13:47:13 2004
-@@ -26,3 +26,4 @@
+@@ -13,3 +13,4 @@
  - hobix/out/rss
  - hobix/out/okaynews
  - hobix/out/atom
@@ -21,7 +21,7 @@ diff -wurP bokononist/lib/local.rb boko.ssi/lib/local.rb
 +end
 +class Out::Quick
 +    def sidebar_erb
-+        "<!--#include virtual='<%= weblog.expand_path( 'sidebar.html' ) %>'-->"
++        %{<!--#include virtual="<%= weblog.expand_path( 'sidebar.html' ) %>"-->}
 +    end
 +end
 +end

@@ -211,7 +211,7 @@ module Hobix
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
     ## Share directory contains external data files
-    SHARE_PATH = "/usr/local/share/hobix/"
+    SHARE_PATH = "/usr/share/hobix/"
 
     ## Get a top-level constant from a string
     def self.const_find( tclass )

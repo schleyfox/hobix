@@ -19,7 +19,14 @@ require 'yaml'
 module Hobix
 module Storage
 class IndexEntry
-    attr_accessor :id, :created, :modified
+    def self.fields; @fields; end
+    def self.add_fields( *names )
+        @fields ||= []
+        @fields += names
+        attr_accessor *names
+    end
+
+    add_fields :id, :created, :modified
 
     def initialize( entry, fields = IndexEntry.fields )
         fields.each do |field|
@@ -40,11 +47,6 @@ class IndexEntry
         "!hobix.com,2004/storage/indexEntry"
     end
 
-    def self.fields
-        ( instance_methods - Object.instance_methods ).collect do |meth|
-            if meth =~ /^(.*)=$/ then $1 else nil end
-        end.compact
-    end
 end
 
 YAML::add_domain_type( 'hobix.com,2004', 'storage/indexEntry' ) do |type, val|
@@ -56,12 +58,14 @@ class FileSys < Hobix::BaseStorage
         @modified = {}
         @basepath = weblog.entry_path
         @link = weblog.link
+        @default_author = weblog.authors.keys.first
         ignored = weblog.sections_ignored
         unless ignored.empty?
             @ignore_test = /^(#{ ignored.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
         end
         @sorts = weblog.sections_sorts
     end
+    def now; Time.at( Time.now.to_i ); end
     def extension
         'yaml'
     end
@@ -74,14 +78,14 @@ class FileSys < Hobix::BaseStorage
     def save_entry( id, e )
         load_index
         check_id( id )
-        e.created ||= (@index.has_key?( id ) ? @index[id].created : Time.now)
+        e.created ||= (@index.has_key?( id ) ? @index[id].created : now)
         path = entry_path( id )
         YAML::dump( e, File.open( path, 'w' ) )
 
         @entry_cache ||= {}
         e.id = id
         e.link = "#{ @link }/#{ id }.html"
-        e.modified = Time.now
+        e.modified = now
         @entry_cache[id] = e
 
         @index[id] = IndexEntry.new( e ) do |i|
@@ -92,6 +96,7 @@ class FileSys < Hobix::BaseStorage
         e
     end
     def load_entry( id )
+        return default_entry( @default_author ) if id == default_entry_id
         load_index
         check_id( id )
         @entry_cache ||= {}
@@ -150,6 +155,7 @@ class FileSys < Hobix::BaseStorage
                         i.modified = @modified[entry_id]
                     end
                 end
+                @index[index_entry.id] = index_entry
             end
         end
         sort_index
@@ -179,7 +185,14 @@ class FileSys < Hobix::BaseStorage
     end
     def find( search = {} )
         load_index
-        entries = @index.collect do |id, entry|
+        _index = @index
+        if _index.empty?
+            e = default_entry( @default_author )
+            e.id = default_entry_id 
+            @modified[e.id] = e.modified
+            _index = {e.id => IndexEntry.new(e)}
+        end
+        entries = _index.collect do |id, entry|
                       skip = false
                       if @ignore_test and not search[:all]
                           skip = entry.id =~ @ignore_test
@@ -218,6 +231,7 @@ class FileSys < Hobix::BaseStorage
         @modified[entry_id]
     end
     def get_months( entries )
+        return [] if entries.empty?
         first_time = entries.collect { |e| e.created }.min
         last_time = entries.collect { |e| e.created }.max
         start = Time.mktime( first_time.year, first_time.month, 1 )
