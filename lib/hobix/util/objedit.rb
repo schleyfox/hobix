@@ -33,8 +33,9 @@ def self.ObjEdit( obj )
 
     # Initialize few color pairs 
     Ncurses.init_pair 1, COLOR_RED, COLOR_BLACK
-    Ncurses.init_pair 2, COLOR_BLACK, COLOR_WHITE
-    Ncurses.init_pair 3, COLOR_BLACK, COLOR_BLUE
+    Ncurses.init_pair 2, COLOR_WHITE, COLOR_BLACK
+    Ncurses.init_pair 3, COLOR_YELLOW, COLOR_BLACK
+    Ncurses.init_pair 4, COLOR_RED, COLOR_BLACK
     scr.bkgd Ncurses.COLOR_PAIR(2) 
 
     # Initialize the fields
@@ -44,20 +45,26 @@ def self.ObjEdit( obj )
     ivars = []
     fields =
         obj.property_map.collect do |ivar, flag, edit_as|
-            ht, wt = 1, 30
+            ht, wt = 1, 60
             case edit_as
             when :text
                 field = FIELD.new ht, wt, y, 1, 0, 0
             when :textarea
-                ht, wt = 5, 50
+                ht, wt = 5, 60
                 field = FIELD.new ht, wt, y, 1, 60, 0
             end
+            if y + ht + 8 >= Ncurses.LINES
+                field.set_new_page TRUE
+                y = 0
+            end
             labels << [y + 2, ivar, ht, wt]
-            ivars << ivar
+            ivars << ivar[1..-1]
             label_end = ivar.length + 3 if label_end < ivar.length + 3
             y += ht + 1
 
-            field.set_field_back A_UNDERLINE
+            field.field_opts_off O_AUTOSKIP
+            field.set_field_back A_REVERSE
+            field.set_field_fore A_BOLD
             field_write( field, obj.instance_variable_get( ivar ) )
             field
         end
@@ -72,33 +79,44 @@ def self.ObjEdit( obj )
     my_win = WINDOW.new rows[0] + 3, cols[0] + 20, 0, 0
     my_win.bkgd Ncurses.COLOR_PAIR( 3 )
     my_win.keypad TRUE
-    labels.each do |y, ivar, ht, wt|
-        my_win.mvaddstr y, 2, ivar
-    end
 
     # Attach
     my_form.set_form_win my_win
     my_form.set_form_sub my_win.derwin( rows[0], cols[0], 2, label_end )
+    my_form.form_opts_off O_NL_OVERLOAD
     my_form.post_form
+    labels.each do |y, ivar, ht, wt|
+        my_win.mvaddstr y, 2, ivar
+    end
+    scr.mvprintw Ncurses.LINES - 2, 28, "Use TAB to switch between fields"
+    scr.mvprintw Ncurses.LINES - 1, 28, "F2 to save | F3 to cancel"
+    scr.refresh
     my_win.wrefresh
 
     # Loop through to get user requests
-    my_form.form_opts_off O_NL_OVERLOAD
-    while((ch = my_win.getch()) != KEY_F1)
+    pressed = []
+    while((ch = my_win.getch()) != KEY_F2)
+        pressed << ch
         case ch
-        when ?\t
+        when 16 # Ctrl + P
+            my_form.form_driver REQ_PREV_PAGE
+            my_form.form_driver REQ_FIRST_FIELD
+
+        when 14 # Ctrl + N
+            my_form.form_driver REQ_NEXT_PAGE
+            my_form.form_driver REQ_LAST_FIELD
+
+        when KEY_C3, ?\t
             # Go to next field
-            my_form.form_driver REQ_VALIDATION
             my_form.form_driver REQ_NEXT_FIELD
             # Go to the end of the present buffer
             # Leaves nicely at the last character
             my_form.form_driver REQ_END_LINE
           
-        # when KEY_UP
-        #     # Go to previous field
-        #     my_form.form_driver REQ_VALIDATION
-        #     my_form.form_driver REQ_PREV_FIELD
-        #     my_form.form_driver REQ_END_LINE
+        when KEY_C1
+            # Go to previous field
+            my_form.form_driver REQ_PREV_FIELD
+            my_form.form_driver REQ_END_LINE
 
         when KEY_UP
             my_form.form_driver REQ_PREV_LINE
@@ -120,25 +138,32 @@ def self.ObjEdit( obj )
         when KEY_ENTER, ?\n, ?\r
             my_form.form_driver REQ_NEW_LINE
 
+        when KEY_F3
+            return nil
+
         else
             # If this is a normal character, it gets Printed    
             my_form.form_driver ch
         end
     end
     # Un post form and free the memory
+    my_form.form_driver REQ_NEXT_FIELD
     my_form.unpost_form
     my_form.free_form
     obj_props = {}
     fields.each do |f|
         b = field_read(f)
         f.free_field()
+        if String === b and b.empty?
+            b = nil
+        end
         obj_props[ivars.shift] = b
     end
-    out_obj = YAML::object_maker( obj.class, obj_props )
-    nil
+    out_obj = YAML::transfer( obj.to_yaml_type[1..-1], obj_props )
 ensure
     Ncurses.endwin
-    p out_obj
+    # p pressed
+    # p out_obj
 end
 def self.field_write( f, obj )
     rows, cols, frow, fcol, nrow, nbuf = [], [], [], [], [], []
@@ -147,7 +172,7 @@ def self.field_write( f, obj )
         obj = "#{ obj }"
     end
     str = obj.to_yaml( :BestWidth => cols[0] - 4 ).
-              sub( /^\-\-\-\s*(\>\n)?/, '' ).
+              sub( /^\-\-\-\s*(\>[0-9\-\+]*\n)?/, '' ).
               gsub( /^([^\n]*)\n/ ) { |line| "%-#{cols}s" % [$1] }
     f.set_field_buffer 0, str
 end
