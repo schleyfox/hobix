@@ -110,8 +110,31 @@ end
 class BaseOutput < BasePlugin
 end
 
-# The BasePublish plguin is the underlying class for all publishing
+# The BasePublish plugin is the underlying class for all publishing
 # plugins, which are notified of updates to pages.
+#
+# Publish plugins are executed after generation of the site.  The plugin
+# may choose to watch updates to certain types of pages.  The plugin also
+# receives a list of all the pages which have been updated.
+#
+# Generally, publish plugins fall into two categories:
+#
+# * Plugins which contact a service when certain updates happen.
+#   (Hobix includes an XML-RPC ping, which is triggered whenever
+#   the front page is updated.)
+# * Plugins which transform Hobix output.  (Hobix includes a
+#   replication plugin, which copies updated pages to a remote
+#   system via FTP or SFTP.)
+#
+# == Publish methods
+#
+# initialize( weblog, settings ):: Like all other plugins, the initialize method takes two parameters,
+#                                  a Hobix::Weblog object for the weblog being published and the 
+#                                  settings data from the plugin's entry in hobix.yaml.
+# watch:: (Optional) Returns an array of page types which, when published, activate the plugin.
+# publish( pages ):: If pages are published and the watch criteria qualifies this plugin,
+#                    this method is called with a hash of pages published.  The key is the page type
+#                    and the value is an array of Page objects.
 class BasePublish < BasePlugin
 end
 

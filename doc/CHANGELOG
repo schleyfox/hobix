@@ -1,11 +1,12 @@
 --- %YAML:1.0
 - version: 0.3c
-  date: 2005-03-05
+  date: 2005-03-10
   changes:
     - lib/hobix/out/rss.rb: RSS feed should have correct absolute URLS.
     - lib/hobix/storage/filesys.rb: William Morgan's excellent IndexEntry patch.  allow
         customization of the index.hobix file.
     - lib/hobix/weblog.rb: senses need for regeneration of 'prev' and 'next' pages.
+    - lib/hobix/base.rb: the `watch' method is now optional for publish plugins.
 
 - version: 0.3b
   date: 2005-01-18

@@ -500,6 +500,7 @@ class Weblog
     end
     def retouch( only_path = nil, how = nil )
         published = {}
+        published_types = []
         output_map.each do |page_name, outputs|
             puts "[Building #{ page_name } pages]"
             outputs.each do |vars|
@@ -538,11 +539,17 @@ class Weblog
                     f << txt
                     f.chmod 0664 rescue nil
                 end
-                published[vars[:page].link] = page_name
+                published[vars[:page].link] = vars[:page]
+                published_types << page_name
             end
         end
+        published_types.uniq!
         publishers.each do |p|
-            if p.watch & published.values.uniq != []
+            if p.respond_to? :watch
+                if p.watch & published_types != []
+                    p.publish( published )
+                end
+            else
                 p.publish( published )
             end
         end

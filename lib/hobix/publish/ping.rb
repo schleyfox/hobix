@@ -27,7 +27,7 @@ class Ping < Hobix::BasePublish
     def watch
         ['index']
     end
-    def publish( page_name )
+    def publish( pages )
         @urls.each do |u|
             link = @link.to_s
             u, link = u.keys.first, u.values.first if Hash === u
