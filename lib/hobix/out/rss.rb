@@ -53,7 +53,7 @@ EOXML
             ele_guid.text = "#{ vars[:weblog].link }#{ e.created.strftime( "%Y/%m/%d/" ) }#{ e.created.to_i }"
             ele << ele_guid
             ele_desc = REXML::Element.new 'description'
-            ele_desc.text = e.body.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" )
+            ele_desc.text = e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }" )
             ele << ele_desc
             rssdoc.elements['/rss/channel'].add ele
         end

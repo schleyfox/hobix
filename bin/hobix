@@ -3,6 +3,7 @@ require 'hobix'
 require 'yaml'
 
 module Hobix
+module CommandLine
     ##
     ## Locate RC
     ##
@@ -16,25 +17,29 @@ module Hobix
 
     SCREEN_WIDTH = 70
 
-    def Hobix.login
+    def CommandLine.login
         @config = YAML::load( File.open( RC ) ) if File.exists? RC
     end
 
-    def Hobix.save_config
+    def CommandLine.save_config
         File.open( RC, "w" ) do |f|
             f.write @config.to_yaml
         end
     end
 
+    # Create a new skeleton for a weblog
+    def CommandLine.create_weblog
+    end
+
     # Add a weblog to local config
-    def Hobix.add_weblog( name, path )
+    def CommandLine.add_weblog( name, path )
         @config['weblogs'] ||= {}
         @config['weblogs'][name] = path
         save_config
     end
 
     # Delete a weblog from local config
-    def Hobix.del_weblog( name )
+    def CommandLine.del_weblog( name )
         @config['weblogs'] ||= {}
         @config['weblogs'].delete( name )
         save_config
@@ -43,7 +48,7 @@ module Hobix
     ##          
     ## Setup user's RC
     ##
-    def Hobix.setup
+    def CommandLine.setup
         @config = {}
 
         username = ''
@@ -83,7 +88,7 @@ module Hobix
         ## XX TODO XX
     end
 
-    def Hobix.editor( str )
+    def CommandLine.editor( str )
         tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
         File.open( tempfile, "w" ) { |f| f.write str }
         system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
@@ -94,6 +99,7 @@ module Hobix
         content
     end
 end
+end
 
 if __FILE__ == $0
     
@@ -103,61 +109,47 @@ if __FILE__ == $0
         exit
     end
 
-    print_usage if ARGV.length < 2
+    print_usage if ARGV.length < 1
 
-    weblog, cmd, *opts = ARGV
+    cmd, *opts = ARGV
     ARGV.clear
              
-    unless Hobix.login
+    unless Hobix::CommandLine.login
         puts "Welcome to hobix (a simple weblog tool).  Looks like your \n" +
              "first time running hobix, eh?  Time to get a bit of information \n" +
              "from you before you start using hobix.  (All of this will be stored \n"
-             "in the file #{ Hobix::RC } if you need to edit.)\n\n"
-        Hobix.setup
+             "in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
+        Hobix::CommandLine.setup
         puts    
     end
 
-    case cmd
-    
-    when "add"
-    Hobix.add_weblog( weblog, opts[0] )
-
-    when "del"
-    Hobix.del_weblog( weblog )
-
-    when "edit"
-    
-    else
-        
+    if Hobix::CommandLine.respond_to? "#{ cmd }_weblog"
+        Hobix::CommandLine.method( "#{ cmd }_weblog" ).call( *opts )
+    elsif Hobix::CommandLine.respond_to? "#{ cmd }_action"
+        weblog = opts.shift
         unless @config['weblogs'].has_key? weblog
-            puts "*** No weblog `#{ weblog }' found in your configuration."
+            puts "*** no weblog `#{ weblog }' found in your configuration."
+            puts "*** type `hobix list' and check your spelling."
             exit
         end
-        hobix_weblog = Hobix::Weblog.load( @config['weblogs'] )
-        case cmd
-        when "post"
-
-        when "post-list"
-
-        when "upgen"
-            hobix_weblog.regenerate( :update )
-
-        when "regen"
-            hobix_weblog.regenerate
-        end
-
+        hobix_weblog = Hobix::Weblog.load( @config['weblogs'][ weblog ] )
+        Hobix::CommandLine.method( "#{ cmd }_action" ).call( hobix_weblog, *opts )
+    else
+        puts "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
     end
+
 end
 
 __END__
-Usage: hobix weblog-name command [command-options]
+Usage: hobix command weblog-name [command-options]
 Commands are
-    add /path/to/weblog.yaml        Add a new weblog to your list.
-    edit                            Edit weblog's configuration.
-    del                             Remove weblog from your list.
+    create weblog-name                      Create a brand new weblog.
+    add weblog-name /path/to/hobix.yaml     Adds a pre-existing hobix weblog to your list.
+    edit weblog-name                        Edit weblog's configuration.
+    del weblog-name                         Remove weblog from your list.
 
-    post shortName                  Add a new post with identifier 'shortName'.
-    post-edit shortName             Edit post with identifier 'shortName'.
-    post-list                       List all posts and titles.
-    upgen                           Update site with only the latest changes.
-    regen                           Regenerate all pages through the site.
+    post weblog-name shortName              Add or edit a post with identifier 'shortName'.
+                                            (You can use full paths. 'blog/weddings/iWentToThisWeakWedding')
+    post-list weblog-name [in/path]         List all posts and titles.
+    upgen weblog-name                       Update site with only the latest changes.
+    regen weblog-name                       Regenerate all pages through the site.

@@ -25,9 +25,11 @@ class FileSys < Hobix::BaseStorage
         @modified = {}
         @basepath = weblog.entry_path
         @link = weblog.link
-        if weblog.ignore
-            @ignore_test = /^(#{ weblog.ignore.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
+        ignored = weblog.sections_ignored
+        unless ignored.empty?
+            @ignore_test = /^(#{ ignored.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
         end
+        @sorts = weblog.sections_sorts
     end
     def extension
         'yaml'
@@ -101,6 +103,11 @@ class FileSys < Hobix::BaseStorage
                   end
         entries.slice!( search[:lastn]..-1 ) if search[:lastn] and entries.length > search[:lastn]
         entries
+    end
+    def last_modified( entries )
+        entries.collect do |entry|
+            @modified[entry[0]]
+        end.max
     end
     def modified( entry_id )
         @modified[entry_id]

@@ -20,11 +20,29 @@ require 'yaml'
 module Hobix
 class Entry
     attr_accessor :id, :link, :title, :tagline, :summary, :author,
-                  :contributor, :modified, :issued, :created,
-                  :summary, :body
+                  :contributors, :modified, :issued, :created,
+                  :content
+
+    def to_yaml_properties
+        [
+            ['@title', :req], 
+            ['@author', :req], 
+            ['@contributors', :opt], 
+            ['@created', :opt], 
+            ['@tagline', :opt], 
+            ['@summary', :opt], 
+            ['@content', :req]
+        ].
+        reject do |prop, req|
+            req == :opt and not instance_variable_get( prop )
+        end.
+        collect do |prop, req|
+            prop
+        end
+    end
 
     def to_yaml_type
-        "!hobix.com,2004/entry"
+        "!okay/news/entry#1.0"
     end
 
     # Load the weblog entry from a file.
@@ -34,7 +52,11 @@ class Entry
 end
 end
 
+YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0' ) do |type, val|
+    val['content'] = RedCloth.new( val['content'].to_s )
+    YAML::object_maker( Hobix::Entry, val )
+end
 YAML::add_domain_type( 'hobix.com,2004', 'entry' ) do |type, val|
-    val['body'] = RedCloth.new( val['body'].to_s )
+    val['content'] = RedCloth.new( val['body'].to_s )
     YAML::object_maker( Hobix::Entry, val )
 end
