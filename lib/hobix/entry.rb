@@ -50,9 +50,9 @@ class Entry
                   :content
 
     def initialize; yield self if block_given?; end
-    def day_id; created.strftime( "/%Y/%m/%d/" ); end
-    def month_id; created.strftime( "/%Y/%m/" ); end
-    def year_id; created.strftime( "/%Y/" ); end
+    def day_id; created.strftime( "%Y/%m/%d" ); end
+    def month_id; created.strftime( "%Y/%m" ); end
+    def year_id; created.strftime( "%Y" ); end
     def section_id; File.dirname( id ); end
 
     include ToYamlExtras

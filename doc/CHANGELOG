@@ -4,6 +4,8 @@
   changes:
     - lib/hobix/util/objedit.rb: pagination of form fields, color support,
         now saves content.
+    - lib/hobix/entry.rb: date ids are now relative.
+    - share/default-blog.apache-ssi.patch: ditto.
 
 - version: 0.2g
   date: 2004-10-05
