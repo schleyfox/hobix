@@ -5,6 +5,8 @@
     - lib/hobix/out/rdf.rb: new rss 1.0 module by Giulio Piancastelli!
     - lib/hobix/out/quick.rb: problem with nested unordered list invalid XHTML.
         Thanks, Eric Stewart!
+    - lib/hobix/weblog.rb: using YAML::transfer to load the linklist rather than
+        YAML::object_maker.  Yes, better.
  
 - version: 0.2f
   date: 2004-10-04
