@@ -124,13 +124,7 @@ require 'hobix/weblog'
 # scripted.  Refer to individual module's documentation for more.
 #
 # == Example 1: Regenerating a weblog
-#
-# Vim is a text editor that can be scripted by Ruby.  One great
-# script for Vim would be a script that could load one of your
-# templates for editing and fire a regeneration when the file
-# is saved.  Any editor, or even an IDE such as FreeRIDE, could
-# be scripted to do the same quite easily.
-#
+# 
 # The first step is to load the Weblog object.
 #
 #   require 'hobix'
@@ -213,7 +207,7 @@ require 'hobix/weblog'
 #
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.1k'
+    VERSION = '0.2'
     ## CVS information
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]

@@ -31,8 +31,8 @@ module Hobix
 # link::             The full URL to this entry from the weblog.
 # title::            The heading for this entry.
 # tagline::          The subheading for this entry.
-# author::           The author's abbreviated name.
-# contributors::     An Array of contributors' abbreviated names.
+# author::           The author's username.
+# contributors::     An Array of contributors' usernames.
 # modified::         A modification time.
 # created::          The time the Entry was initially created.
 # summary::          A brief description of this entry.  Can be used
@@ -54,7 +54,7 @@ class Entry
     def day_id; created.strftime( "/%Y/%m/%d/" ); end
     def month_id; created.strftime( "/%Y/%m/" ); end
     def year_id; created.strftime( "/%Y/" ); end
-    def section_id; File.basename( id ); end
+    def section_id; File.dirname( id ); end
 
     include ToYamlExtras
     def to_yaml_property_map
@@ -69,6 +69,9 @@ class Entry
         ]
     end
 
+    # Hobix::Entry objects are typed in YAML as !hobix.com,2004/entry
+    # objects.  This type is virtually identical to !okay/news/feed objects,
+    # which are documented at http://yaml.kwiki.org/?OkayNews.
     def to_yaml_type
         "!hobix.com,2004/entry"
     end

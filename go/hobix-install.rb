@@ -177,16 +177,8 @@ den['setup'].each do |action, screen|
             require 'hobix/commandline'
             cmdline = Class.new
             cmdline.extend Hobix::CommandLine
-            unless cmdline.login
-                puts "# Welcome to hobix (a simple weblog tool).  Looks like your \n" +
-                     "# first time running hobix, eh?  Time to get a bit of information \n" +
-                     "# from you before you start using hobix.  (All of this will be stored \n"
-                     "# in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
-                cmdline.setup
-                puts    
-            else
-                puts "# Configuration found in #{ Hobix::CommandLine::RC }"
-            end
+            puts "# Configuration stored in #{ Hobix::CommandLine::RC }"
+            cmdline.login
             cmdline.setup_blogs
         end
     end

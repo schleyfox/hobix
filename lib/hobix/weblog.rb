@@ -398,10 +398,10 @@ class Weblog
                         vars.keys.each do |var_name|
                             case var_name.to_s
                             when /entry$/
-                                vars[var_name] = storage.load_entry( vars[var_name] )
+                                vars[var_name] = load_and_validate_entry( vars[var_name] )
                             when /entries$/
                                 vars[var_name].collect! do |e|
-                                    storage.load_entry( e[0] )
+                                    load_and_validate_entry( e[0] )
                                 end
                                 vars[var_name].extend Hobix::EntryEnum
                             end
@@ -570,13 +570,25 @@ class Weblog
         end.compact
     end
 
+    class AuthorNotFound < Exception; end
+
+    # Loads an entry from +storage+, first validating that the author
+    # is listed in the weblog config.
+    def load_and_validate_entry( entry_id )
+        entry = storage.load_entry( entry_id )
+        unless authors.has_key?( entry.author )
+            raise AuthorNotFound, "Invalid author '#{ entry.author }' found in entry #{ entry_id }"
+        end
+        entry
+    end
+
     # For convenience, storage queries can be made through the Weblog
     # class.  Queries will return the full Entry data, though, so it's
     # best to use this only when you're scripting and need data quick.
     def method_missing( methId, *args )
         if storage.respond_to? methId
             storage.method( methId ).call( *args ).collect do |e|
-                storage.load_entry( e[0] )
+                load_and_validate_entry( e[0] )
             end
         end
     end

@@ -31,14 +31,7 @@ cmd, *opts = ARGV.collect do |arg|
 end
 ARGV.clear
          
-unless cmdline.login
-    puts "Welcome to hobix (a simple weblog tool).  Looks like your \n" +
-         "first time running hobix, eh?  Time to get a bit of information \n" +
-         "from you before you start using hobix.  (All of this will be stored \n"
-         "in the file #{ Hobix::CommandLine::RC } if you need to edit.)\n\n"
-    cmdline.setup
-    puts    
-end
+cmdline.login
 
 if cmd == 'setup_blogs'
     cmdline.setup_blogs

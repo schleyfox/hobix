@@ -36,6 +36,8 @@ module CommandLine
 
     def login
         @config = YAML::load( File.open( RC ) ) if File.exists? RC
+        setup unless @config
+        setup_personal unless @config['personal']
     end
 
     def config
@@ -123,8 +125,7 @@ module CommandLine
             patcher.apply( path )
         end
 
-        @config['weblogs'][name] = File.join( path, "hobix.yaml" )
-        save_config
+        join_as_author( name, File.join( path, "hobix.yaml" ) )
     end
 
 
@@ -143,8 +144,16 @@ module CommandLine
             puts "*** No file `#{ path }' found!  Aborting."
             return
         end
-        hobix_weblog = Hobix::Weblog.load( path )
-        puts "*** Found blog `#{ hobix_weblog.title }', added to your config"
+        join_as_author( name, path )
+    end
+
+    def join_as_author( name, path )
+        weblog = Hobix::Weblog.load( path )
+        puts "*** Joining blog `#{ weblog.title }', adding you as author."
+        weblog.authors[@config['username']] = @config['personal']
+        File.open( path, 'w' ) do |f|
+            YAML::dump( weblog, f )
+        end
         @config['weblogs'][name] = path
         save_config
     end
@@ -217,6 +226,11 @@ module CommandLine
     ##
     def setup
         @config = {}
+        puts "Welcome to hobix (a simple weblog tool).  Looks like your" 
+        puts "first time running hobix, eh?  Time to get a bit of information"
+        puts "from you before you start using hobix.  (All of this will be stored"
+        puts "in the file #{ Hobix::CommandLine::RC } if you need to edit.)"
+        puts
 
         username = ''
         default_user = ''
@@ -256,6 +270,24 @@ module CommandLine
             @config['post upgen'] = false
         else
             @config['post upgen'] = true
+        end
+        save_config
+    end
+
+    ##
+    ## Setup personal information
+    ##
+    def setup_personal
+        @config['personal'] ||= {}
+        puts
+        puts "Your personal information has not been setup yet."
+        [['name', 'Your real name', true], 
+         ['url', 'URL to your home page', false],
+         ['email', 'Your e-mail address', false]].each do |k, txt, req|
+            print "#{ txt }: "
+            val = gets.strip
+            retry if req and val.empty?
+            @config['personal'][k] = val
         end
         save_config
     end
@@ -329,7 +361,7 @@ module CommandLine
 
     def tabular( table, fields, desc = nil )
         client_format = fields.collect do |f| 
-            f[0] = [f[0], f[2].length].max * ( f[0] / f[0].abs )
+            f[0] = [f[0].abs, f[2].length].max * ( f[0] / f[0].abs )
             "%#{ f[0] }s"
         end.join( ': ' )
         puts client_format % fields.collect { |f| f[2] }
