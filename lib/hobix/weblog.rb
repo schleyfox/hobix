@@ -321,6 +321,8 @@ class Weblog
     def linklist
         if @linklist.class == ::Array
             YAML::transfer( 'hobix.com,2004/linklist', {'links' => @linklist} )
+        else
+           @linklist
         end
     end
 
