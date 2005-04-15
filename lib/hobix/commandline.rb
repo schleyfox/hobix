@@ -72,7 +72,7 @@ module CommandLine
     def blogs_weblog
         if @config['weblogs'].respond_to? :sort
             blogs = @config['weblogs'].sort
-            name_width = blogs.collect { |b| b[0].length }.max + 1
+            name_width = blogs.collect { |b| b[0].length }.max
             tabular( blogs, [[-name_width, 0, 'weblog-name'], [-40, 1, 'path']] )
         else
             puts "** You have no blogs set up.  Use `hobix setup_blogs' to get started."
@@ -222,10 +222,15 @@ module CommandLine
     def list_action_explain; "List all posts within a given path."; end
     def list_action_args; ['weblog-name', 'search/path']; end
     def list_action( weblog, inpath = '' )
-        entries = weblog.storage.find( :all => true, :inpath => inpath ).
-                  sort { |e1, e2| e1[0] <=> e2[0] }
-        name_width = entries.collect { |e| e[0].length }.max + 1
-        tabular( entries, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+        entries = weblog.storage.find( :all => true, :inpath => inpath )
+        if entries.empty?
+            puts "** No posts found in the weblog for path '#{inpath}'."
+        else
+            entries.sort { |e1, e2| e1.id <=> e2.id }
+            name_width = entries.collect { |e| e.id.length }.max
+            rows = entries.inject([]) { |rows, entry| rows << [entry.id, entry.created] }
+            tabular( rows, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+        end
     end
 
     # Post a new entry
@@ -397,14 +402,14 @@ module CommandLine
     end
 
     def tabular( table, fields, desc = nil )
-        client_format = fields.collect do |f| 
-            f[0] = [f[0].abs, f[2].length].max * ( f[0] / f[0].abs )
-            "%#{ f[0] }s"
-        end.join( ': ' )
-        puts client_format % fields.collect { |f| f[2] }
-        puts fields.collect { |f| "-" * f[0].abs }.join( ':-' )
+        field_widths = fields.collect do |width, id, title|
+            ([width.abs, title.length].max + 1) * ( width / width.abs )
+        end
+        client_format = field_widths.collect { |width| "%#{ width}s"}.join( ': ')
+        puts client_format % fields.collect { |width, id, title| title }
+        puts field_widths.collect { |width| "-" * width.abs }.join( ':-' )
         table.each do |row|
-            puts client_format % fields.collect { |f| row[ f[1] ] }
+            puts client_format % fields.collect { |width, id, title| row[ id ] }
             if desc
                 puts row[ desc ]
                 puts
