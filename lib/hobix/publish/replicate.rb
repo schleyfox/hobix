@@ -23,7 +23,10 @@ module Publish
   Target = Struct.new( :path, :host, :user, :passwd )
 
   class PublishReplication < Hobix::BasePublish
+    attr_reader :replicator, :weblog
+
     def initialize( weblog, hash_opt )
+        @weblog = weblog
         hash_opt['items'] = nil
         hash_opt['source'] = weblog.output_path
         
@@ -40,14 +43,34 @@ module Publish
 
         end
     end
+
+    def watch
+      ['index']
+    end
+
     def publish( published )
-      @replicator.items = published.keys
-      @replicator.copy do |nb,f,src,tgt|
+      replicator.items = weblog.updated_pages
+      replicator.copy do |nb,f,src,tgt|
         puts "## Replicating #{src}"
       end
     end
 end
 end
+
+module Hobix
+  class Weblog
+    attr_reader :updated_pages
+    
+    alias p_publish_orig p_publish
+
+    def p_publish( obj )
+      (@updated_pages ||= []) << obj.link
+      p_publish_orig( obj )
+    end
+
+  end
+end
+
 
 class Replicate
 
