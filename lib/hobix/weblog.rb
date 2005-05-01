@@ -702,7 +702,7 @@ class Weblog
     def method_missing( methId, *args )
         if storage.respond_to? methId
             storage.method( methId ).call( *args ).collect do |e|
-                load_and_validate_entry( e[0] )
+                load_and_validate_entry( e.id )
             end
         end
     end
