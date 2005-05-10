@@ -36,6 +36,51 @@ module CommandLine
     end
     RC = File.join( HOME_DIR, '.hobixrc' )
 
+    def CommandLine.extended( o )
+      #
+      # When extended we should get all required plugin for the 
+      # whole Hobix stuff
+      #
+      return unless File.exists? RC
+
+      config = YAML::load( File.open( RC ) )
+      
+      #
+      # Add a new instance variable to o
+      #
+      o.instance_variable_set( :@config, config )
+
+      #
+      # Eventually add user specified path
+      #
+      if config['libs']
+        config['libs'].each do |p|
+          if File.exists?( p ) && File.directory?( p )
+            $LOAD_PATH << p
+          else
+            warn "#{p} not loaded. Either inexistant or not a directory"
+          end
+        end
+      end
+
+      #
+      # And system wide path too
+      #
+      if File.exists?( Hobix::SHARE_PATH )
+        $LOAD_PATH << File.join(Hobix::SHARE_PATH,"lib")
+      end
+      
+      #
+      # Load plugins if necessary
+      #
+      if config['requires']
+        config['requires'].each do |req|
+          Hobix::BasePlugin::start( req, self )
+        end
+      end
+      
+    end
+
     def gets;          $stdin.gets;          end
     def puts( *args ); $stdin.puts( *args ); end
 
