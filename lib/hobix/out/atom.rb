@@ -67,8 +67,8 @@ EOXML
             ele.x( 'issued', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'modified', e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'dc:subject', e.section_id )
-            e.keywords.each do |kw|
-                ele.x( 'dc:subject', kw )
+            e.tags.each do |t|
+                ele.x( 'dc:subject', t )
             end
             ele.x( 'summary', 
                 e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),

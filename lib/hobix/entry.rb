@@ -30,7 +30,7 @@ module Hobix
 # link::             The full URL to this entry from the weblog.
 # title::            The heading for this entry.
 # tagline::          The subheading for this entry.
-# keywords::         A list of free-tagged categories.
+# tags::             A list of free-tagged categories.
 # author::           The author's username.
 # contributors::     An Array of contributors' usernames.
 # modified::         A modification time.
@@ -47,16 +47,45 @@ module Hobix
 # year_id::          A path for the year's entries.
 class Entry
     attr_accessor :id, :link, :title, :tagline, :summary, :author,
-                  :contributors, :modified, :created, :keywords,
+                  :contributors, :modified, :created, :tags,
                   :content
+    #
+    # If set to true, tags won't be deduced from the entry id
+    #
+    @@no_implicit_tags = false
+
+    def self.no_implicit_tags
+      @@no_implicit_tags = true
+    end
 
     def initialize; yield self if block_given?; end
     def day_id; created.strftime( "%Y/%m/%d" ) if created; end
     def month_id; created.strftime( "%Y/%m" ) if created; end
     def year_id; created.strftime( "%Y" ) if created; end
     def section_id; File.dirname( id ) if id; end
-    def force_keywords; []; end
-    def keywords; force_keywords + Array( @keywords ); end
+    def force_tags; []; end
+
+    #
+    # return an array of tags deduced from the path
+    # i.e. a path like ruby/hobix/foo.yml will lead
+    # to [ ruby, hobix ] tags
+    #
+    def path_to_tags( path )
+      return [] if @@no_implicit_tags
+      tags_array = path.split("/").find_all { |e| e.size > 0 }
+      tags_array.pop # Last item is the entry title
+      tags_array
+    end
+
+    # 
+    # return canonical tags, i.e. tags that are forced and that are deduced
+    # from the entry path
+    #
+    def canonical_tags( path=nil )
+      ( force_tags + path_to_tags( path || self.id ) ).uniq
+    end
+
+    def tags; ( canonical_tags + Array( @tags ) ).uniq; end
 
     include ToYamlExtras
     def property_map
@@ -66,7 +95,7 @@ class Entry
             ['@contributors', :opt, :textarea], 
             ['@created', :opt, :text], 
             ['@tagline', :opt, :text], 
-            ['@keywords', :opt, :text],
+            ['@tags', :opt, :text],
             ['@summary', :opt, :textarea], 
             ['@content', :req, :textarea]
         ]

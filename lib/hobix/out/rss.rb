@@ -66,9 +66,9 @@ EOXML
             ele_subject = REXML::Element.new 'dc:subject'
             ele_subject.text = e.section_id
             ele << ele_subject
-            e.keywords.each do |kw|
+            e.tags.each do |t|
                 ele_subject = REXML::Element.new 'dc:subject'
-                ele_subject.text = kw
+                ele_subject.text = t
                 ele << ele_subject
             end
             ele_creator = REXML::Element.new 'dc:creator'

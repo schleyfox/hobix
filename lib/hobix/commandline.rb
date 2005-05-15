@@ -292,6 +292,7 @@ module CommandLine
                                    last.
                                    gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }.
                                    strip
+          entry.tags = entry.canonical_tags( entry_id )
         end
         entry = aorta( entry )
         return if entry.nil?

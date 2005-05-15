@@ -26,7 +26,7 @@ class IndexEntry
         attr_accessor *names
     end
 
-    add_fields :id, :created, :modified
+    add_fields :id, :created, :modified, :tags
 
     def initialize( entry, fields = IndexEntry.fields )
         fields.each do |field|
@@ -150,6 +150,7 @@ class FileSys < Hobix::BaseStorage
 
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
+                    e.id = entry_id
                     index_entry = IndexEntry.new( e, index_fields ) do |i|
                         i.id = entry_id
                         i.modified = @modified[entry_id]
