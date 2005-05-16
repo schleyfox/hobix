@@ -57,6 +57,18 @@ class Entry
     def self.no_implicit_tags
       @@no_implicit_tags = true
     end
+    
+    #
+    # When computing so-called implicit 'implicit-tag', whether
+    # or not we should split the path into several tags
+    # (default: false)
+    #
+    @@split_implicit_tags = false
+    
+    def self.split_implicit_tags
+      @@split_implicit_tags = true
+    end
+
 
     def initialize; yield self if block_given?; end
     def day_id; created.strftime( "%Y/%m/%d" ) if created; end
@@ -72,8 +84,12 @@ class Entry
     #
     def path_to_tags( path )
       return [] if @@no_implicit_tags
-      tags_array = path.split("/").find_all { |e| e.size > 0 }
-      tags_array.pop # Last item is the entry title
+      if @@split_implicit_tags
+        tags_array = path.split("/").find_all { |e| e.size > 0 }
+        tags_array.pop # Last item is the entry title
+      else
+        tags_array = [ File.dirname( path )]
+      end
       tags_array
     end
 
