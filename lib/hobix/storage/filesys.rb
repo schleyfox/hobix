@@ -80,7 +80,7 @@ class FileSys < Hobix::BaseStorage
         check_id( id )
         e.created ||= (@index.has_key?( id ) ? @index[id].created : now)
         path = entry_path( id )
-        YAML::dump( e, File.open( path, 'w' ) )
+        File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
 
         @entry_cache ||= {}
         e.id = id
@@ -108,7 +108,7 @@ class FileSys < Hobix::BaseStorage
             e.modified = modified( id )
             unless e.created
                 e.created = @index[id].created
-                YAML::dump( e, File.open( entry_file, 'w' ) )
+                File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
             end
             @entry_cache[id] = e
         else
