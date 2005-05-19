@@ -84,6 +84,7 @@ class Entry
     #
     def path_to_tags( path )
       return [] if @@no_implicit_tags
+      return [] if path.nil? 
       if @@split_implicit_tags
         tags_array = path.split("/").find_all { |e| e.size > 0 }
         tags_array.pop # Last item is the entry title

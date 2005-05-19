@@ -89,6 +89,7 @@ class BaseStorage < BasePlugin
             e.tagline = "A temporary message, a tingling sensation, Hobix is up!!"
             e.author = author
             e.content = Hobix::Entry.text_processor.new( "Welcome to Hobix!  Once you make your first blog post, this entry will disappear.  However, in the meantime, you can tweak the CSS of your blog until it suits your satisfaction and you have this bit of words to act as a place holder." )
+            e.id = default_entry_id
         end
     end
     def all
