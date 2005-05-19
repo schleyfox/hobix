@@ -394,7 +394,7 @@ module CommandLine
             print "Path to weblog's hobix.yaml `#{ blogname }': "
             blogpath = gets.strip
             if blogpath.empty?
-                "*** Aborting setup of weblog `#{ blogname }'."
+                puts "*** Aborting setup of weblog `#{ blogname }'."
                 break
             end
             add_weblog( blogname, blogpath )
@@ -416,7 +416,7 @@ module CommandLine
             print "Path to create weblog `#{ blogname }': "
             blogpath = gets.strip
             if blogpath.empty?
-                "*** Aborting creation of weblog `#{ blogname }'."
+                puts "*** Aborting creation of weblog `#{ blogname }'."
                 break
             end
             create_weblog( blogname, blogpath )
