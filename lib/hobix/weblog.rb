@@ -684,6 +684,23 @@ class Weblog
         end.compact
     end
 
+
+    # Handler for templates with `tags' prefix.  These templates
+    # will receive a tag with all entries tagged with it. The handler
+    # requests will be output as `/tags/<tag>/index.ext'.
+    def skel_tags( path_storage ) 
+      # Get a list of all known tags
+      tags = path_storage.find( :all => true ).map { |e| e.tags }.flatten.uniq
+      
+      tags.each do |tag|
+        entries = path_storage.find.find_all { |e| e.tags.member? tag }
+        page = Page.new( File::join('tags',tag,'index' ) )
+        page.updated = path_storage.last_modified( entries ) 
+        yield :page => page, :entries => entries
+      end
+    end
+
+
     class AuthorNotFound < Exception; end
 
     # Loads an entry from +storage+, first validating that the author
