@@ -124,6 +124,10 @@ module CommandLine
         end
     end
 
+    def load_patchsets
+        File.open( "#{ Hobix::SHARE_PATH }/default-blog-modes.yaml" ) { |f| YAML::load( f ) }
+    end
+
     # Create a new skeleton for a weblog
     def create_weblog_explain; "Create a brand new weblog."; end
     def create_weblog_args; ['weblog-name', '/path/to/']; end
@@ -166,7 +170,7 @@ module CommandLine
             return
         end
 
-        modes = File.open( "#{ Hobix::SHARE_PATH }/default-blog-modes.yaml" ) { |f| YAML::load( f ) }
+        modes = load_patchsets
 
         puts "The default blog is available in the following modes:"
         puts "  #{ modes.keys.join( ', ' ) }"
@@ -195,7 +199,6 @@ module CommandLine
         join_as_author( name, hobix_yaml )
         edit_action( Hobix::Weblog.load( hobix_yaml ) )
     end
-
 
     # Add a weblog to local config
     def add_weblog_explain; "Adds a pre-existing hobix weblog to your list."; end
@@ -261,6 +264,17 @@ module CommandLine
         else
             puts "** No blogs found in the configuration."
         end
+    end
+
+    # Patch a weblog
+    def patch_action_explain; "Applies a patch to a weblog."; end
+    def patch_action_args; ['weblog-name', 'patch-name']; end
+    def patch_action( weblog, patch )
+        require 'hobix/util/patcher'
+        modes = load_patchsets
+        patchlist = modes[patch.strip].map { |p| "#{ Hobix::SHARE_PATH }/default-blog.#{ p }.patch" }
+        patcher = Hobix::Util::Patcher[ *patchlist ]
+        patcher.apply( weblog.path )
     end
 
     # List entries
