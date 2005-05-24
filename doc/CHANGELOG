@@ -1,4 +1,13 @@
 --- %YAML:1.0
+- version: 0.4
+  date: 2005-05-22
+  changes:
+    - lib/hobix/entry.rb: new @tags, force_tags, implicit_tags for loosely categorizing entries.
+    - lib/hobix/webapp.rb: Tanaka Akira's WebApp library enhanced and distributed with Hobix.
+    - lib/hobix/weblog.rb: added skel_tags, new facets code.  (facets are user interfaces for hobix.)
+    - lib/hobix/comments.rb: comment templates, comment api.
+    - share/default-blog.cgi.patch: new patch for using CGI.
+
 - version: 0.3c
   date: 2005-03-10
   changes:

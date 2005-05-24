@@ -173,10 +173,11 @@ module CommandLine
         puts
         mode = nil
         loop do
-            print "Mode: [Enter for none] "
+            print "Modes: [Comma between each mode or Enter for none] "
             mode = gets.strip.downcase
-            break if mode.empty? or modes.has_key? mode
-            puts "*** No `#{ mode }' mode available."
+            m = mode
+            break if mode.empty? or not mode.split( /,/ ).detect { |m| m.strip!; not modes.has_key?( m ) }
+            puts "*** No `#{ m }' mode available."
         end
 
         require 'fileutils'
@@ -184,12 +185,11 @@ module CommandLine
         FileUtils.cp_r Dir.glob( "#{ Hobix::SHARE_PATH }/default-blog/*" ), path
 
         # apply any patches
-        if modes[mode]
-            require 'hobix/util/patcher'
-            patchlist = modes[mode].collect { |p| "#{ Hobix::SHARE_PATH }/default-blog.#{ p }.patch" }
-            patcher = Hobix::Util::Patcher[ *patchlist ]
-            patcher.apply( path )
-        end
+        patchlist = mode.split( /,/ ).map { |m| modes[m.strip] }.flatten.uniq
+        require 'hobix/util/patcher'
+        patchlist.collect! { |p| "#{ Hobix::SHARE_PATH }/default-blog.#{ p }.patch" }
+        patcher = Hobix::Util::Patcher[ *patchlist ]
+        patcher.apply( path )
 
         hobix_yaml = File.join( path, "hobix.yaml" )
         join_as_author( name, hobix_yaml )
@@ -292,7 +292,6 @@ module CommandLine
                                    last.
                                    gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }.
                                    strip
-          entry.tags = entry.canonical_tags( entry_id )
         end
         entry = aorta( entry )
         return if entry.nil?

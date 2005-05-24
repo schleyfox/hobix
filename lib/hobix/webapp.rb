@@ -7,6 +7,7 @@ require 'stringio'
 require 'pathname'
 require 'zlib'
 require 'time'
+require 'hobix'
 require 'hobix/webapp/urigen'
 require 'hobix/webapp/message'
 require 'hobix/webapp/htmlform'
@@ -22,6 +23,11 @@ class Regexp
       end
     }
     Regexp.new(re, self.options, self.kcode)
+  end
+end
+
+module Kernel
+  def puts( *args )
   end
 end
 
@@ -84,6 +90,28 @@ class WebApp
   def request_uri() @request.request_uri end
   def action_uri() @request.action_uri end
 
+  def _GET() 
+    unless @_get_vars
+      @_get_vars = {}
+      query_html_get_application_x_www_form_urlencoded.each do |k, v|
+        v.gsub!( /\r\n/, "\n" ) if defined? v.gsub!
+        @_get_vars[k] = v
+      end
+    end
+    @_get_vars
+  end
+
+  def _POST()
+    unless @_post_vars
+      @_post_vars = {}
+      query_html_post_application_x_www_form_urlencoded.each do |k, v|
+        v.gsub!( /\r\n/, "\n" ) if defined? v.gsub!
+        @_post_vars[k] = v
+      end
+    end
+    @_post_vars
+  end
+
   def set_header(field_name, field_body) @response_header.set(field_name, field_body) end
   def add_header(field_name, field_body) @response_header.add(field_name, field_body) end
   def remove_header(field_name) @response_header.remove(field_name) end
@@ -139,16 +167,7 @@ class WebApp
     begin
       mtime = path.mtime
     rescue Errno::ENOENT
-      @response.status_line = '404 Not Found'
-      @response_body << <<'End'
-<html>
-  <head><title>404 Not Found</title></head>
-  <body>
-    <h1>404 Not Found</h1>
-    <p>Resource not found: #{path}</p>
-  </body>
-</html>
-End
+      send_not_found "Resource not found: #{path}"
       return
     end
     check_last_modified(path.mtime) {
@@ -156,6 +175,21 @@ End
         @response_body << f.read
       }
     }
+  end
+
+  def send_not_found(msg)
+    @response.status_line = '404 Not Found'
+    @response_body << <<End
+<html>
+  <head><title>404 Not Found</title></head>
+  <body>
+    <h1>404 Not Found</h1>
+    <p>#{msg}</p>
+    <hr />
+    <small><a href="http://hobix.com/">hobix</a> #{ Hobix::VERSION } / <a href="http://docs.hobix.com">docs</a> / <a href="http://let.us.all.hobix.com">wiki</a> / <a href="http://google.com/search?q=hobix+#{ URI.escape action_uri }">search google for this action</a></small>
+  </body>
+</html>
+End
   end
 
   def check_last_modified(last_modified)

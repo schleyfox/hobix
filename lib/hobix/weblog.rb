@@ -329,7 +329,7 @@ class Weblog
     # Translate paths relative to the weblahhg's URL.  This is especially important
     # if a weblog isn't at the root directory for a domain.
     def expand_path( path )
-        File.expand_path( path.gsub( /^\/+/, '' ), self.link.path + "/" )
+        File.expand_path( path.gsub( /^\/+/, '' ), self.link.path.gsub( /\/*$/, '/' ) )
     end
 
     # Load the weblog information from a YAML file and +start+ the Weblog.
@@ -392,6 +392,17 @@ class Weblog
     # be many.)
     def publishers
         @plugins.find_all { |p| p.is_a? BasePublish }
+    end
+
+    # Returns an Array of all facet plugins in use.  (There can
+    # be many.)
+    def facets
+        @plugins.find_all { |p| p.is_a? BaseFacet }
+    end
+
+    def facet_for( app )
+        facets.each { |p| return if p.get app }
+        Hobix::BaseFacet.not_found app
     end
 
     # Clears the hash used to cache the results of +output_map+.

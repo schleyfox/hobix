@@ -155,8 +155,9 @@ class WebApp
       @request_uri = env['REQUEST_URI'] # Apache
 
       # hobix action uri
-      @action_uri = ( @path_info || @request_uri ).
-        gsub( /^(#{ Regexp::quote( File::dirname( @script_name ) ) })?\/*/, '' )
+      @action_uri = ( env['PATH_INFO'] || env['REQUEST_URI'] ).
+        gsub( /^(#{ Regexp::quote( File::dirname( @script_name ) ) })?\/*/, '' ).
+        gsub( /\?.+$/, '' )
     end
   end
 

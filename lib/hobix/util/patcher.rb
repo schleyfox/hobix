@@ -35,7 +35,7 @@ class Patcher
     FILENAME_RE = /[\w\.\/\\]+/
     ORIG_HEADER = /^---\s+(#{ FILENAME_RE })/
     PATCH_HEADER = /^\+\+\+\s+(#{ FILENAME_RE })/
-    LINE_RANGE = /^@@\s+(.{1})(\d+),(\d+)\s+(.{1})(\d+),(\d+)\s+@@/
+    LINE_RANGE = /^@@\s+(.{1})(\d+),(\d+)\s+(.{1})(\d+)(?:,(\d+))?\s+@@/
     # Initialize the Patcher with a list of +paths+ to patches which
     # must be applied in order.
     #
@@ -99,7 +99,7 @@ class Patcher
                 end
 
                 # apply the changes
-                puts "*** Applying patch ##{ patchno } for #{ fname } (#{ patch[:from_start] }, #{ patch[:from_len] })."
+                puts "*** Applying patch ##{ patchno + 1 } for #{ fname } (#{ patch[:from_start] }, #{ patch[:from_len] })."
                 lines[patch[:from_start], patch[:from_len]] = adds
 
                 # save the file
@@ -138,6 +138,7 @@ class Patcher
             patch[:from_len], patch[:to_len] = $3.to_i, $6.to_i
             patch[:from_count], patch[:to_count] = 0, 0
             patch[:from_start] -= 1 if patch[:from_start] > 0
+            patch[:to_len] = 1 if patch[:to_len] == 0
         end
     end
 

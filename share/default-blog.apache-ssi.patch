@@ -39,8 +39,8 @@ diff -wurP bokononist/skel/sidebar.html.quick boko.ssi/skel/sidebar.html.quick
 +  <div class="sidebarBox">
 +  <h2 class="sidebarTitle">Archive</h2>
 +  <ul>
-+  <% months.each do |month_start, month_end, month_id| %>
-+      <li><a href="<%= weblog.link %>/<%= month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
++  <% months.reverse.each do |month_start, month_end, month_id| %>
++      <li><a href="<%= weblog.expand_path month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
 +  <% end %>
 +  </ul>
 +  </div>

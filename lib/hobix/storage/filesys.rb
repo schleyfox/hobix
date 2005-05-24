@@ -55,9 +55,9 @@ end
 
 class FileSys < Hobix::BaseStorage
     def initialize( weblog )
+        super( weblog )
         @modified = {}
         @basepath = weblog.entry_path
-        @link = weblog.link
         @default_author = weblog.authors.keys.first
         ignored = weblog.sections_ignored
         unless ignored.empty?
@@ -189,7 +189,6 @@ class FileSys < Hobix::BaseStorage
         _index = @index
         if _index.empty?
             e = default_entry( @default_author )
-            e.id = default_entry_id 
             @modified[e.id] = e.modified
             _index = {e.id => IndexEntry.new(e)}
         end

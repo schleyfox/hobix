@@ -80,9 +80,14 @@ end
 #           end date.
 # 
 class BaseStorage < BasePlugin
+    def initialize( weblog )
+        @link = weblog.link
+    end
     def default_entry_id; "hobix-default-entry"; end
     def default_entry( author )
         Hobix::Entry.new do |e|
+            e.id = default_entry_id 
+            e.link = "#{ @link }/#{ e.id }.html"
             e.created = Time.now
             e.modified = Time.now
             e.title = "This Ghostly Message From the Slime Will Soon Vanish!"
@@ -148,6 +153,15 @@ end
 #                    this method is called with a hash of pages published.  The key is the page type
 #                    and the value is an array of Page objects.
 class BasePublish < BasePlugin
+end
+
+# The BaseFacet plugin is the superclass for all plugins which have
+# an interface (CGI, UI, etc.)  These interfaces expose some functionality
+# to the user through an entry form or series of views.
+class BaseFacet < BasePlugin
+    def self.not_found app
+        app.send_not_found "Action `#{ app.action_uri }' not found.  If this address should work, check your plugins."
+    end
 end
 
 # Enumerable::each_with_neighbors from Joel Vanderwerf's 

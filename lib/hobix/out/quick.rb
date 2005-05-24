@@ -23,6 +23,17 @@ class QuickError < StandardError; end
 
 class Quick < Hobix::BaseOutput
     APPEND_TPL_RE = /^(.+)\s*(<<|>>)$/
+    # Class method for appending to a method template
+    def self.append_def( method, str )
+        newstr = "#{ self.allocate.method( method ).call }#{ str }"
+        define_method( method ) { newstr }
+    end
+    # Class method for prepending to a method template
+    def self.prepend_def( method, str )
+        newstr = "#{ str }#{ self.allocate.method( method ).call }"
+        define_method( method ) { newstr }
+    end
+
     def initialize( weblog, defaults = {} )
         @path = weblog.skel_path
         defaults.each do |k, v|

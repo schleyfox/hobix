@@ -18,14 +18,14 @@ require 'hobix/base'
 module Hobix
 class Weblog
     def to_okaynews( entries ) 
-        YAML::quick_emit( self.object_id ) { |out|
-            out.map( "!okay/news/^feed" ) { |map|
+        YAML::quick_emit( self.object_id ) do |out|
+            out.map( "!okay/news/^feed" ) do |map|
                 ['@title', '@tagline', '@link', '@period',
                  '@created', '@issued', '@modified',
                  '@authors', '@contributors'
-                ].each { |m|
+                ].each do |m|
                     map.add( m[1..-1], instance_variable_get( m ) )
-                }
+                end
                 entries = entries.collect do |e|
                     e = e.dup
                     e.author = @authors[e.author]
@@ -35,8 +35,8 @@ class Weblog
                     e
                 end
                 map.add( 'entries', entries )
-            }
-        }
+            end
+        end
     end
 end
 module Out

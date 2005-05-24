@@ -127,13 +127,15 @@ class Entry
 
     alias to_yaml_orig to_yaml
     def to_yaml( opts = {} )
-        opts[:UseFold] = true
+        opts[:UseFold] = true if opts.respond_to? :[]
         Entry::text_processor_fields.each do |f|
             v = instance_variable_get( '@' + f )
             if v.is_a? Entry::text_processor
                 instance_eval %{
                     def @#{ f }.to_yaml( opts = {} )
-                        self.to_str.to_yaml( opts )
+                        s = self.to_str
+                        def s.to_yaml_style; :fold; end
+                        s.to_yaml( opts )
                     end
                 }
             end

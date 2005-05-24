@@ -50,6 +50,7 @@ class WebApp
 
   # HTMLFormQuery represents a query submitted by HTML form. 
   class HTMLFormQuery
+
     def HTMLFormQuery.each_string_key_pair(arg, &block) # :nodoc:
       if arg.respond_to? :to_ary
         arg = arg.to_ary
