@@ -57,6 +57,15 @@ class Entry
     def self.no_implicit_tags
       @@no_implicit_tags = true
     end
+
+    #
+    # When using implicit tag, the blog root (i.e) is not considered
+    # unless you set the value of +@@root_tag+ to what you need.
+    #
+    @@root_tag = nil
+    def self.root_tag=( tag )
+      @@root_tag = tag
+    end
     
     #
     # When computing so-called implicit 'implicit-tag', whether
@@ -81,6 +90,8 @@ class Entry
     # return an array of tags deduced from the path
     # i.e. a path like ruby/hobix/foo.yml will lead
     # to [ ruby, hobix ] tags
+    # Occurence of . (alone) will be either removed or replaced
+    # by the value of +root_tag+
     #
     def path_to_tags( path )
       return [] if @@no_implicit_tags
@@ -91,7 +102,7 @@ class Entry
       else
         tags_array = [ File.dirname( path )]
       end
-      tags_array
+      tags_array.map { |e| e == '.' ? @@root_tag : e }.compact
     end
 
     # 
