@@ -535,6 +535,7 @@ class Weblog
                 output = vars.delete( :output )
                 template = vars.delete( :template )
                 txt = output.load( template, vars )
+                full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
                 File.makedirs( File.dirname( full_out_path ) )
                 File.open( full_out_path, 'w' ) do |f| 
                     f << txt
