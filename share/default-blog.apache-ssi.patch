@@ -1,46 +1,38 @@
-diff -wurP bokononist/hobix.yaml boko.ssi/hobix.yaml
---- bokononist/hobix.yaml	Sat Aug 28 14:02:00 2004
-+++ boko.ssi/hobix.yaml	Sat Aug 28 13:47:13 2004
-@@ -14,3 +14,4 @@
- - hobix/out/rss
- - hobix/out/okaynews
- - hobix/out/atom
-+- local
-diff -wurP bokononist/lib/local.rb boko.ssi/lib/local.rb
---- bokononist/lib/local.rb	Wed Dec 31 19:00:00 1969
-+++ boko.ssi/lib/local.rb	Sat Aug 28 13:47:13 2004
-@@ -0,0 +1,15 @@
-+module Hobix
-+class Weblog
-+    def skel_sidebar( path_storage )
-+        months = path_storage.get_months( storage.find )
-+        page = Page.new( 'sidebar' )
-+        page.updated = Time.now
-+        yield :page => page, :months => months
-+    end
-+end
-+class Out::Quick
-+    def sidebar_erb
-+        %{<!--#include virtual="<%= weblog.expand_path( 'sidebar.html' ) %>"-->}
-+    end
-+end
-+end
-diff -wurP bokononist/skel/sidebar.html.quick boko.ssi/skel/sidebar.html.quick
---- bokononist/skel/sidebar.html.quick	Wed Dec 31 19:00:00 1969
-+++ boko.ssi/skel/sidebar.html.quick	Sat Aug 28 13:47:13 2004
-@@ -0,0 +1,15 @@
-+page: <+ sidebar +>
-+sidebar: |
-+  <div id="sidebar">
-+  <+ sidebar_list +>
-+  </div>
-+
-+sidebar_archive: |
-+  <div class="sidebarBox">
-+  <h2 class="sidebarTitle">Archive</h2>
-+  <ul>
-+  <% months.reverse.each do |month_start, month_end, month_id| %>
-+      <li><a href="<%= weblog.expand_path month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
-+  <% end %>
-+  </ul>
-+  </div>
+--- !hobix.com,2004/patches/^list
+hobix.yaml: !^yaml-merge
+  requires:
+  - local
+
+lib/local.rb: !^file-create |
+  module Hobix
+  class Weblog
+      def skel_sidebar( path_storage )
+          months = path_storage.get_months( storage.find )
+          page = Page.new( 'sidebar' )
+          page.updated = Time.now
+          yield :page => page, :months => months
+      end
+  end
+  class Out::Quick
+      def sidebar_erb
+          %{<!--#include virtual="<%= weblog.expand_path( 'sidebar.html' ) %>"-->}
+      end
+  end
+  end
+
+skel/sidebar.html.quick: !^file-create |
+  page: <+ sidebar +>
+  sidebar: |
+    <div id="sidebar">
+    <+ sidebar_list +>
+    </div>
+  
+  sidebar_archive: |
+    <div class="sidebarBox">
+    <h2 class="sidebarTitle">Archive</h2>
+    <ul>
+    <% months.reverse.each do |month_start, month_end, month_id| %>
+        <li><a href="<%= weblog.expand_path month_id %>"><%= month_start.strftime( "%B %Y" ) %></a></li>
+    <% end %>
+    </ul>
+    </div>

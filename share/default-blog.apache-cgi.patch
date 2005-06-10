@@ -1,10 +1,8 @@
-diff -wurP bokononist/htdocs/control/.htaccess boko.ssi/htdocs/control/.htaccess
---- bokononist/htdocs/control/.htaccess	Wed Dec 31 19:00:00 1969
-+++ boko.ssi/htdocs/control/.htaccess	Sat May 14 13:47:13 2005
-@@ -0,0 +1,6 @@
-+AddHandler cgi-script .cgi
-+Options +FollowSymLinks +ExecCGI
-+
-+RewriteEngine   On
-+RewriteCond %{REQUEST_URI} !hobix.cgi
-+RewriteRule     ^(.*)$              /control/hobix.cgi
+--- !hobix.com,2004/patches/^list
+htdocs/control/.htaccess: !^file-ensure |
+  AddHandler cgi-script .cgi
+  Options +FollowSymLinks +ExecCGI
+  
+  RewriteEngine   On
+  RewriteCond %{REQUEST_URI} !hobix.cgi
+  RewriteRule     ^(.*)$              /control/hobix.cgi

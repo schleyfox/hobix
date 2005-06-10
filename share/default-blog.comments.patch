@@ -1,8 +1,5 @@
-diff -wurP bokononist/hobix.yaml boko.ssi/hobix.yaml
---- bokononist/hobix.yaml	Sat Aug 28 14:02:00 2004
-+++ boko.ssi/hobix.yaml	Sat Aug 28 13:47:13 2004
-@@ -14,3 +14,4 @@
- - hobix/out/rss
- - hobix/out/okaynews
- - hobix/out/atom
-+- hobix/comments
+--- !hobix.com,2004/patches/^list
+hobix.yaml: !^yaml-merge
+  requires:
+  - hobix/out/quick
+  - hobix/comments

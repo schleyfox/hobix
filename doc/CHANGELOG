@@ -2,6 +2,8 @@
 - version: 0.4
   date: 2005-05-22
   changes:
+    - lib/hobix/util/patcher.rb: cool! switched to a new YAML-based patch system which is much easier,
+        more foolproof, totally basic, all that!
     - lib/hobix/entry.rb: new @tags, force_tags, implicit_tags for loosely categorizing entries.
     - lib/hobix/webapp.rb: Tanaka Akira's WebApp library enhanced and distributed with Hobix.
     - lib/hobix/weblog.rb: added skel_tags, new facets code.  (facets are user interfaces for hobix.)

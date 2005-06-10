@@ -17,25 +17,17 @@ require 'fileutils'
 
 module Hobix
 module Util
-# The Patcher class applies unified diffs to a directory of files.
-# The idea here is to allow cross-platform patching, even if this
-# class only understands a subset of diff syntax.
+# The Patcher class applies Hobix's own YAML patch format to a directory.
+# These patches can create or append to existing plain-text files, as well
+# as modifying YAML files using YPath.
 #
-# Best results are achieved by using the following diff command to 
-# generate your patch:
-#
-#   diff -wurP original-dir/ patched-dir/ > unified.patch
-#
-# Then to apply your patch:
+# To apply your patch:
 #
 #   patch_set = Hobix::Util::Patcher['1.patch', '2.patch']
 #   patch_set.apply('/dir/to/unaltered/code')
 #
+class PatchError < Exception; end
 class Patcher
-    FILENAME_RE = /[\w\.\/\\]+/
-    ORIG_HEADER = /^---\s+(#{ FILENAME_RE })/
-    PATCH_HEADER = /^\+\+\+\s+(#{ FILENAME_RE })/
-    LINE_RANGE = /^@@\s+(.{1})(\d+),(\d+)\s+(.{1})(\d+)(?:,(\d+))?\s+@@/
     # Initialize the Patcher with a list of +paths+ to patches which
     # must be applied in order.
     #
@@ -45,11 +37,9 @@ class Patcher
     def initialize( *paths )
         @patches = {}
         paths.each do |path|
-            patch = {}
-            File.foreach( path ) do |line|
-                parse_line( line, patch )
+            YAML::load_file( path ).each do |k, v|
+                ( @patches[k] ||= [] ) << v
             end
-            parse_line( "", patch )
         end
     end
 
@@ -69,80 +59,89 @@ class Patcher
     #   patch_set.apply('/dir/to/unaltered/code')
     #
     def apply( path )
-        @patches.each do |fname, patchset|
-            fname = File.join( path, fname.gsub( /^.*?[\/\\]/, '' ) )
-            lines = 
-                if File.exists?( fname )
-                    File.readlines( fname )
-                else
-                    []
-                end
+        @patches.map do |fname, patchset|
+            fname = File.join( path, fname ) # .gsub( /^.*?[\/\\]/, '' ) )
+            ftarg = File.read( fname ) rescue ''
+            ftarg = YAML::load( ftarg ) if fname =~ /\.yaml$/
             
-            patchset.each_with_index do |patch, patchno|
-                # match the chunk
-                i = 0
-                adds = []
-                patch[:lines].each do |pline|
-                    c = pline.slice!( 0, 1 )
-                    if c =~ /[#{ Regexp::quote( patch[:from_char] ) }\s]/
-                        ln = patch[:from_start] + i
-                        if lines[ln] != pline
-                            raise ChunkError, 
-                                "chunk ##{ patchno + 1 } failed on '#{ pline.chomp }' != '#{ lines[ln] }' (line #{ ln })"
-                        else
-                            i += 1
-                        end
-                    end
-                    if c =~ /[#{ Regexp::quote( patch[:to_char] ) }\s]/
-                        adds << pline
-                    end
-                end
-
+            patchset.each_with_index do |(ptype, patch), patchno|
                 # apply the changes
-                puts "*** Applying patch ##{ patchno + 1 } for #{ fname } (#{ patch[:from_start] }, #{ patch[:from_len] })."
-                lines[patch[:from_start], patch[:from_len]] = adds
+                puts "*** Applying patch ##{ patchno + 1 } for #{ fname } (#{ ptype })."
+                ftarg = method( ptype.gsub( /\W/, '_' ) ).call( ftarg, patch )
+            end
 
-                # save the file
-                FileUtils.makedirs( File.dirname( fname ) )
-                File.open( fname, "w" ) do |f|
-                    lines.each do |line|
-                        f.puts line.chomp
+            [fname, ftarg]
+        end.
+        each do |fname, ftext|
+            # save the files
+            FileUtils.makedirs( File.dirname( fname ) )
+            ftext = ftext.to_yaml if fname =~ /\.yaml$/
+            File.open( fname, 'w+' ) { |f| f << ftext }
+        end
+    end
+
+    def file_create( target, text )
+        text
+    end
+
+    def file_ensure( target, text )
+        target << text unless target.include? text
+        target
+    end
+
+    def yaml_merge( obj, merge )
+        obj = obj.value if obj.respond_to? :value
+        if obj.class != merge.class and merge.class != Hash
+            raise PatchError, "*** Patch failure since #{ obj.class } != #{ merge.class }."
+        end
+
+        case obj
+        when Hash
+            merge.each do |k, v|
+                if obj.has_key? k
+                    yaml_merge obj[k], v
+                else
+                    obj[k] = v
+                end
+            end
+        when Array
+            at = nil
+            merge.each do |v|
+                vat = obj.index( v )
+                if vat
+                    at = vat if vat > at.to_i
+                else
+                    if at
+                        obj[at+=1,0] = v
+                    else
+                        obj << v
                     end
                 end
             end
-
-        end
-    end
-
-    def parse_line( line, patch )
-        if patch.has_key? :from_count
-            if patch[:from_count] == patch[:from_len] and patch[:to_count] == patch[:to_len]
-                @patches[patch[:from_file]] ||= []
-                @patches[patch[:from_file]] << patch.dup
-                patch.clear
-            else
-                patch[:lines] ||= []
-                patch[:lines] << line
-                patch[:from_count] += 1 if line =~ /^[#{ Regexp::quote( patch[:from_char] )}\s]/
-                patch[:to_count] += 1 if line =~ /^[#{ Regexp::quote( patch[:to_char] )}\s]/
+        when String
+            obj.replace merge
+        else
+            merge.each do |k, v|
+                ivar = obj.instance_variable_get "@#{k}"
+                if ivar
+                    yaml_merge ivar, v
+                else
+                    obj.instance_variable_set "@#{k}", v
+                end
             end
         end
-        case line
-        when ORIG_HEADER
-            patch[:from_file] = $1
-        when PATCH_HEADER
-            patch[:to_file] = $1
-        when LINE_RANGE
-            patch[:from_char], patch[:to_char] = $1, $4
-            patch[:from_start], patch[:to_start] = $2.to_i, $5.to_i
-            patch[:from_len], patch[:to_len] = $3.to_i, $6.to_i
-            patch[:from_count], patch[:to_count] = 0, 0
-            patch[:from_start] -= 1 if patch[:from_start] > 0
-            patch[:to_len] = 1 if patch[:to_len] == 0
-        end
-    end
 
-    class ChunkError < Exception; end
+        obj
+    end
 end
 end
+end
+
+YAML::add_domain_type( 'hobix.com,2004', 'patches/list' ) do |type, val|
+    val
+end
+['yaml-merge', 'file-create', 'file-ensure'].each do |ptype|
+    YAML::add_domain_type( 'hobix.com,2004', 'patches/' + ptype ) do |type, val|
+        [ptype, val]
+    end
 end

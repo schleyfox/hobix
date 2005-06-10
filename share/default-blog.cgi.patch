@@ -1,10 +1,8 @@
-diff -wurP bokononist/htdocs/control/hobix.cgi boko.ssi/htdocs/control/hobix.cgi
---- bokononist/htdocs/control/hobix.cgi Wed Dec 31 19:00:00 1969
-+++ boko.ssi/htdocs/control/hobix.cgi   Sat May 14 13:47:13 2005
-@@ -0,0 +1,6 @@
-+#!/usr/bin/env ruby
-+require 'hobix/webapp'
-+require 'hobix/weblog'
-+Hobix::WebApp() do |web|
-+  Hobix::Weblog.load( "../../hobix.yaml" ).facet_for( web )
-+end
+--- !hobix.com,2004/patches/^list
+control/hobix.cgi: !^file-create |
+  #!/usr/bin/env ruby
+  require 'hobix/webapp'
+  require 'hobix/weblog'
+  Hobix::WebApp() do |web|
+    Hobix::Weblog.load( "../../hobix.yaml" ).facet_for( web )
+  end
