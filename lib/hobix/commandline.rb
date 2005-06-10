@@ -14,12 +14,9 @@
 # $Id$
 #++
 require 'hobix'
-require 'hobix/api'
 
 module Hobix
 module CommandLine
-    include APIMethods
-
     ##
     ## Locate RC
     ##
@@ -228,6 +225,23 @@ module CommandLine
         save_config
     end
 
+    # Update the site
+    def upgen_action_explain; "Update site with only the latest changes."; end
+    def upgen_action_args; ['weblog-name']; end
+    def upgen_action( weblog )
+        weblog.regenerate( :update )
+    end
+
+    # Regenerate the site
+    def regen_action_explain; "Regenerate the all the pages throughout the site."; end
+    def regen_action_args; ['weblog-name']; end
+    def regen_action( weblog )
+        weblog.regenerate
+    end
+
+    # Edit a weblog from local config
+    def edit_action_explain; "Edit weblog's configuration"; end
+    def edit_action_args; ['weblog-name']; end
     def edit_action( weblog )
         path = weblog.hobix_yaml
         weblog = aorta( weblog )
@@ -258,6 +272,7 @@ module CommandLine
             @config['weblogs'].each do |name, path|
                 blogs[name] = Hobix::Weblog.load path
             end
+            require 'hobix/api'
             api = Hobix::API.new blogs
             DRb.start_service @config['druby'], api
             DRb.thread.join
@@ -277,6 +292,7 @@ module CommandLine
         patcher.apply( weblog.path )
     end
 
+    # Post a new entry
     # List entries
     def list_action_explain; "List all posts within a given path."; end
     def list_action_args; ['weblog-name', 'search/path']; end
@@ -478,6 +494,82 @@ module CommandLine
 
     def puts( str = '' )
         Kernel::puts str.gsub( /^\s+\|/, '' )
+    end
+
+    ##
+    ## Hobix over the wire
+    ##
+    def http( *args )
+        p http_get( *args )
+    end
+
+    def http_get( weblog, *args )
+        require 'net/http'
+        response =
+            Net::HTTP.new( weblog.host, weblog.port ).start do |http|
+                http.get( File.expand_path( "remote/#{ args.join '/' }", weblog.path ) )
+            end
+        case response
+        when Net::HTTPSuccess     then YAML::load( response.body )
+        else
+          response.error!
+        end
+    end
+
+    def http_post( weblog, url, obj )
+        require 'net/http'
+        response =
+            Net::HTTP.new( weblog.host, weblog.port ).start do |http|
+                http.post( File.expand_path( "remote/#{ url }", weblog.path ), obj.to_yaml, "Content-Type" => "text/yaml" )
+            end
+        case response
+        when Net::HTTPSuccess     then YAML::load( response.body )
+        else
+          response.error!
+        end
+    end
+
+    def http_post_remote( weblog, entry_id )
+        entry = http_get( weblog, "post", entry_id )
+        if entry.class == Errno::ENOENT
+            entry = http_get( weblog, 'new' )
+            entry.author = @config['username']
+            entry.title = entry_id.split( '/' ).
+                                   last.
+                                   gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }.
+                                   strip
+        end
+        entry = aorta( entry )
+        return if entry.nil?
+
+        rsp = http_post( weblog, "post/#{ entry_id }", entry )
+        http_get( weblog, "upgen" ) if @config['post upgen']
+        p rsp
+    end
+
+    def http_edit_remote( weblog )
+        config = http_get( weblog, "edit" )
+        config = aorta( config )
+        return if config.nil?
+        p http_post( weblog, "edit", config )
+    end
+
+    def http_list_remote( weblog, inpath = '' )
+        require 'hobix/storage/filesys'
+        entries = http_get( weblog, 'list' )
+        if entries.empty?
+            puts "** No posts found in the weblog for path '#{inpath}'."
+        else
+            entries.sort { |e1, e2| e1.id <=> e2.id }
+            name_width = entries.collect { |e| e.id.length }.max
+            rows = entries.inject([]) { |rows, entry| rows << [entry.id, entry.created] }
+            tabular( rows, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+        end
+    end
+
+    def http_patch_remote( *args )
+        puts "** Weblogs cannot be patched over the wire yet."
+        exit
     end
 end
 end

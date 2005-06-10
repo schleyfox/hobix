@@ -2,6 +2,8 @@
 - version: 0.4
   date: 2005-05-22
   changes:
+    - lib/hobix/api.rb: remote API, currently usable over HTTP!
+    - lib/hobix/commandline.rb: use remote API from the commandline.
     - lib/hobix/util/patcher.rb: cool! switched to a new YAML-based patch system which is much easier,
         more foolproof, totally basic, all that!
     - lib/hobix/entry.rb: new @tags, force_tags, implicit_tags for loosely categorizing entries.

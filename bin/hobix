@@ -58,9 +58,18 @@ elsif cmdline.respond_to? "#{ cmd }_action"
         puts "*** type `hobix help' and check your spelling."
         exit
     end
-    hobix_weblog = Hobix::Weblog.load( cmdline.config['weblogs'][ weblog ] )
+    hobix_weblog = URI::parse( cmdline.config['weblogs'][ weblog ] )
+    if hobix_weblog.scheme
+        mname = "#{ hobix_weblog.scheme }_#{ cmd }_remote"
+        unless cmdline.respond_to? mname
+            opts.unshift cmd
+            mname = hobix_weblog.scheme
+        end
+    else
+        hobix_weblog = Hobix::Weblog.load( cmdline.config['weblogs'][ weblog ] )
+        mname = "#{ cmd }_action"
+    end
     opts.unshift hobix_weblog
-    mname = "#{ cmd }_action"
 end
 unless mname
     abort "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."

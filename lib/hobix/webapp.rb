@@ -79,6 +79,7 @@ class WebApp
   def get_request_header(field_name) @request_header[field_name] end
 
   def request_method() @request.request_method end
+  def request_body() @request_body.string end
   def server_name() @request.server_name end
   def server_port() @request.server_port end
   def script_name() @request.script_name end

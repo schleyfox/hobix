@@ -14,60 +14,70 @@
 # $Id$
 #++
 module Hobix
-module APIMethods
-    # Update the site
-    def upgen_action_explain; "Update site with only the latest changes."; end
-    def upgen_action_args; ['weblog-name']; end
-    def upgen_action( weblog )
-        weblog.regenerate( :update )
+
+# The API facet
+class API < BaseFacet
+
+    def initialize( weblog, defaults = {} )
+        @weblog = weblog
     end
-
-    # Regenerate the site
-    def regen_action_explain; "Regenerate the all the pages throughout the site."; end
-    def regen_action_args; ['weblog-name']; end
-    def regen_action( weblog )
-        weblog.regenerate
-    end
-
-    # Edit a weblog from local config
-    def edit_action_explain; "Edit weblog's configuration"; end
-    def edit_action_args; ['weblog-name']; end
-    def edit_action( weblog )
-        path = weblog.hobix_yaml
-        weblog = aorta( weblog )
-        return if weblog.nil?
-        weblog.save( path )
-    end
-
-end
-
-class API
-    include APIMethods
-    def initialize( weblogs )
-        @weblogs = weblogs
-    end
-
-    def call( cmd, *opts )
-        if cmdline.respond_to? "#{ cmd }_weblog"
-            mname = "#{ cmd }_weblog"
-        elsif cmdline.respond_to? "#{ cmd }_action"
-            weblog = opts.shift
-            unless @weblogs.has_key? weblog
-                raise ArgumentError, "no weblog `#{ weblog }' found."
+    def get app
+        if app.respond_to? :action_uri
+            @app = app
+            prefix, action, *args = app.action_uri.split( '/' )
+            if prefix == "remote"
+                if respond_to? "#{ action }_action"
+                    begin
+                        @app.puts method( "#{ action }_action" ).call( *args ).to_yaml
+                        return true
+                    rescue StandardError => e
+                        @app.puts e.to_yaml
+                    end
+                    return true
+                end
             end
-            hobix_weblog = Hobix::Weblog.load( @weblogs[ weblog ] )
-            opts.unshift hobix_weblog
-            mname = "#{ cmd }_action"
         end
-        unless mname
-            raise ArgumentError, "no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
+    end
+
+    def upgen_action
+        @weblog.regenerate( :update )
+        "Regeneration complete"
+    end
+
+    def regen_action
+        @weblog.regenerate
+        "Regeneration complete"
+    end
+
+    def new_action
+        @weblog.entry_class.new
+    end
+
+    def list_action( *inpath )
+        inpath = inpath.join '/'
+        @weblog.storage.find( :all => true, :inpath => inpath )
+    end
+
+    def post_action( *id )
+        id = id.join '/'
+        case @app.request_method
+        when "GET"
+            @weblog.storage.load_entry id
+        when "POST"
+            entry = YAML::load( @app.request_body )
+            @weblog.storage.save_entry id, entry
+            "Entry successfully saved."
         end
-        m = cmdline.method( mname )
-        begin
-            m.call( *opts )
-        rescue ArgumentError => ae
-            arglist = [cmd] + cmdline.method( "#{ mname }_args" ).call
-            raise ArgumentError, "use syntax: `hobix #{ arglist.join( ' ' ) }'"
+    end
+
+    def edit_action
+        case @app.request_method
+        when "GET"
+            @weblog
+        when "POST"
+            config = YAML::load( @app.request_body )
+            config.save @weblog.hobix_yaml
+            "Weblog configuration saved."
         end
     end
 end
