@@ -49,7 +49,7 @@ module Publish
     end
 
     def publish( published )
-      replicator.items = weblog.updated_pages
+      replicator.items = weblog.updated_pages.map { |o| o.link }
       replicator.copy do |nb,f,src,tgt|
         puts "## Replicating #{src}"
       end
@@ -64,7 +64,7 @@ module Hobix
     alias p_publish_orig p_publish
 
     def p_publish( obj )
-      (@updated_pages ||= []) << obj.link
+      (@updated_pages ||= []) << obj
       p_publish_orig( obj )
     end
 
