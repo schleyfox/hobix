@@ -45,23 +45,9 @@ require 'yaml'
 #    - Textile Reference: http://hobix.com/textile/
 #
 module Hobix
-class LinkList < Entry
-    attr_accessor :id, :link, :title, :tagline, :summary, :author,
-                  :contributors, :modified, :issued, :created, :links
+class LinkList < BaseEntry
 
-    # Definition map for outputting YAML.  Used by +to_yaml+,
-    # see +ToYamlExtras+ module.
-    def property_map
-        [
-            ['@title', :opt, :text], 
-            ['@author', :opt, :text], 
-            ['@contributors', :opt, :textarea], 
-            ['@created', :opt, :text], 
-            ['@tagline', :opt, :text], 
-            ['@summary', :opt, :textarea], 
-            ['@links', :req, :textarea]
-        ]
-    end
+    _ :links,   [:req, :textarea]
 
     # Converts the link list into a RedCloth string for display
     # in templates.

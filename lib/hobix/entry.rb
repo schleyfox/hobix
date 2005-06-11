@@ -45,6 +45,7 @@ module Hobix
 # year_id::          A path for the year's entries.
 class Entry < BaseEntry
 
+    _ :title,   [:req, :text, :search_fulltext]
     _ :tagline, [:opt, :text, :search_fulltext, :text_processor]
     _ :summary, [:opt, :textarea, :search_fulltext, :text_processor]
     _ :content, [:req, :textarea, :search_fulltext, :text_processor]
@@ -52,18 +53,10 @@ class Entry < BaseEntry
     # Hobix::Entry objects are typed in YAML as !hobix.com,2004/entry
     # objects.  This type is virtually identical to !okay/news/feed objects,
     # which are documented at http://yaml.kwiki.org/?OkayNews.
-    def to_yaml_type
-        "!hobix.com,2004/entry"
-    end
+    yaml_type "tag:okay.yaml.org,2002:news/entry#1.0"
+    yaml_type "tag:hobix.com,2004:entry"
 
 end
-end
-
-YAML::add_domain_type( 'okay.yaml.org,2002', 'news/entry#1.0' ) do |type, val|
-    Hobix::Entry::maker( val )
-end
-YAML::add_domain_type( 'hobix.com,2004', 'entry' ) do |type, val|
-    Hobix::Entry::maker( val )
 end
 
 module Hobix

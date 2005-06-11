@@ -221,21 +221,30 @@ end
 # entries (i.e. the content for your website/blahhg.)
 class BaseEntry
     include ToYamlExtras
-    def self.properties; @@properties || []; end
+    def self.properties
+        if superclass.respond_to? :properties
+            s = superclass.properties
+            @properties.each { |k, v| s[k] = v }
+            s
+        else
+            @properties
+        end
+    end
     def self._ name, opts = nil
-        @@properties ||= []
-        @@properties << [name, opts]
+        @properties ||= YAML::Omap[]
+        @properties[name] = opts
         attr_accessor name
     end
 
     _ :id
     _ :link
-    _ :title,        [:req, :text, :search_fulltext]
+    _ :title,        [:opt, :text, :search_fulltext]
     _ :author,       [:req, :text, :search_prefix]
     _ :contributors, [:opt, :textarea, :search_prefix]
     _ :created,      [:opt, :text, :search_prefix]
     _ :modified
     _ :tags,         [:opt, :text, :search_prefix]
+    _ :content,      [:opt, :textarea, :search_fulltext, :text_processor]
 
     def initialize; yield self if block_given?; end
     def day_id; created.strftime( "%Y/%m/%d" ) if created; end
@@ -301,6 +310,17 @@ class BaseEntry
     end
 
     def tags; ( canonical_tags + Array( @tags ) ).uniq; end
+
+    def self.yaml_type( tag )
+        if self.respond_to? :tag_as
+            tag_as tag
+        else
+            if tag =~ /^tag:([^:]+):(.+)$/
+                define_method( :to_yaml_type ) { "!#$1/#$2" }
+                YAML::add_domain_type( $1, $2 ) { |t, v| self.maker( v ) }
+            end
+        end
+    end
 
     def property_map
         self.class.properties.map do |name, opts|
