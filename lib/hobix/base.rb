@@ -13,6 +13,8 @@
 #--
 # $Id$
 #++
+require 'redcloth'
+require 'yaml'
 
 module Hobix
 # The BasePlugin class is *bingo* the underlying class for
@@ -197,7 +199,7 @@ end
 
 module ToYamlExtras
     def to_yaml_properties
-        property_map.find_all do |prop, req, edit|
+        property_map.find_all do |prop, req|
             case req
             when :opt
                 val = nil
@@ -212,6 +214,165 @@ module ToYamlExtras
         collect do |prop, req|
             prop
         end
+    end
+end
+
+# The BaseEntry class is the underlying class for all Hobix
+# entries (i.e. the content for your website/blahhg.)
+class BaseEntry
+    include ToYamlExtras
+    def self.properties; @@properties || []; end
+    def self._ name, opts = nil
+        @@properties ||= []
+        @@properties << [name, opts]
+        attr_accessor name
+    end
+
+    _ :id
+    _ :link
+    _ :title,        [:req, :text, :search_fulltext]
+    _ :author,       [:req, :text, :search_prefix]
+    _ :contributors, [:opt, :textarea, :search_prefix]
+    _ :created,      [:opt, :text, :search_prefix]
+    _ :modified
+    _ :tags,         [:opt, :text, :search_prefix]
+
+    def initialize; yield self if block_given?; end
+    def day_id; created.strftime( "%Y/%m/%d" ) if created; end
+    def month_id; created.strftime( "%Y/%m" ) if created; end
+    def year_id; created.strftime( "%Y" ) if created; end
+    def section_id; File.dirname( id ) if id; end
+    def force_tags; []; end
+
+    #
+    # If set to true, tags won't be deduced from the entry id
+    #
+    @@no_implicit_tags = false
+
+    def self.no_implicit_tags
+      @@no_implicit_tags = true
+    end
+
+    #
+    # When using implicit tag, the blog root (i.e) is not considered
+    # unless you set the value of +@@root_tag+ to what you need.
+    #
+    @@root_tag = nil
+    def self.root_tag=( tag )
+      @@root_tag = tag
+    end
+    
+    #
+    # When computing so-called implicit 'implicit-tag', whether
+    # or not we should split the path into several tags
+    # (default: false)
+    #
+    @@split_implicit_tags = false
+    
+    def self.split_implicit_tags
+      @@split_implicit_tags = true
+    end
+
+    #
+    # return an array of tags deduced from the path
+    # i.e. a path like ruby/hobix/foo.yml will lead
+    # to [ ruby, hobix ] tags
+    # Occurence of . (alone) will be either removed or replaced
+    # by the value of +root_tag+
+    #
+    def path_to_tags( path )
+      return [] if @@no_implicit_tags
+      return [] if path.nil? 
+      if @@split_implicit_tags
+        tags_array = path.split("/").find_all { |e| e.size > 0 }
+        tags_array.pop # Last item is the entry title
+      else
+        tags_array = [ File.dirname( path )]
+      end
+      tags_array.map { |e| e == '.' ? @@root_tag : e }.compact
+    end
+
+    # 
+    # return canonical tags, i.e. tags that are forced and that are deduced
+    # from the entry path
+    #
+    def canonical_tags( path=nil )
+      ( force_tags + path_to_tags( path || self.id ) ).uniq
+    end
+
+    def tags; ( canonical_tags + Array( @tags ) ).uniq; end
+
+    def property_map
+        self.class.properties.map do |name, opts|
+            if opts
+                yreq = ( [:req, :opt] & opts ).first
+                ["@#{ name }", yreq] if yreq
+            end
+        end.compact
+    end
+
+    alias to_yaml_orig to_yaml
+    def to_yaml( opts = {} )
+        opts[:UseFold] = true if opts.respond_to? :[]
+        self.class.text_processor_fields.each do |f|
+            v = instance_variable_get( '@' + f )
+            if v.is_a? self.class.text_processor
+                instance_eval %{
+                    def @#{ f }.to_yaml( opts = {} )
+                        s = self.to_str
+                        def s.to_yaml_style; :fold; end
+                        s.to_yaml( opts )
+                    end
+                }
+            end
+        end
+        to_yaml_orig( opts )
+    end
+
+    # Build the searchable text
+    def to_search
+        self.class.properties.map do |name, opts|
+            next unless opts
+            val = instance_variable_get( "@#{ name }" )
+            next unless val
+            val = val.strftime "%Y-%m-%dT%H:%M:%S" if val.respond_to? :strftime
+            if opts.include? :search_prefix
+                "#{ name }:" + val.to_s
+            elsif opts.include? :search_fulltext
+                val.to_s
+            end
+        end.compact.join "\n"
+    end
+
+    # Load the weblog entry from a file.
+    def self.load( file )
+        File.open( file ) { |f| YAML::load( f ) }
+    end
+
+    # Accessor which returns the text processor used for untyped
+    # strings in Entry fields.  (defaults to +RedCloth+.)
+    def self.text_processor; RedCloth; end
+    # Returns an Array of fields to which the text processor applies.
+    def self.text_processor_fields
+        self.properties.map do |name, opts|
+            name.to_s if opts and opts.include? :text_processor
+        end.compact
+    end
+    # Factory method for generating Entry classes from a hash.  Used
+    # by the YAML loader.
+    def self.maker( val )
+        self::text_processor_fields.each do |f|
+            if val[f].respond_to? :value
+                str = val[f].value
+                def str.to_html
+                    self
+                end
+                val[f] = str
+            elsif val[f].respond_to? :to_str
+                val[f] = self::text_processor.new( val[f].to_str ) 
+            end
+        end
+        YAML::object_maker( self, val )
     end
 end
 end

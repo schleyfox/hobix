@@ -15,6 +15,7 @@
 #++
 require 'find'
 require 'yaml'
+require 'hobix/search/simple'
 
 module Hobix
 module Storage
@@ -92,7 +93,8 @@ class FileSys < Hobix::BaseStorage
             i.modified = e.modified
         end
         @modified[id] = e.modified
-        sort_index
+        catalog_search_entry( e )
+        sort_index( true )
         e
     end
     def load_entry( id )
@@ -115,6 +117,15 @@ class FileSys < Hobix::BaseStorage
             @entry_cache[id]
         end
     end
+    def load_search_index( wash )
+        @search_index = Hobix::Search::Simple::Searcher.load( File.join( @basepath, 'index.search' ), wash )
+    end
+    def catalog_search_entry( e )
+        @search_index.catalog( Hobix::Search::Simple::Content.new( e.to_search, e.id, e.modified ) )
+    end
+    def search_needs_update? ie 
+        not @search_index.has_entry? ie.id, ie.modified
+    end
     def load_index
         return false if @index
         index_path = File.join( @basepath, 'index.hobix' )
@@ -124,7 +135,9 @@ class FileSys < Hobix::BaseStorage
                     YAML::Omap::new
                 end
         @index = YAML::Omap::new
+        load_search_index( index.length == 0 )
 
+        modified = false
         index_fields = IndexEntry.fields
         Find::find( @basepath ) do |path|
             path.untaint
@@ -138,7 +151,6 @@ class FileSys < Hobix::BaseStorage
                 entry_id = entry_paths.join( '/' )
                 @modified[entry_id] = File.mtime( path )
 
-
                 index_entry = nil
                 if ( index.has_key? entry_id ) and !( index[entry_id].is_a? ::Time ) # old index format
                     index_entry = index[entry_id]
@@ -146,7 +158,8 @@ class FileSys < Hobix::BaseStorage
                 ## we will (re)load the entry if:
                 if index_entry.nil? or # it's new
                         ( index_entry.modified != @modified[entry_id] ) or # it's changed
-                        index_fields.detect { |f| index_entry.send( f ).nil? } # index fields have been added
+                        index_fields.detect { |f| index_entry.send( f ).nil? } or # index fields have been added
+                        search_needs_update? index_entry # entry is old or not available in search db
 
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
@@ -155,19 +168,24 @@ class FileSys < Hobix::BaseStorage
                         i.id = entry_id
                         i.modified = @modified[entry_id]
                     end
+                    catalog_search_entry( e )
+                    modified = true
                 end
                 @index[index_entry.id] = index_entry
             end
         end
-        sort_index
+        sort_index( modified )
         true
     end
-    def sort_index
+    def sort_index( modified )
         return unless @index
         index_path = File.join( @basepath, 'index.hobix' )
         @index.sort! { |x,y| y[1].created <=> x[1].created }
-        File.open( index_path, 'w' ) do |f|
-            YAML::dump( @index, f )
+        if modified
+            File.open( index_path, 'w' ) do |f|
+                YAML::dump( @index, f )
+            end
+            @search_index.dump
         end
     end
     def path_storage( p )
@@ -192,6 +210,9 @@ class FileSys < Hobix::BaseStorage
             @modified[e.id] = e.modified
             _index = {e.id => IndexEntry.new(e)}
         end
+        if search[:search]
+            sr = @search_index.find_words( search[:search] )
+        end
         entries = _index.collect do |id, entry|
                       skip = false
                       if @ignore_test and not search[:all]
@@ -208,6 +229,8 @@ class FileSys < Hobix::BaseStorage
                                      entry.id.index( sval ) != 0
                                  when :match
                                      entry.id.match sval
+                                 when :search
+                                     !sr.results[entry.id]
                                  else
                                      false
                                  end

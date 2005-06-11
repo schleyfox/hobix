@@ -79,8 +79,8 @@ begin
     m.call( *opts )
 rescue ArgumentError => ae
     arglist = [cmd] + cmdline.method( "#{ mname }_args" ).call
-    puts "*** #{ ae.message }"
-    puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
+    # puts "*** #{ ae.message }"
+    # puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
 end
 
 __END__

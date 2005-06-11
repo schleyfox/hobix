@@ -292,7 +292,6 @@ module CommandLine
         patcher.apply( weblog.path )
     end
 
-    # Post a new entry
     # List entries
     def list_action_explain; "List all posts within a given path."; end
     def list_action_args; ['weblog-name', 'search/path']; end
@@ -301,10 +300,19 @@ module CommandLine
         if entries.empty?
             puts "** No posts found in the weblog for path '#{inpath}'."
         else
-            entries.sort { |e1, e2| e1.id <=> e2.id }
-            name_width = entries.collect { |e| e.id.length }.max
-            rows = entries.inject([]) { |rows, entry| rows << [entry.id, entry.created] }
-            tabular( rows, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+            tabular_entries( entries )
+        end
+    end
+
+    # List entries
+    def search_action_explain; "Search for words within posts of a given path."; end
+    def search_action_args; ['weblog-name', 'word1,word2', 'search/path']; end
+    def search_action( weblog, words, inpath = '' )
+        entries = weblog.storage.find( :all => true, :inpath => inpath, :search => words.split( ',' ) )
+        if entries.empty?
+            puts "** No posts found in the weblog for path '#{inpath}'."
+        else
+            tabular_entries( entries )
         end
     end
 
@@ -492,6 +500,13 @@ module CommandLine
         end
     end
 
+    def tabular_entries( entries )
+        entries.sort { |e1, e2| e1.id <=> e2.id }
+        name_width = entries.collect { |e| e.id.length }.max
+        rows = entries.inject([]) { |rows, entry| rows << [entry.id, entry.created] }
+        tabular( rows, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+    end
+
     def puts( str = '' )
         Kernel::puts str.gsub( /^\s+\|/, '' )
     end
@@ -556,14 +571,21 @@ module CommandLine
 
     def http_list_remote( weblog, inpath = '' )
         require 'hobix/storage/filesys'
-        entries = http_get( weblog, 'list' )
+        entries = http_get( weblog, 'list', inpath )
         if entries.empty?
             puts "** No posts found in the weblog for path '#{inpath}'."
         else
-            entries.sort { |e1, e2| e1.id <=> e2.id }
-            name_width = entries.collect { |e| e.id.length }.max
-            rows = entries.inject([]) { |rows, entry| rows << [entry.id, entry.created] }
-            tabular( rows, [[-name_width, 0, 'shortName'], [-34, 1, 'created']] )
+            tabular_entries( entries )
+        end
+    end
+
+    def http_search_remote( weblog, words, inpath = '' )
+        require 'hobix/storage/filesys'
+        entries = http_get( weblog, 'search', words, inpath )
+        if entries.empty?
+            puts "** No posts found in the weblog for path '#{inpath}'."
+        else
+            tabular_entries( entries )
         end
     end
 

@@ -58,6 +58,11 @@ class API < BaseFacet
         @weblog.storage.find( :all => true, :inpath => inpath )
     end
 
+    def search_action( words, *inpath )
+        inpath = inpath.join '/'
+        @weblog.storage.find( :all => true, :inpath => inpath, :search => words.split( ',' ) )
+    end
+
     def post_action( *id )
         id = id.join '/'
         case @app.request_method
