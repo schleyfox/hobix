@@ -201,7 +201,7 @@ class Quick < Hobix::BaseOutput
     end
     def entry_title_erb
      %{ <h3 class="entryTitle"><%= entry.title %></h3>
-        <% if entry.tagline %><div class="entryTagline"><%= entry.tagline %></div><% end %> }
+        <% if entry.respond_to? :tagline and entry.tagline %><div class="entryTagline"><%= entry.tagline %></div><% end %> }
     end
     def entry_content_erb
         %{ <div class="entryContent"><%= entry.content.to_html %></div> }
@@ -253,7 +253,7 @@ class QuickSummary < Quick
     end
     def entry_content_erb
      %{ <div class="entryContent">
-        <% if entry.summary %>
+        <% if entry.respond_to? :summary and entry.summary %>
         <%= entry.summary.to_html %>
         <p><a href="<%= entry.link %>">Continue to full post.</a></p>
         <% else %>

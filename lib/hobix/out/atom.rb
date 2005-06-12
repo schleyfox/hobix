@@ -72,7 +72,7 @@ EOXML
             end
             ele.x( 'summary', 
                 e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
-                {'type' => 'text/html', 'mode' => 'escaped'} ) if e.summary
+                {'type' => 'text/html', 'mode' => 'escaped'} ) if e.respond_to? :summary and e.summary
             author = vars[:weblog].authors[e.author]
             ele_auth = REXML::Element.new 'author'
             ele_auth.extend XmlQuick

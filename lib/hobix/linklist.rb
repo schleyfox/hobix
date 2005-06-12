@@ -61,9 +61,7 @@ class LinkList < BaseEntry
 
     # LinkLists currently output as YAML type family
     # !hobix.com,2004/linklist.
-    def to_yaml_type
-        "!hobix.com,2004/linklist"
-    end
+    yaml_type "tag:hobix.com,2004:linklist"
 end
 end
 
