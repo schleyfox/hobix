@@ -334,7 +334,29 @@ module CommandLine
         entry = aorta( entry )
         return if entry.nil?
 
-        weblog.storage.save_entry( entry_id, entry )
+        begin
+            weblog.storage.save_entry( entry_id, entry, false )
+        rescue Errno::ENOENT
+            puts
+            puts "The category for #{entry_id} doesn't exist."
+	    print "Create it [Yn]? "
+            response = gets.strip
+
+            if response.empty? or response =~ /^[Yy]/
+                weblog.storage.save_entry( entry_id, entry, true )
+            else
+                puts
+                print "Supply a different shortName [<Enter> to discard post]: "
+                response = gets.strip
+
+                if response.empty?
+                    return nil
+                else
+                    entry_id = response
+                    retry
+                end
+            end
+        end
         weblog.regenerate( :update ) if @config['post upgen']
     end
 

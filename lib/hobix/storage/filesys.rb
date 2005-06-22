@@ -15,6 +15,7 @@
 #++
 require 'find'
 require 'yaml'
+require 'fileutils'
 require 'hobix/search/simple'
 
 module Hobix
@@ -76,12 +77,19 @@ class FileSys < Hobix::BaseStorage
     def entry_path( id, ext = extension )
         File.join( @basepath, id.split( '/' ) ) + "." + ext
     end
-    def save_entry( id, e )
+    def save_entry( id, e, create_category=true )
         load_index
         check_id( id )
         e.created ||= (@index.has_key?( id ) ? @index[id].created : now)
         path = entry_path( id )
-        File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
+
+        begin
+            File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
+        rescue Errno::ENOENT
+            raise unless create_category and File.exists? @basepath
+            FileUtils.makedirs File.dirname( path )
+            retry
+        end
 
         @entry_cache ||= {}
         e.id = id
