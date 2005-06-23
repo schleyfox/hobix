@@ -488,15 +488,23 @@ module CommandLine
         if @config['use editor']
             tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
             File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
-            created = File.mtime( tempfile )
-            system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-            return nil unless File.exists?( tempfile )
+  
+            begin
+                created = File.mtime( tempfile )
+                system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
+                return nil unless File.exists?( tempfile )
 
-            if created < File.mtime( tempfile )
-                obj = YAML::load( File.open( tempfile ) )
-            else
-                puts "** Edit aborted"
-                obj = nil
+                if created < File.mtime( tempfile )
+                    obj = YAML::load( File.open( tempfile ) )
+                else
+                    puts "** Edit aborted"
+                    obj = nil
+                end
+            rescue StandardError => e
+                puts "There was an error saving the entry: #{ e.class }: #{ e.message }"
+                print "Re-edit [Yn]? "
+                response = gets.strip
+                retry if response.empty? or response =~ /^[Yy]/
             end
             File.delete( tempfile )
         else
