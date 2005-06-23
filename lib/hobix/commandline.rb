@@ -504,7 +504,12 @@ module CommandLine
                 puts "There was an error saving the entry: #{ e.class }: #{ e.message }"
                 print "Re-edit [Yn]? "
                 response = gets.strip
-                retry if response.empty? or response =~ /^[Yy]/
+                if response.empty? or response =~ /^[Yy]/
+                    retry
+                else
+                    puts "** Edit aborted"
+                    obj = nil
+                end
             end
             File.delete( tempfile )
         else
