@@ -505,7 +505,7 @@ class Weblog
         output_map.each do |page_name, outputs|
             puts "[Building #{ page_name } pages]"
             outputs.each do |vars|
-                full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
+                full_out_path = File.join( @output_path, vars[:page].split( '/' ) )
 
                 ## If retouching, skip pages outside of path
                 next if only_path and vars[:page].link.index( "/" + only_path ) != 0
@@ -535,7 +535,6 @@ class Weblog
                 output = vars.delete( :output )
                 template = vars.delete( :template )
                 txt = output.load( template, vars )
-                full_out_path = File.join( @output_path, vars[:page].link[1..-1] )
                 File.makedirs( File.dirname( full_out_path ) )
                 File.open( full_out_path, 'w' ) do |f| 
                     f << txt
