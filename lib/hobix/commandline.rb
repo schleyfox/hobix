@@ -335,7 +335,7 @@ module CommandLine
         return if entry.nil?
 
         begin
-            weblog.storage.save_entry( entry_id, entry, false )
+            weblog.storage.save_entry( entry_id, entry )
         rescue Errno::ENOENT
             puts
             puts "The category for #{entry_id} doesn't exist."

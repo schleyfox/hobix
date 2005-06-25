@@ -77,7 +77,7 @@ class FileSys < Hobix::BaseStorage
     def entry_path( id, ext = extension )
         File.join( @basepath, id.split( '/' ) ) + "." + ext
     end
-    def save_entry( id, e, create_category=true )
+    def save_entry( id, e, create_category=false )
         load_index
         check_id( id )
         e.created ||= (@index.has_key?( id ) ? @index[id].created : now)
