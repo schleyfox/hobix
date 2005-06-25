@@ -444,8 +444,8 @@ class Weblog
 
                         ## If output by a deeper page, skip
                         pub_name, = path_watch[vars[:page].link]
-                        next if pub_name unless vars[:page].link.index( page_name ) == 0 and
-                                              page_name.length > pub_name.length
+                        next if pub_name and !( vars[:page].link.index( page_name ) == 0 and
+                                              page_name.length > pub_name.length )
 
                         path_watch[vars[:page].link] = [page_name, vars]
                     end
