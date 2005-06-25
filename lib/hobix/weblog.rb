@@ -505,7 +505,7 @@ class Weblog
         output_map.each do |page_name, outputs|
             puts "[Building #{ page_name } pages]"
             outputs.each do |vars|
-                full_out_path = File.join( @output_path, vars[:page].split( '/' ) )
+                full_out_path = File.join( @output_path, vars[:page].link.split( '/' ) )
 
                 ## If retouching, skip pages outside of path
                 next if only_path and vars[:page].link.index( "/" + only_path ) != 0
