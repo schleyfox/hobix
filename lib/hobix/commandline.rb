@@ -4,8 +4,10 @@
 # Hobix command-line weblog system.
 #
 # Copyright (c) 2003-2004 why the lucky stiff
+# Copyright (c) 2005 MenTaLguY
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
+# Additional bits by MenTaLguY <mental@rydia.net>
 #
 # This program is free software, released under a BSD license.
 # See COPYING for details.
@@ -318,13 +320,28 @@ module CommandLine
 
     # Post a new entry
     def post_action_explain; "Add or edit a post with identifier 'shortName'.\n" +
-        "(You can use full paths. 'blog/weddings/anotherPatheticWedding')"; end
-    def post_action_args; ['weblog-name', 'shortName']; end
-    def post_action( weblog, entry_id )
+        "(You can use full paths. 'blog/weddings/anotherPatheticWedding')\n" +
+        "'type' specifies the type of entry to create if the entry does not\n" +
+        "already exist." ; end
+    def post_action_args; ['weblog-name', '[type]', 'shortName']; end
+    def post_action( weblog, *args )
+        if args.size == 1
+            entry_type = nil
+            entry_id = args[0]
+        elsif args.size == 2
+            ( entry_type, entry_id ) = args
+        else
+            raise ArgumentError, "Wrong number of arguments"
+        end
+        
+        entry_class = weblog.entry_class(entry_type)
         begin
             entry = weblog.storage.load_entry( entry_id )
+            if entry_type and not entry.instance_of? entry_class
+                raise TypeError, "#{entry_id} already exists with a different type (#{entry.class})"
+            end
         rescue Errno::ENOENT
-            entry = weblog.entry_class.new
+            entry = entry_class.new
             entry.author = @config['username']
             entry.title = entry_id.split( '/' ).
                                    last.
@@ -339,7 +356,7 @@ module CommandLine
         rescue Errno::ENOENT
             puts
             puts "The category for #{entry_id} doesn't exist."
-	    print "Create it [Yn]? "
+            print "Create it [Yn]? "
             response = gets.strip
 
             if response.empty? or response =~ /^[Yy]/

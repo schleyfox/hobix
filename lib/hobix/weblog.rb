@@ -4,8 +4,10 @@
 # Hobix command-line weblog system.
 #
 # Copyright (c) 2003-2004 why the lucky stiff
+# Copyright (c) 2005 MenTaLguY
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
+# Additional bits by MenTaLguY <mental@rydia.net>
 #
 # This program is free software, released under a BSD license.
 # See COPYING for details.
@@ -312,7 +314,22 @@ class Weblog
     def default_central_prefix; "entry"; end
     def default_central_ext; "html"; end
     def default_entry_class; "Hobix::Entry"; end
-    def entry_class; Hobix.const_find( @entry_class ); end
+    def entry_class( tag = nil )
+        tag = @entry_class unless tag
+            
+        found_class = nil
+        if @@entry_classes
+            found_class = @@entry_classes.find do |c|
+                tag == c.name.split( '::' ).last.downcase
+            end
+        end
+
+        begin
+            found_class || Hobix.const_find( tag )
+        rescue NameError => e
+            raise NameError, "No such entry class"
+        end
+    end
 
     def link
         URI::parse( @link.gsub( /\/$/, '' ) ).extend Hobix::UriStr

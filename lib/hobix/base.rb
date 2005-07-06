@@ -217,6 +217,14 @@ module ToYamlExtras
     end
 end
 
+# placed here to avoid dependency cycle between base.rb and weblog.rb
+class Weblog
+    @@entry_classes = []
+    def self.add_entry_class( c )
+        @@entry_classes << c
+    end
+end
+
 # The BaseEntry class is the underlying class for all Hobix
 # entries (i.e. the content for your website/blahhg.)
 class BaseEntry
@@ -310,6 +318,10 @@ class BaseEntry
     end
 
     def tags; ( canonical_tags + Array( @tags ) ).uniq; end
+
+    def self.inherited( sub )
+        Weblog::add_entry_class( sub )
+    end
 
     def self.yaml_type( tag )
         if self.respond_to? :tag_as
