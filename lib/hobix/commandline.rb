@@ -16,6 +16,7 @@
 # $Id$
 #++
 require 'hobix'
+require 'tempfile'
 
 module Hobix
 module CommandLine
@@ -503,16 +504,18 @@ module CommandLine
 
     def aorta( obj )
         if @config['use editor']
-            tempfile = File.join(ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp',"%10.6f.hobix" % Time.now())
-            File.open( tempfile, 'w' ) { |f| f << obj.to_yaml }
+            # I am quite displeased that Tempfile.open eats its blocks result,
+            # thereby necessitating this blecherous construct...
+            tempfile = nil
+            Tempfile.open("hobix.post") { |tempfile| tempfile << obj.to_yaml }
   
             begin
-                created = File.mtime( tempfile )
-                system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile }" )
-                return nil unless File.exists?( tempfile )
+                created = File.mtime( tempfile.path )
+                system( "#{ ENV['EDITOR'] || 'vi' } #{ tempfile.path }" )
+                return nil unless File.exists?( tempfile.path )
 
-                if created < File.mtime( tempfile )
-                    obj = YAML::load( File.open( tempfile ) )
+                if created < File.mtime( tempfile.path )
+                    obj = YAML::load( tempfile.open )
                 else
                     puts "** Edit aborted"
                     obj = nil
@@ -527,8 +530,14 @@ module CommandLine
                     puts "** Edit aborted"
                     obj = nil
                 end
+            ensure
+                # tempfile will get closed/unlinked when it's collected anyway;
+                # may as well do it here to provide some determinism for the user
+                begin
+                    tempfile.close true
+                rescue
+                end
             end
-            File.delete( tempfile )
         else
             require 'hobix/util/objedit'
             obj = Hobix::Util::ObjEdit( obj )
