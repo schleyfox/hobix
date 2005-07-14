@@ -20,6 +20,9 @@ require 'hobix/search/simple'
 
 module Hobix
 module Storage
+#
+# The IndexEntry class 
+#
 class IndexEntry
     def self.fields; @fields; end
     def self.add_fields( *names )
@@ -55,7 +58,12 @@ YAML::add_domain_type( 'hobix.com,2004', 'storage/indexEntry' ) do |type, val|
     YAML::object_maker( IndexEntry, val )
 end
 
+#
+# The FileSys class is a storage plugin, it manages the loading and dumping of
+# Hobix entries and attachments.  The FileSys class also keeps an index of entry
+# information, to keep the system from loading unneeded entries.
 class FileSys < Hobix::BaseStorage
+    # Start the storage plugin for the +weblog+ passed in.
     def initialize( weblog )
         super( weblog )
         @modified = {}
@@ -67,16 +75,34 @@ class FileSys < Hobix::BaseStorage
         end
         @sorts = weblog.sections_sorts
     end
+
     def now; Time.at( Time.now.to_i ); end
+
+    # The default extension for entries.  Defaults to: yaml.
     def extension
         'yaml'
     end
+
+    # Determine if +id+ is a valid entry identifier, untaint if so.
     def check_id( id )
         id.untaint if id.tainted? and id =~ /^[\w\/\\]+$/
     end
+
+    # Build an entry's complete path based on its +id+.  Optionally, extension +ext+ can
+    # be used to find the path of attachments.
     def entry_path( id, ext = extension )
         File.join( @basepath, id.split( '/' ) ) + "." + ext
     end
+
+    # Brings an entry's modified time current.
+    def touch_entry( id )
+        check_id( id )
+        @modified[id] = Time.now
+        FileUtils.touch entry_path( id )
+    end
+
+    # Save the entry object +e+ and identify it as +id+.  The +create_category+ flag
+    # will forcefully make the needed directories.
     def save_entry( id, e, create_category=false )
         load_index
         check_id( id )
@@ -105,6 +131,8 @@ class FileSys < Hobix::BaseStorage
         sort_index( true )
         e
     end
+
+    # Loads the entry object identified by +id+.  Entries are cached for future loading.
     def load_entry( id )
         return default_entry( @default_author ) if id == default_entry_id
         load_index
@@ -125,15 +153,24 @@ class FileSys < Hobix::BaseStorage
             @entry_cache[id]
         end
     end
+
+    # Loads the search engine database.  The database will be cleansed and re-scanned if +wash+ is true.
     def load_search_index( wash )
         @search_index = Hobix::Search::Simple::Searcher.load( File.join( @basepath, 'index.search' ), wash )
     end
+
+    # Catalogs an entry object +e+ in the search engine.
     def catalog_search_entry( e )
-        @search_index.catalog( Hobix::Search::Simple::Content.new( e.to_search, e.id, e.modified ) )
+        @search_index.catalog( Hobix::Search::Simple::Content.new( e.to_search, e.id, e.modified, e.content_ratings ) )
     end
+
+    # Determines if the search engine has already scanned an entry represented by IndexEntry +ie+.
     def search_needs_update? ie 
         not @search_index.has_entry? ie.id, ie.modified
     end
+
+    # Load the internal index (saved at @entry_path/index.hobix) and refresh any timestamps
+    # which may be stale.
     def load_index
         return false if @index
         index_path = File.join( @basepath, 'index.hobix' )
@@ -160,7 +197,7 @@ class FileSys < Hobix::BaseStorage
                 @modified[entry_id] = File.mtime( path )
 
                 index_entry = nil
-                if ( index.has_key? entry_id ) and !( index[entry_id].is_a? ::Time ) # old index format
+                if ( index.has_key? entry_id ) and !( index[entry_id].is_a? ::Time ) # pre-0.4 index format
                     index_entry = index[entry_id]
                 end
                 ## we will (re)load the entry if:
@@ -185,6 +222,8 @@ class FileSys < Hobix::BaseStorage
         sort_index( modified )
         true
     end
+
+    # Sorts the internal entry index (used by load_index.)
     def sort_index( modified )
         return unless @index
         index_path = File.join( @basepath, 'index.hobix' )
@@ -196,6 +235,9 @@ class FileSys < Hobix::BaseStorage
             @search_index.dump
         end
     end
+
+    # Returns a Hobix::Storage::FileSys object with its scope limited
+    # to entries inside a certain path +p+.
     def path_storage( p )
         return self if ['', '.'].include? p
         load_index
@@ -210,6 +252,19 @@ class FileSys < Hobix::BaseStorage
         end
         path_storage
     end
+
+    # Find entries based on criteria from the +search+ hash.
+    # Possible criteria include:
+    #
+    # :after:: Select entries created after a given Time.
+    # :before:: Select entries created before a given Time.
+    # :inpath:: Select entries contained within a path.
+    # :match:: Select entries with an +id+ which match a Regexp.
+    # :search:: Fulltext search of entries for search words.
+    # :lastn:: Limit the search to include only a given number of entries.
+    #
+    # This method returns an Array of +IndexEntry+ objects for use in
+    # skel_* methods.
     def find( search = {} )
         load_index
         _index = @index
@@ -248,19 +303,33 @@ class FileSys < Hobix::BaseStorage
         entries.slice!( search[:lastn]..-1 ) if search[:lastn] and entries.length > search[:lastn]
         entries
     end
+
+    # Returns a Time object for the latest modified time for a group of
+    # +entries+ (pass in an Array of IndexEntry objects).
     def last_modified( entries )
         entries.collect do |entry|
             @modified[entry.id]
         end.max
     end
+
+    # Returns a Time object for the latest creation time for a group of
+    # +entries+ (pass in an Array of IndexEntry objects).
     def last_created( entries )
         entries.collect do |entry|
             entry.created
         end.max
     end
+
+    # Returns a Time object representing the +modified+ time for the
+    # entry identified by +entry_id+.
     def modified( entry_id )
         @modified[entry_id]
     end
+
+    # Returns an Array of Arrays representing the months which contain
+    # +entries+ (pass in an Array of IndexEntry objects).
+    #
+    # See Hobix::Weblog.skel_month for an example of this method's usage.
     def get_months( entries )
         return [] if entries.empty?
         first_time = entries.collect { |e| e.created }.min
@@ -281,7 +350,7 @@ class FileSys < Hobix::BaseStorage
         months
     end
 
-    # basic entry attachment functions
+    # Discovers attachments to an entry identified by +id+.
     def find_attached( id )
         check_id( id )
         Dir[ entry_path( id, '*' ) ].collect do |att|
@@ -289,6 +358,9 @@ class FileSys < Hobix::BaseStorage
             atp.post_match if atp
         end.compact
     end
+
+    # Loads an attachment to an entry identified by +id+.  Entries
+    # can have any kind of YAML attachment, each which a specific extension.
     def load_attached( id, ext )
         check_id( id )
         @attach_cache ||= {}
@@ -301,6 +373,9 @@ class FileSys < Hobix::BaseStorage
             @attach_cache[id]
         end
     end
+
+    # Saves an attachment to an entry identified by +id+.  The attachment
+    # +e+ is saved with an extension +ext+.
     def save_attached( id, ext, e )
         check_id( id )
         File.open( entry_path( id, ext ), 'w' ) do |f|

@@ -63,7 +63,7 @@ class WebApp
     @response_body = response.body_object
     @urigen = URIGen.new('http', # xxx: https?
       @request.server_name, @request.server_port,
-      @request.script_name, @request.path_info)
+      File.dirname(@request.script_name), @request.path_info)
   end
 
   def <<(str) @response_body << str end
@@ -259,6 +259,7 @@ End
   def make_absolute_uri(hash={})
     @urigen.make_absolute_uri(hash)
   end
+  alias absuri make_absolute_uri
 
   # :stopdoc:
   StatusMessage = { # RFC 2616

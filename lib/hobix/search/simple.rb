@@ -16,11 +16,12 @@ module Search
     end
     
     class Content
-      attr_accessor :content, :identifier, :mtime
-      def initialize(content, identifier, mtime)
+      attr_accessor :content, :identifier, :mtime, :classifications
+      def initialize(content, identifier, mtime, clsf)
         @content = content
         @identifier = identifier
         @mtime = mtime
+        @classifications = clsf
       end
     end
     
@@ -177,13 +178,30 @@ module Search
           vector = Vector.new
           vector.at = entry.mtime
           extract_words_for_searcher(entry.content.downcase) do |word|
-            word_index = @dict.add_word(word)
+            word_index = @dict.add_word(word, entry.classifications)
             if word_index
               vector.add_word_index(word_index) 
             end
           end
           @document_vectors[entry.identifier] = vector
         end
+      end
+
+      def classifications(text)
+        score = Hash.new
+        @dict.clsf.each do |category, category_words|
+          score[category] = 0
+          total = category_words.values.inject(0) {|sum, element| sum+element}
+          extract_words_for_searcher(text) do |word|
+            s = category_words.has_key?(word) ? category_words[word] : 0.1
+            score[category] += Math.log(s/total.to_f)
+          end
+        end
+        score
+      end
+
+      def classify(text)
+        (classifications(text).sort_by { |a| -a[1] })[0][0]
       end
     end
   end

@@ -197,16 +197,56 @@ module Enumerable
     end
 end
 
-module ToYamlExtras
+module BaseProperties
+    # Returns the complete list of properties for the immediate class.
+    # If called on an inheriting class, inherited properties are included.
+    module ClassMethods
+        def properties
+            if superclass.respond_to? :properties
+                s = superclass.properties.dup
+                @__props.each { |k, v| s[k] = v }
+                s
+            else
+                @__props
+            end
+        end
+        def prop_sections
+            if superclass.respond_to? :prop_sections
+                s = superclass.prop_sections.dup
+                (@__sects || {}).each { |k, v| s[k] = v }
+                s
+            else
+                (@__sects || {})
+            end
+        end
+        # Quick property definitions in class definitions.
+        def _ name, opts = nil
+            @__props ||= YAML::Omap[]
+            @__props[name] = opts
+            attr_accessor name
+        end
+        # Property sections
+        def _! name, opts = {}
+            @__sects ||= YAML::Omap[]
+            opts[:__sect] = @__props.last[0] rescue nil
+            @__sects[name] = opts
+        end
+    end
+    # Build a simple map of properties
+    def property_map
+        self.class.properties.map do |name, opts|
+            if opts
+                yreq = opts[:req] ? :req : :opt
+                ["@#{ name }", yreq] if yreq
+            end
+        end.compact
+    end
+    # Build a property map for the YAML module
     def to_yaml_properties
         property_map.find_all do |prop, req|
             case req
             when :opt
-                val = nil
-                if respond_to?( "default_#{ prop[1..-1] }" )
-                    val = method( "default_#{ prop[1..-1] }" ).call
-                end
-                val != instance_variable_get( prop )
+                not instance_variable_get( prop ).nil?
             when :req
                 true
             end
@@ -214,6 +254,10 @@ module ToYamlExtras
         collect do |prop, req|
             prop
         end
+    end
+    def self.append_features klass
+        super
+        klass.extend ClassMethods
     end
 end
 
@@ -228,31 +272,19 @@ end
 # The BaseEntry class is the underlying class for all Hobix
 # entries (i.e. the content for your website/blahhg.)
 class BaseEntry
-    include ToYamlExtras
-    def self.properties
-        if superclass.respond_to? :properties
-            s = superclass.properties
-            @properties.each { |k, v| s[k] = v }
-            s
-        else
-            @properties
-        end
-    end
-    def self._ name, opts = nil
-        @properties ||= YAML::Omap[]
-        @properties[name] = opts
-        attr_accessor name
-    end
+    include BaseProperties
 
+    _! 'Entry Information'
     _ :id
     _ :link
-    _ :title,        [:opt, :text, :search_fulltext]
-    _ :author,       [:req, :text, :search_prefix]
-    _ :contributors, [:opt, :textarea, :search_prefix]
-    _ :created,      [:opt, :text, :search_prefix]
+    _ :title,               :edit_as => :text, :search => :fulltext
+    _ :author,              :req => true, :edit_as => :text, :search => :prefix
+    _ :contributors,        :edit_as => :array, :search => :prefix
+    _ :created,             :edit_as => :datetime, :search => :prefix
     _ :modified
-    _ :tags,         [:opt, :text, :search_prefix]
-    _ :content,      [:opt, :textarea, :search_fulltext, :text_processor]
+    _ :tags,                :edit_as => :text, :search => :prefix
+    _ :content,             :edit_as => :textarea, :search => :fulltext, :text_processor => true
+    _ :content_ratings,     :edit_as => :array
 
     def initialize; yield self if block_given?; end
     def day_id; created.strftime( "%Y/%m/%d" ) if created; end
@@ -260,6 +292,7 @@ class BaseEntry
     def year_id; created.strftime( "%Y" ) if created; end
     def section_id; File.dirname( id ) if id; end
     def force_tags; []; end
+    def content_ratings; @content_ratings || [:ham]; end
 
     #
     # If set to true, tags won't be deduced from the entry id
@@ -334,15 +367,6 @@ class BaseEntry
         end
     end
 
-    def property_map
-        self.class.properties.map do |name, opts|
-            if opts
-                yreq = ( [:req, :opt] & opts ).first
-                ["@#{ name }", yreq] if yreq
-            end
-        end.compact
-    end
-
     alias to_yaml_orig to_yaml
     def to_yaml( opts = {} )
         opts[:UseFold] = true if opts.respond_to? :[]
@@ -368,9 +392,10 @@ class BaseEntry
             val = instance_variable_get( "@#{ name }" )
             next unless val
             val = val.strftime "%Y-%m-%dT%H:%M:%S" if val.respond_to? :strftime
-            if opts.include? :search_prefix
+            case opts[:search]
+            when :prefix
                 "#{ name }:" + val.to_s
-            elsif opts.include? :search_fulltext
+            when :fulltext
                 val.to_s
             end
         end.compact.join "\n"
@@ -387,7 +412,7 @@ class BaseEntry
     # Returns an Array of fields to which the text processor applies.
     def self.text_processor_fields
         self.properties.map do |name, opts|
-            name.to_s if opts and opts.include? :text_processor
+            name.to_s if opts and opts[:text_processor]
         end.compact
     end
     # Factory method for generating Entry classes from a hash.  Used

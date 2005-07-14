@@ -1,0 +1,5 @@
+--- !hobix.com,2004/patches/^list
+hobix.yaml: !^yaml-merge
+  requires:
+  - hobix/out/quick
+  - hobix/publisher

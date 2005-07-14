@@ -1,0 +1,90 @@
+body {
+    font-family: verdana, arial, sans-serif;
+    background-color: #F1F1F1;
+    margin: 0;
+}
+
+.clearfix:after {
+    content: "."; 
+    display: block; 
+    position:relative; /*works better in IE5.5 or float in float situations*/
+    height: 0; 
+    clear: both; 
+    visibility: hidden;
+}
+
+.clearfix {display: inline-block;}
+
+/* Hides from IE-mac \*/
+* html .clearfix {height: 1%;}
+.clearfix {display: block;}
+/* End hide from IE-mac */
+
+/* header styles */
+h2, h3, h4, h5, h6, legend
+{
+    font-family: Baskerville, Georgia, "Times New Roman", serif;
+    /* text-shadow: 3px 3px 5px #ccc; */
+    font-weight: normal;
+    margin: 0px;
+    padding: 0px;
+}
+p
+{
+    margin: 5px 0;
+}
+#emblazen {
+    /* background-color: #F46C51; */
+    background-color: #94CC31;
+    height: 80px;
+}
+#emblazen .gfx {
+    background: url(hobix-emblazen-7.png) top left no-repeat;
+    width: 400px;
+    height: 80px;
+    float: left;
+}
+#emblazen .selector {
+    float: right;
+    margin: 0;
+    padding: 10px 30px;
+}
+#emblazen .selector h1 {
+    margin: 0;
+}
+#emblazen .selector h2,
+#emblazen .selector h3,
+#emblazen .selector h4 {
+    margin: 0;
+    max-width: 280px;
+}
+#emblazen-low {
+    /* background-color: #549Ca1; */
+    background-color: #94CC31;
+    margin-top: 2px;
+    height: 26px;
+    clear: both;
+}
+#emblazen-low .gfx {
+    float: left;
+    background: url(hobix-emblazen-7.png) bottom left no-repeat;
+    width: 400px;
+    height: 26px;
+    background-color: #846173;
+}
+#emblazen-low .selector {
+    float: right;
+    margin: 0;
+    padding: 4px 30px;
+}
+#emblazen-low .selector h1 {
+    margin: 0;
+}
+
+/* entry screen styles */
+#entry-screen {
+    background-color: #F8FEFE;
+    border: dotted 1px #94CC31;
+    padding: 20px;
+    margin: 8px;
+}

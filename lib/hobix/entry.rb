@@ -45,10 +45,10 @@ module Hobix
 # year_id::          A path for the year's entries.
 class Entry < BaseEntry
 
-    _ :title,   [:req, :text, :search_fulltext]
-    _ :tagline, [:opt, :text, :search_fulltext, :text_processor]
-    _ :summary, [:opt, :textarea, :search_fulltext, :text_processor]
-    _ :content, [:req, :textarea, :search_fulltext, :text_processor]
+    _ :title,   :req => true, :edit_as => :text, :search => :fulltext
+    _ :tagline, :edit_as => :text, :search => :fulltext, :text_processor => true
+    _ :summary, :edit_as => :textarea, :search => :fulltext, :text_processor => true
+    _ :content, :req => true, :edit_as => :textarea, :search => :fulltext, :text_processor => true
 
     # Hobix::Entry objects are typed in YAML as !hobix.com,2004/entry
     # objects.  This type is virtually identical to !okay/news/feed objects,

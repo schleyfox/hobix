@@ -39,6 +39,7 @@ class Comments < BaseFacet
             action, entry_id = app.action_uri.split( '/', 2 )
             case action
             when "comment"
+                # Create the comment entry
                 on_entry = @weblog.storage.load_entry( entry_id )
                 comment = Comments.comment_class.new do |c|
                     Comments.comment_fields.each do |cf|
@@ -53,12 +54,13 @@ class Comments < BaseFacet
                 end
                 comments = @weblog.storage.load_attached( entry_id, 'comments' ) rescue []
                 comments << comment
-                @weblog.storage.save_attached( entry_id, "comments", comments )
-                @weblog.regenerate :update
-                # @weblog.retouch entry_id
-                # @weblog.retouch( 'redesign2005/index' ) if entry_id =~ /redesign2005/
-                # @weblog.retouch 'index'
 
+                # Save the attachment, upgen
+                @weblog.storage.save_attached( entry_id, "comments", comments )
+                @weblog.storage.touch_entry( entry_id )
+                @weblog.regenerate :update
+
+                # Redirect
                 link = @weblog.output_entry_map[entry_id]
                 app.setup_redirection( 302, link[:page].link )
                 return true

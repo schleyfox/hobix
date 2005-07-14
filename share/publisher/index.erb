@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>hobix .: <%= @title %> :.</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <script src="<%= app.absuri( :path_info => '/publisher/js/prototype.js' ) %>" type="text/javascript"></script>
+    <script src="<%= app.absuri( :path_info => '/publisher/js/controls.js' ) %>" type="text/javascript"></script>
+    <script src="<%= app.absuri( :path_info => '/publisher/js/effects.js' ) %>" type="text/javascript"></script>
+    <script src="<%= app.absuri( :path_info => '/publisher/js/dragdrop.js' ) %>" type="text/javascript"></script>
+    <style type="text/css">
+        @import '<%= app.absuri( :path_info => '/publisher/css/control.css' ) %>';
+        @import '<%= app.absuri( :path_info => '/publisher/css/main-menu.css' ) %>';
+        @import '<%= app.absuri( :path_info => '/publisher/css/form.css' ) %>';
+        #emblazen .gfx,
+        #emblazen-low .gfx {
+            background: url(<%= app.absuri( :path_info => '/publisher/i/hobix-emblazen-1.png' ) %>) bottom left no-repeat;
+        }
+    </style>
+</head>
+<body>
+
+<div id="all">
+
+    <!-- hobix header, blog title, login -->
+    <div class="clearfix">
+    <div id="emblazen">
+        <div class="gfx">&nbsp;</div>
+        <div class="selector">
+            <h1><%= @weblog.title %></h1>
+            <div id="login">Logged in as: <b><%= @user %></b></div>
+        </div>
+    </div>
+    </div>
+
+    <!-- hobix menu items, search box -->
+    <div id="main-menu" class="clearfix">
+    <form id="search_form" method="post" action="<%= app.absuri :path_info => '/publisher/search' %>">
+    <ul class="clearfix">
+        <li><a href="<%= app.absuri( :path_info => '/publisher/config' ) %>">config</a></li>
+        <li><a href="<%= app.absuri( :path_info => '/publisher/entries' ) %>">entries</a></li>
+        <li><a href="<%= app.absuri( :path_info => '/publisher/images' ) %>">images</a></li>
+        <li><a href="<%= app.absuri( :path_info => '/publisher/skel' ) %>">skel</a></li>
+        <li><p>search:
+            <input id="search_box" name="q" type="text" /></p>
+        </li>
+        <li><a href="<%= app.absuri( :path_info => '/publisher/help' ) %>">help</a></li>
+    </ul>
+    </form>
+    </div>
+
+    <!-- hobix entry screens -->
+    <div id="entry-screen">
+        <%= @screen %>
+    </div>
+</div>
+
+    <!-- hobix header, blog title, login -->
+    <div id="emblazen-low">
+        <div class="gfx">&nbsp;</div>
+        <div class="selector">
+            <h5 id="ad">You are using <a href="http://hobix.com">Hobix</a> 0.3f!</h5>
+        </div>
+    </div>
+
+</body>
+</html>

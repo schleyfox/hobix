@@ -4,5 +4,5 @@ htdocs/control/.htaccess: !^file-ensure |
   Options +FollowSymLinks +ExecCGI
   
   RewriteEngine   On
-  RewriteCond %{REQUEST_URI} !hobix.cgi
+  RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule     ^(.*)$              /control/hobix.cgi

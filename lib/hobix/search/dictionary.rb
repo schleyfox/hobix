@@ -92,25 +92,38 @@ module Search
       "youll" => 1,
       }
     
+      attr_reader :total, :clsf, :words
+
       def initialize
+        @total = 0
+        @clsf = {}
         @words = {}
       end
     
-      def add_word(word)
+      def add_word(word, classifications = [], mod = 1)
         word = Stemmable::stem_porter(word)
         if STOP_WORDS[word]
           nil
         else
-          @words[word] ||= @words.size
+          @words[word] ||= {:pos => @words.size, :clsf => {}}
+          classifications.each do |c|
+            @clsf[c] ||= {}
+            @clsf[c][word] ||= 0
+            @clsf[c][word] += mod
+            @total += mod
+          end
+          @words[word][:pos]
         end
       end
     
+      def remove_word(word, classifications = [])
+        add_word(word, classifications, -1)
+      end
+
       def find(word)
         word = Stemmable::stem_porter(word)
-        if STOP_WORDS[word]
-          nil
-        else
-          @words[word]
+        if @words[word] and not STOP_WORDS[word]
+          @words[word][:pos]
         end
       end
     

@@ -75,12 +75,14 @@ unless mname
     abort "*** no hobix command `#{ cmd }'. use `hobix' without arguments to get help."
 end
 m = cmdline.method( mname )
-begin
+if m.arity == opts.length or (m.arity < 0 and opts.length >= m.arity.abs - 1)
     m.call( *opts )
-rescue ArgumentError => ae
+else
     arglist = [cmd] + cmdline.method( "#{ mname }_args" ).call
-    # puts "*** #{ ae.message }"
-    # puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
+    need = m.arity
+    need = need.abs - 1 if need < 0
+    puts "*** wrong arguments (#{opts.length} given, #{need} needed)"
+    puts "*** use syntax: `hobix #{ arglist.join( ' ' ) }'"
 end
 
 __END__

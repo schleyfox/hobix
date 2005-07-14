@@ -272,12 +272,41 @@ end
 # path, use +path_storage+.  Both are +Hobix::BaseStorage+ objects and
 # respond to the same methods.
 class Weblog
-    attr_accessor :title, :link, :authors, :contributors, :tagline,
-                  :copyright, :period, :path, :sections, :requires,
-                  :entry_path, :skel_path, :output_path, :lib_path,
-                  :linklist, :lastn, :central_prefix, :central_ext,
-                  :entry_class
+    include BaseProperties
 
+    _! 'Basic Information'
+    _ :title,              :req => true, :edit_as => :text
+    _ :link,               :req => true, :edit_as => :text
+    _ :tagline,            :req => true, :edit_as => :text
+    _ :copyright,          :edit_as => :text
+    _ :period,             :edit_as => :text
+    _ :lastn,              :edit_as => :text
+
+    _! 'Entry Customization'
+    _ :entry_class,        :edit_as => :text
+    _ :central_prefix,     :edit_as => :text
+    _ :central_ext,        :edit_as => :text
+
+    _! 'Paths'
+    _ :entry_path,         :edit_as => :text
+    _ :lib_path,           :edit_as => :text
+    _ :skel_path,          :edit_as => :text
+    _ :output_path,        :edit_as => :text
+
+    _! 'Participants'
+    _ :authors,            :req => true, :edit_as => :map 
+    _ :contributors,       :edit_as => :map
+    
+    _! 'Links'
+    _ :linklist,           :edit_as => :omap
+
+    _! 'Sections'
+    _ :sections,           :edit_as => :map
+
+    _! 'Libraries and Plugins'
+    _ :requires,           :req => true, :edit_as => :omap
+    
+    attr_accessor :path
     attr_reader   :hobix_yaml
 
     # After the weblog is initialize, the +start+ method is called
@@ -288,18 +317,8 @@ class Weblog
         @hobix_yaml = hobix_yaml
         @path = File.dirname( hobix_yaml )
         @sections ||= {}
-        @entry_path = default_entry_path( @entry_path ).untaint
-        @skel_path = default_skel_path( @skel_path ).untaint
-        @output_path = default_output_path( @output_path ).untaint
-        @lib_path = default_lib_path( @lib_path ).untaint
-        @central_prefix = default_central_prefix unless @central_prefix =~ /^[\w\.]+$/
-        @central_prefix.untaint
-        @central_ext = default_central_ext unless @central_ext =~ /^\w*$/
-        @central_ext.untaint
-        @entry_class = default_entry_class
-        @entry_class.untaint
-        if File.exists?( @lib_path )
-            $LOAD_PATH << @lib_path
+        if File.exists?( lib_path )
+            $LOAD_PATH << lib_path
         end
         @plugins = []
         @requires.each do |req|
@@ -307,15 +326,22 @@ class Weblog
         end
     end
 
-    def default_entry_path( dir = nil ); File.expand_path( dir || "entries", @path ); end
-    def default_skel_path( dir = nil ); File.expand_path( dir || "skel", @path ); end
-    def default_output_path( dir = nil ); File.expand_path( dir || "htdocs", @path ); end
-    def default_lib_path( dir = nil ); File.expand_path( dir || "lib", @path ); end
+    def default_entry_path; "entries"; end
+    def default_skel_path; "skel"; end
+    def default_output_path; "htdocs"; end
+    def default_lib_path; "lib"; end
     def default_central_prefix; "entry"; end
     def default_central_ext; "html"; end
     def default_entry_class; "Hobix::Entry"; end
+
+    def entry_path; File.expand_path( @entry_path || default_entry_path, @path ).untaint; end
+    def skel_path; File.expand_path( @skel_path || default_skel_path, @path ).untaint; end
+    def output_path; File.expand_path( @output_path || default_output_path, @path ).untaint; end
+    def lib_path; File.expand_path( @lib_path || default_lib_path, @path ).untaint; end
+    def central_prefix; @central_prefix =~ /^[\w\.]+$/ ? @central_prefix.untaint : default_central_prefix; end
+    def central_ext; @central_ext =~ /^\w*$/ ? @central_ext.untaint : default_central_ext; end
     def entry_class( tag = nil )
-        tag = @entry_class unless tag
+        tag = @entry_class =~ /^[\w:]+$/ ? @entry_class.untaint : default_entry_class unless tag
             
         found_class = nil
         if @@entry_classes
@@ -434,12 +460,12 @@ class Weblog
         return @output_map if @output_map
         path_watch = {}
         @output_entry_map = {}
-        Find::find( @skel_path ) do |path|
+        Find::find( skel_path ) do |path|
             path.untaint
             if File.basename(path)[0] == ?.
                 Find.prune 
             elsif not FileTest.directory? path
-                tpl_path = path.gsub( /^#{ Regexp::quote( @skel_path ) }\/?/, '' )
+                tpl_path = path.gsub( /^#{ Regexp::quote( skel_path ) }\/?/, '' )
                 output = outputs.detect { |p| if tpl_path =~ /\.#{ p.extension }$/; tpl_path = $`; end }
                 if output
                     ## Figure out template extension and output filename
@@ -455,7 +481,7 @@ class Weblog
                         eid = vars[:entry] || page_name
                         if not @output_entry_map[ eid ]
                             @output_entry_map[ eid ] = vars
-                        elsif tpl_ext.split( '.' )[1] == @central_ext
+                        elsif tpl_ext.split( '.' )[1] == central_ext
                             @output_entry_map[ eid ] = vars
                         end
 
@@ -522,7 +548,7 @@ class Weblog
         output_map.each do |page_name, outputs|
             puts "[Building #{ page_name } pages]"
             outputs.each do |vars|
-                full_out_path = File.join( @output_path, vars[:page].link.split( '/' ) )
+                full_out_path = File.join( output_path, vars[:page].link.split( '/' ) )
 
                 ## If retouching, skip pages outside of path
                 next if only_path and vars[:page].link.index( "/" + only_path ) != 0
@@ -759,27 +785,6 @@ class Weblog
     end
 
     ## YAML Display
-    include ToYamlExtras
-    def property_map
-        [
-            ['@title', :req, :text], 
-            ['@link', :req, :text], 
-            ['@tagline', :req, :text], 
-            ['@period', :opt, :text], 
-            ['@lastn', :opt, :text],
-            ['@entry_class', :opt, :text],
-            ['@central_prefix', :opt, :text],
-            ['@central_ext', :opt, :text],
-            ['@entry_path', :opt, :text],
-            ['@skel_path', :opt, :text],
-            ['@output_path', :opt, :text],
-            ['@authors', :req, :textarea], 
-            ['@contributors', :opt, :textarea], 
-            ['@linklist', :opt, :textarea],
-            ['@sections', :opt, :textarea], 
-            ['@requires', :req, :textarea]
-        ]
-    end
 
     # Returns the YAML type information, which expands to
     # tag:hobix.com,2004:weblog.

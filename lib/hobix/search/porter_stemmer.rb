@@ -2,6 +2,8 @@
 #
 # $Id$
 #
+# Lifted from SimpleSearch by Chad Fowler / Dave Thomas / Allen Condit / perhaps other unseeable folks in the distance ...
+#
 # See example usage at the end of this file.
 #
 

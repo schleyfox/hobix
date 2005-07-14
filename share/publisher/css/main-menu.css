@@ -1,0 +1,134 @@
+#main-menu {
+    width: 100%;
+    padding: 0;
+    z-index: 100;
+}
+
+#main-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    z-index: 100;
+}
+
+#main-menu li {
+    float: left;
+    z-index: 100;
+    text-align:left;
+    border-right: dotted 1px #D1E1C9;
+}
+
+#main-menu > li {
+    z-index: 100;
+}
+
+#main-menu li, #main-menu ul li {
+	position: relative;
+    z-index: 100;
+}
+	
+#main-menu li ul, #main-menu ul li {
+    z-index: 100;
+}
+
+#main-menu li ul {
+	position: absolute;
+	left: 0; /* Set 1px less than menu width */
+	top: 28px;
+	display: none;
+    z-index: 100;
+}
+
+#main-menu li ul li ul {
+	position: absolute;
+	left: 220px; /* Set 1px less than menu width */
+	top: 0px;
+    border-top: none;
+	display: none;
+    z-index: 100;
+}
+
+/* Styles for Menu Items */
+#main-menu ul li a {
+    display: block;
+	text-decoration: none;
+	filter: alpha(opacity= 70); opacity: 0.700;
+    z-index: 100;
+}
+
+#main-menu h2, #main-menu a, #main-menu #search {
+	text-decoration: none;
+    font-weight: 300;
+    z-index: 100;
+}
+
+h2 img {
+	border: none;
+}
+
+#main-menu ul li a, #main-menu ul li a:hover, #main-menu ul li p {
+    margin: 0;
+    padding: 3px 15px 3px 15px;
+    z-index: 100;
+}
+
+#main-menu a:hover {
+    color: #000;
+    background: #ddd;
+    z-index: 100;
+}
+
+#main-menu li.first a,
+#main-menu li.first a:visited,
+#main-menu li.first a:active,
+#main-menu li.first a:hover {
+	padding-top: 10px;
+}
+
+/*
+#main-menu a:active {
+    color:#060;
+    background: #ccc;
+    z-index: 100;
+}
+*/
+
+/* Fix IE. Hide from IE Mac \*/
+* html #main-menu ul li { float: left; height: 1%; }
+* html #main-menu ul li a { height: 1%; }
+/* End */
+
+#main-menu li a:hover, #main-menu ul li a:hover { color: white; background: #455; filter: alpha(opacity=100); opacity: 1.000; } /* Hover Styles */
+		
+#main-menu li:hover > ul { display: block; } /* The magic */
+#main-menu ul.over { display: block; } /* The magic */
+
+/* SEARCH FORM */
+#main-menu #search_form {
+    margin: 0;
+}
+
+#search_title img {
+	border: none;
+}
+
+#search_form #search_box {
+	display: inline;
+	margin: 0px 0px 0px 5px;
+    font-size: 11px;
+    border: solid 1px #ccc;
+    padding: 2px;
+}
+
+#search_form #search_box input {
+	background-color: #EBBDBD;
+	border: 1px solid #CF5F5F;
+	width: 85px;
+	color: black;
+}
+
+#search_form #search_button {
+	display: inline;
+	float: left;
+	margin-left: 5px;
+}

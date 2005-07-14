@@ -142,7 +142,7 @@ class WebApp
         @header_object.add k, v
       }
       @request_method = env['REQUEST_METHOD']
-      @server_name = env['SERVER_NAME'] || ''
+      @server_name = ( env['SERVER_NAME'] || '' ).gsub( /\:\d+$/, '' )  # lighttpd affixes port!!
       @server_port = env['SERVER_PORT'].to_i
       @script_name = env['SCRIPT_NAME'] || ''
       @path_info = env['PATH_INFO'] || ''

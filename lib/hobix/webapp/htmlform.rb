@@ -23,8 +23,8 @@ class WebApp
       pairs = []
       boundary = "--" + boundary
       eol = "\015\012"
-      str = @escaped_query_string.gsub( /^#{ Regexp::quote( boundary ) }--#{ eol }.*\Z/m, '' )
-      str.split( /^#{ Regexp::quote( boundary ) }#{ eol }/m ).each do |part|
+      str = @escaped_query_string.gsub( /(?:\r?\n|\A)#{ Regexp::quote( boundary ) }--#{ eol }.*/m, '' )
+      str.split( /(?:\r?\n|\A)#{ Regexp::quote( boundary ) }#{ eol }/m ).each do |part|
           headers = {}
           header, value = part.split( "#{eol}#{eol}", 2 )
           next unless header and value
