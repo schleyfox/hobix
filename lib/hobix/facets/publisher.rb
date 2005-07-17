@@ -28,6 +28,8 @@ module Facets
 #   - hobix/facets/publisher
 #
 class Publisher < BaseFacet
+    class MissingRequired < Exception; end
+
     def initialize( weblog, defaults = {} )
         @weblog = weblog
     end
@@ -193,34 +195,60 @@ class Publisher < BaseFacet
         return ::ERB.new( form_erb, 0, "%<>", "_hobixpublishFORM" ).result( binding )
     end
 
-    def save_form( obj )
+    def save_form( obj, app )
         obj = obj.dup
+        missing = []
         obj.class.properties.each do |name, opts|
+            next unless opts
+            next unless app._POST.has_key? name.to_s
+            val = app._POST[name.to_s]
+            val = nil if val and val.empty?
+            missing << name if val.nil? and opts[:req]
+
             case opts[:edit_as]
             when :omap
-                obj
+            when :map
             else
-                obj
+                obj.instance_variable_set( "@#{name}", val )
             end
         end
+        [obj, missing]
+    end
+
+    def red( str ); RedCloth.new( str ).to_html; end
+
+    def show_weblog_form( weblog, app )
+        make_form :app => app,
+          :full_title => 'Configure Your Weblahhg',
+          :intro => %q{
+              Generally speaking, you shouldn't have to alter many of your weblog settings.
+              Most of the below are available for those who really want to customize.
+              
+              **Bold** fields are required.
+          }.gsub( /^ +/, '' ),
+          :object => weblog
     end
 
     def get_config( app )
         @title = 'config'
         case app.request_method
         when "GET"
-            make_form :app => app,
-              :full_title => 'Configure Your Weblahhg',
-              :intro => %q{
-                  Generally speaking, you shouldn't have to alter many of your weblog settings.
-                  Most of the below are available for those who really want to customize.
-                  
-                  **Bold** fields are required.
-              }.gsub( /^ +/, '' ),
-              :object => @weblog
+            show_weblog_form( @weblog, app )
         when "POST"
-            # weblog = save_form( @weblog )
-            app._POST.inspect
+            weblog, missing = save_form( @weblog, app )
+            if missing.empty?
+                weblog.save( weblog.hobix_yaml + ".edit" )
+                red %{
+                    *Your configuraton has been saved.*
+                    
+                    Please note that this development version of Hobix isn't
+                    yet equipped to deal with re-sorting of the requires.  I'm not that great with Prototype
+                    yet and I also want to write some code to sandbox the configuration, to check that the
+                    requires will load right before saving it.
+                }
+            else
+                show_weblog_form( weblog, app )
+            end
         end
     end
 
@@ -240,8 +268,8 @@ class Publisher < BaseFacet
               }.gsub( /^ +/, '' ),
               :object => e
         when "POST"
-            # weblog = save_form( @weblog )
-            app._POST.inspect
+            e, missing = save_form( e, app )
+            e.inspect
         end
     end
 end
