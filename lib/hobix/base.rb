@@ -204,7 +204,7 @@ module BaseProperties
         def properties
             if superclass.respond_to? :properties
                 s = superclass.properties.dup
-                @__props.each { |k, v| s[k] = v }
+                (@__props || {}).each { |k, v| s[k] = v }
                 s
             else
                 @__props
@@ -350,7 +350,7 @@ class BaseEntry
       ( force_tags + path_to_tags( path || self.id ) ).uniq
     end
 
-    def tags; ( canonical_tags + Array( @tags ) ).uniq; end
+    def tags;( canonical_tags + Array( @tags ) ).uniq; end
 
     def self.inherited( sub )
         Weblog::add_entry_class( sub )
