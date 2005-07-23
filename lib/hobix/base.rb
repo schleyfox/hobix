@@ -16,6 +16,12 @@
 require 'redcloth'
 require 'yaml'
 
+module YAML
+    class Omap
+        def keys; map { |k, v| k }; end
+    end
+end
+
 module Hobix
 # The BasePlugin class is *bingo* the underlying class for
 # all Hobix plugins.  The +Class::inherited+ hook is used
@@ -89,14 +95,13 @@ class BaseStorage < BasePlugin
     def default_entry( author )
         Hobix::Entry.new do |e|
             e.id = default_entry_id 
-            e.link = "#{ @link }/#{ e.id }.html"
+            e.link = e.class.url_link e, @link, "html"
             e.created = Time.now
             e.modified = Time.now
             e.title = "This Ghostly Message From the Slime Will Soon Vanish!"
             e.tagline = "A temporary message, a tingling sensation, Hobix is up!!"
             e.author = author
             e.content = Hobix::Entry.text_processor.new( "Welcome to Hobix!  Once you make your first blog post, this entry will disappear.  However, in the meantime, you can tweak the CSS of your blog until it suits your satisfaction and you have this bit of words to act as a place holder." )
-            e.id = default_entry_id
         end
     end
     def all
@@ -207,7 +212,7 @@ module BaseProperties
                 (@__props || {}).each { |k, v| s[k] = v }
                 s
             else
-                @__props
+                (@__props || {})
             end
         end
         def prop_sections
@@ -223,7 +228,7 @@ module BaseProperties
         def _ name, opts = nil
             @__props ||= YAML::Omap[]
             @__props[name] = opts
-            attr_accessor name
+            attr_accessor name unless method_defined? "#{ name }="
         end
         # Property sections
         def _! name, opts = {}
@@ -269,30 +274,26 @@ class Weblog
     end
 end
 
-# The BaseEntry class is the underlying class for all Hobix
-# entries (i.e. the content for your website/blahhg.)
-class BaseEntry
+class Core
     include BaseProperties
 
     _! 'Entry Information'
     _ :id
     _ :link
     _ :title,               :edit_as => :text, :search => :fulltext
-    _ :author,              :req => true, :edit_as => :text, :search => :prefix
-    _ :contributors,        :edit_as => :array, :search => :prefix
     _ :created,             :edit_as => :datetime, :search => :prefix
     _ :modified
     _ :tags,                :edit_as => :text, :search => :prefix
-    _ :content,             :edit_as => :textarea, :search => :fulltext, :text_processor => true
-    _ :content_ratings,     :edit_as => :array
 
     def initialize; yield self if block_given?; end
     def day_id; created.strftime( "%Y/%m/%d" ) if created; end
     def month_id; created.strftime( "%Y/%m" ) if created; end
     def year_id; created.strftime( "%Y" ) if created; end
     def section_id; File.dirname( id ) if id; end
+    def base_id; File.basename( id ) if id; end
+    def self.url_link( e, url = nil, ext = nil ); "#{ url }/#{ link_format e }#{ '.' + ext if ext }"; end
+    def self.link_format( e ); e.id; end
     def force_tags; []; end
-    def content_ratings; @content_ratings || [:ham]; end
 
     #
     # If set to true, tags won't be deduced from the entry id
@@ -352,10 +353,6 @@ class BaseEntry
 
     def tags;( canonical_tags + Array( @tags ) ).uniq; end
 
-    def self.inherited( sub )
-        Weblog::add_entry_class( sub )
-    end
-
     def self.yaml_type( tag )
         if self.respond_to? :tag_as
             tag_as tag
@@ -383,22 +380,6 @@ class BaseEntry
             end
         end
         to_yaml_orig( opts )
-    end
-
-    # Build the searchable text
-    def to_search
-        self.class.properties.map do |name, opts|
-            next unless opts
-            val = instance_variable_get( "@#{ name }" )
-            next unless val
-            val = val.strftime "%Y-%m-%dT%H:%M:%S" if val.respond_to? :strftime
-            case opts[:search]
-            when :prefix
-                "#{ name }:" + val.to_s
-            when :fulltext
-                val.to_s
-            end
-        end.compact.join "\n"
     end
 
     # Load the weblog entry from a file.
@@ -431,5 +412,44 @@ class BaseEntry
         end
         YAML::object_maker( self, val )
     end
+end
+
+# The BaseEntry class is the underlying class for all Hobix
+# entries (i.e. the content for your website/blahhg.)
+class BaseEntry < Core
+
+    _ :id
+    _ :link
+    _ :title,               :edit_as => :text, :search => :fulltext
+    _ :author,              :req => true, :edit_as => :text, :search => :prefix
+    _ :contributors,        :edit_as => :array, :search => :prefix
+    _ :created,             :edit_as => :datetime, :search => :prefix
+    _ :modified
+    _ :tags,                :edit_as => :text, :search => :prefix
+    _ :content,             :edit_as => :textarea, :search => :fulltext, :text_processor => true
+    _ :content_ratings,     :edit_as => :array
+
+    def content_ratings; @content_ratings || [:ham]; end
+
+    def self.inherited( sub )
+        Weblog::add_entry_class( sub )
+    end
+
+    # Build the searchable text
+    def to_search
+        self.class.properties.map do |name, opts|
+            next unless opts
+            val = instance_variable_get( "@#{ name }" )
+            next unless val
+            val = val.strftime "%Y-%m-%dT%H:%M:%S" if val.respond_to? :strftime
+            case opts[:search]
+            when :prefix
+                "#{ name }:" + val.to_s
+            when :fulltext
+                val.to_s
+            end
+        end.compact.join "\n"
+    end
+
 end
 end

@@ -74,14 +74,22 @@ class Patcher
         end.
         each do |fname, ftext|
             # save the files
-            FileUtils.makedirs( File.dirname( fname ) )
-            ftext = ftext.to_yaml if fname =~ /\.yaml$/
-            File.open( fname, 'w+' ) { |f| f << ftext }
+            if ftext == :remove
+                FileUtils.rm_rf fname
+            else
+                FileUtils.makedirs( File.dirname( fname ) )
+                ftext = ftext.to_yaml if fname =~ /\.yaml$/
+                File.open( fname, 'w+' ) { |f| f << ftext }
+            end
         end
     end
 
+    def file_remove( target, text )
+        :remove
+    end
+
     def file_create( target, text )
-        text
+        text.to_s
     end
 
     def file_ensure( target, text )
@@ -140,7 +148,7 @@ end
 YAML::add_domain_type( 'hobix.com,2004', 'patches/list' ) do |type, val|
     val
 end
-['yaml-merge', 'file-create', 'file-ensure'].each do |ptype|
+['yaml-merge', 'file-create', 'file-ensure', 'file-remove'].each do |ptype|
     YAML::add_domain_type( 'hobix.com,2004', 'patches/' + ptype ) do |type, val|
         [ptype, val]
     end

@@ -48,7 +48,7 @@ class OkayNews < Hobix::BaseOutput
         "okaynews"
     end
     def load( file_name, vars )
-        vars[:weblog].to_okaynews( vars[:entries] )
+        vars[:weblog].to_okaynews( vars[:entries] || [vars[:entry]] )
     end
 end
 end

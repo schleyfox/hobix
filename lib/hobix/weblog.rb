@@ -167,10 +167,10 @@ end
 # To give you a general idea, skel_index looks something like this:
 #
 #   def skel_index( path_storage )
-#       index_entries = path_storage.lastn
+#       index_entries = path_storage.lastn( @lastn )
 #       page = Page.new( 'index' )
-#       page.prev = index_entries.last[1].strftime( "/%Y/%m/index" )
-#       page.timestamp = index_entries.first[1]
+#       page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
+#       page.timestamp = index_entries.first.created
 #       page.updated = path_storage.last_modified( index_entries )
 #       yield :page => page, :entries => index_entries
 #   end
@@ -284,6 +284,7 @@ class Weblog
 
     _! 'Entry Customization'
     _ :entry_class,        :edit_as => :text
+    _ :index_class,        :edit_as => :text
     _ :central_prefix,     :edit_as => :text
     _ :central_ext,        :edit_as => :text
 
@@ -333,6 +334,7 @@ class Weblog
     def default_central_prefix; "entry"; end
     def default_central_ext; "html"; end
     def default_entry_class; "Hobix::Entry"; end
+    def default_index_class; "Hobix::IndexEntry"; end
 
     def entry_path; File.expand_path( @entry_path || default_entry_path, @path ).untaint; end
     def skel_path; File.expand_path( @skel_path || default_skel_path, @path ).untaint; end
@@ -353,7 +355,15 @@ class Weblog
         begin
             found_class || Hobix.const_find( tag )
         rescue NameError => e
-            raise NameError, "No such entry class"
+            raise NameError, "No such entry class #{ tag }"
+        end
+    end
+    def index_class( tag = nil )
+        tag = @index_class =~ /^[\w:]+$/ ? @index_class.untaint : default_index_class unless tag
+        begin
+            Hobix.const_find( tag )
+        rescue NameError => e
+            raise NameError, "No such index class #{ tag }"
         end
     end
 
@@ -478,7 +488,7 @@ class Weblog
                         vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
                         vars[:template] = path
                         vars[:output] = output
-                        eid = vars[:entry] || page_name
+                        eid = ( vars[:entry] && vars[:entry].id ) || page_name
                         if not @output_entry_map[ eid ]
                             @output_entry_map[ eid ] = vars
                         elsif tpl_ext.split( '.' )[1] == central_ext
@@ -564,10 +574,14 @@ class Weblog
                 vars.keys.each do |var_name|
                     case var_name.to_s
                     when /entry$/
-                        vars[var_name] = load_and_validate_entry( vars[var_name] )
+                        unless vars[:no_load]
+                            vars[var_name] = load_and_validate_entry( vars[var_name].id )
+                        end
                     when /entries$/
-                        vars[var_name].collect! do |e|
-                            load_and_validate_entry( e.id )
+                        unless vars[:no_load]
+                            vars[var_name].collect! do |e|
+                                load_and_validate_entry( e.id )
+                            end
                         end
                         vars[var_name].extend Hobix::EntryEnum
                     end
@@ -688,12 +702,12 @@ class Weblog
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
             entry_set.each_with_neighbors do |nexte, entry, prev|
-                page = Page.new( "/#{ entry.id }" )
+                page = Page.new( entry.class.url_link( entry ) )
                 page.prev = prev.id if prev
                 page.next = nexte.id if nexte
                 page.timestamp = entry.created
                 page.updated = path_storage.modified( entry.id )
-                yield :page => page, :entry => entry.id
+                yield :page => page, :entry => entry
             end
         end
     end

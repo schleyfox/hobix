@@ -19,21 +19,12 @@ require 'fileutils'
 require 'hobix/search/simple'
 
 module Hobix
-module Storage
+
 #
 # The IndexEntry class 
 #
-class IndexEntry
-    def self.fields; @fields; end
-    def self.add_fields( *names )
-        @fields ||= []
-        @fields += names
-        attr_accessor *names
-    end
-
-    add_fields :id, :created, :modified, :tags
-
-    def initialize( entry, fields = IndexEntry.fields )
+class IndexEntry < Core
+    def initialize( entry, fields = self.class.properties.keys )
         fields.each do |field|
             val = if entry.respond_to? field
                       entry.send( field )
@@ -44,19 +35,13 @@ class IndexEntry
                   end
             send( "#{field}=", val )
         end
-
         yield self if block_given?
     end
 
-    def to_yaml_type
-        "!hobix.com,2004/storage/indexEntry"
-    end
-
+    yaml_type "!hobix.com,2004/storage/indexEntry"
 end
 
-YAML::add_domain_type( 'hobix.com,2004', 'storage/indexEntry' ) do |type, val|
-    YAML::object_maker( IndexEntry, val )
-end
+module Storage
 
 #
 # The FileSys class is a storage plugin, it manages the loading and dumping of
@@ -69,6 +54,7 @@ class FileSys < Hobix::BaseStorage
         @modified = {}
         @basepath = weblog.entry_path
         @default_author = weblog.authors.keys.first
+        @weblog = weblog
         ignored = weblog.sections_ignored
         unless ignored.empty?
             @ignore_test = /^(#{ ignored.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
@@ -119,11 +105,11 @@ class FileSys < Hobix::BaseStorage
 
         @entry_cache ||= {}
         e.id = id
-        e.link = "#{ @link }/#{ id }.html"
+        e.link = e.class.url_link e, @link, @weblog.central_ext
         e.modified = now
         @entry_cache[id] = e
 
-        @index[id] = IndexEntry.new( e ) do |i|
+        @index[id] = @weblog.index_class.new( e ) do |i|
             i.modified = e.modified
         end
         @modified[id] = e.modified
@@ -142,7 +128,7 @@ class FileSys < Hobix::BaseStorage
             entry_file = entry_path( id )
             e = Hobix::Entry::load( entry_file )
             e.id = id
-            e.link = "#{ @link }/#{ id }.html"
+            e.link = e.class.url_link e, @link, @weblog.central_ext
             e.modified = modified( id )
             unless e.created
                 e.created = @index[id].created
@@ -183,7 +169,7 @@ class FileSys < Hobix::BaseStorage
         load_search_index( index.length == 0 )
 
         modified = false
-        index_fields = IndexEntry.fields
+        index_fields = @weblog.index_class.properties.keys
         Find::find( @basepath ) do |path|
             path.untaint
             if FileTest.directory? path
@@ -209,8 +195,7 @@ class FileSys < Hobix::BaseStorage
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
                     e.id = entry_id
-                    index_entry = IndexEntry.new( e, index_fields ) do |i|
-                        i.id = entry_id
+                    index_entry = @weblog.index_class.new( e, index_fields ) do |i|
                         i.modified = @modified[entry_id]
                     end
                     catalog_search_entry( e )
@@ -271,7 +256,7 @@ class FileSys < Hobix::BaseStorage
         if _index.empty?
             e = default_entry( @default_author )
             @modified[e.id] = e.modified
-            _index = {e.id => IndexEntry.new(e)}
+            _index = {e.id => @weblog.index_class.new(e)}
         end
         if search[:search]
             sr = @search_index.find_words( search[:search] )
@@ -291,9 +276,9 @@ class FileSys < Hobix::BaseStorage
                                  when :inpath
                                      entry.id.index( sval ) != 0
                                  when :match
-                                     entry.id.match sval
+                                     not entry.id.match sval
                                  when :search
-                                     !sr.results[entry.id]
+                                     not sr.results[entry.id]
                                  else
                                      false
                                  end

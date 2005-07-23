@@ -1,5 +1,5 @@
 --- !hobix.com,2004/patches/^list
-control/hobix.cgi: !^file-create |
+htdocs/control/hobix.cgi: !^file-create |
   #!/usr/bin/env ruby
   require 'hobix/webapp'
   require 'hobix/weblog'
