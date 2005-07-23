@@ -346,7 +346,7 @@ module CommandLine
             entry.author = @config['username']
             entry.title = entry_id.split( '/' ).
                                    last.
-                                   gsub( /^\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }.
+                                   gsub( /^\w|\W\w|_\w|[A-Z]/ ) { |up| " #{up[-1, 1].upcase}" }.
                                    strip
         end
         entry = aorta( entry )
