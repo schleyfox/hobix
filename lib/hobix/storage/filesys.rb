@@ -55,11 +55,6 @@ class FileSys < Hobix::BaseStorage
         @basepath = weblog.entry_path
         @default_author = weblog.authors.keys.first
         @weblog = weblog
-        ignored = weblog.sections_ignored
-        unless ignored.empty?
-            @ignore_test = /^(#{ ignored.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
-        end
-        @sorts = weblog.sections_sorts
     end
 
     def now; Time.at( Time.now.to_i ); end
@@ -238,6 +233,15 @@ class FileSys < Hobix::BaseStorage
         path_storage
     end
 
+    # Returns an Array all `sections', or directories which contain entries.
+    # If you have three entries: `news/article1', `about/me', and `news/misc/article2',
+    # then you have three sections: `news', `about', `news/misc'.
+    def sections( opts = nil )
+        load_index
+        hsh = {}
+        @index.collect { |id, e| e.section_id }.uniq.sort
+    end
+
     # Find entries based on criteria from the +search+ hash.
     # Possible criteria include:
     #
@@ -261,10 +265,17 @@ class FileSys < Hobix::BaseStorage
         if search[:search]
             sr = @search_index.find_words( search[:search] )
         end
+        unless search[:all]
+            ignore_test = nil
+            ignored = @weblog.sections_ignored
+            unless ignored.empty?
+                ignore_test = /^(#{ ignored.collect { |i| Regexp.quote( i ) }.join( '|' ) })/
+            end
+        end
         entries = _index.collect do |id, entry|
                       skip = false
-                      if @ignore_test and not search[:all]
-                          skip = entry.id =~ @ignore_test
+                      if ignore_test and not search[:all]
+                          skip = entry.id =~ ignore_test
                       end
                       search.each do |skey, sval|
                           break if skip

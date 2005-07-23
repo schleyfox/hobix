@@ -732,6 +732,18 @@ class Weblog
         end
     end
 
+    # Receive a Hash pairing all section ids with the options for that section.
+    def sections( opts = nil )
+        sections = Marshal::load( Marshal::dump( @sections ) )
+        observes = !sections.values.detect { |s| s['observe'] }
+        storage.sections.each do |s|
+            sections[s] ||= {}
+            sections[s]['observe'] ||= sections[s].has_key?( 'ignore' ) ? !sections[s]['ignore'] : observes
+            sections[s]['ignore'] ||= !sections[s]['observe']
+        end
+        sections
+    end
+
     # Returns a hash of special sorting cases.  Key is the entry path,
     # value is the sorting method.  Storage plugins must honor these
     # default sorts.
@@ -747,11 +759,10 @@ class Weblog
     # Storage plugins must withhold these entries from queries, unless
     # the :all => true setting is passed to the query.
     def sections_ignored
-        @sections.collect do |k, v|
+        sections.collect do |k, v|
             k if v['ignore']
         end.compact
     end
-
 
     # Handler for templates with `tags' prefix.  These templates
     # will receive a tag with all entries tagged with it. The handler
