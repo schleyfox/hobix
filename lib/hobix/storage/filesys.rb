@@ -23,7 +23,7 @@ module Hobix
 #
 # The IndexEntry class 
 #
-class IndexEntry < Core
+class IndexEntry < BaseContent
     def initialize( entry, fields = self.class.properties.keys )
         fields.each do |field|
             val = if entry.respond_to? field

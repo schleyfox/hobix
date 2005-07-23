@@ -274,7 +274,7 @@ class Weblog
     end
 end
 
-class Core
+class BaseContent
     include BaseProperties
 
     _! 'Entry Information'
@@ -416,7 +416,7 @@ end
 
 # The BaseEntry class is the underlying class for all Hobix
 # entries (i.e. the content for your website/blahhg.)
-class BaseEntry < Core
+class BaseEntry < BaseContent
 
     _ :id
     _ :link
