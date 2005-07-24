@@ -20,8 +20,8 @@ module Hobix
 module Out
 class Quick
 append_def :head_tags_erb, %{
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="-1">
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="-1" />
   <script type="text/javascript" src="<%= weblog.expand_path( '/js/prototype.js' ) %>"></script>
   <script type="text/javascript">
       function quickRedReference() {
