@@ -57,7 +57,6 @@ class Comments < BaseFacet
 
                 # Save the attachment, upgen
                 @weblog.storage.save_attached( entry_id, "comments", comments )
-                @weblog.storage.touch_entry( entry_id )
                 @weblog.regenerate :update
 
                 # Redirect

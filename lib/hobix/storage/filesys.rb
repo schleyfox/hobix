@@ -304,7 +304,7 @@ class FileSys < Hobix::BaseStorage
     # +entries+ (pass in an Array of IndexEntry objects).
     def last_modified( entries )
         entries.collect do |entry|
-            @modified[entry.id]
+            modified( entry.id )
         end.max
     end
 
@@ -319,7 +319,10 @@ class FileSys < Hobix::BaseStorage
     # Returns a Time object representing the +modified+ time for the
     # entry identified by +entry_id+.
     def modified( entry_id )
-        @modified[entry_id]
+        find_attached( entry_id ).inject( @modified[entry_id] ) do |max, ext|
+            mtime = File.mtime( entry_path( entry_id, ext ) )
+            mtime > max ? mtime : max
+        end
     end
 
     # Returns an Array of Arrays representing the months which contain
