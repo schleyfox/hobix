@@ -19,8 +19,13 @@ require 'rexml/document'
 module Hobix
 module Out
 class RSS < Hobix::BaseOutput
-    def initialize( weblog )
+    def initialize( weblog, params = {} )
         @path = weblog.skel_path
+        @extra_ns = params["namespaces"]
+        @extra_els = params["elements"]
+        @summaries = params["summary-only"]
+        @more_link = params["more-link"]
+        @comment_aname = params["comment-location"]
     end
     def extension
         "rss"
@@ -51,14 +56,30 @@ EOXML
         rssdoc.elements['/rss/channel/link'].text = vars[:weblog].link.to_s
         rssdoc.elements['/rss/channel/description'].text = vars[:weblog].tagline
         rssdoc.elements['/rss/channel/dc:date'].text = Time.now.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
+
+        @extra_ns.each do |k, v|
+            rssdoc.elements['/rss'].attributes["xmlns:" + k.to_s] = v.to_s
+        end if @extra_ns
+        @extra_els.each do |k, v|
+            extra = REXML::Element.new k.to_s
+            extra.text = v.to_s
+            rssdoc.elements['/rss/channel'].add extra
+        end if @extra_els
+
         ( vars[:entries] || [vars[:entry]] ).each do |e|
             ele = REXML::Element.new 'item'
             ele_title = REXML::Element.new 'title'
             ele_title.text = e.title
             ele << ele_title
             ele_link = REXML::Element.new 'link'
-            ele_link.text = "#{ e.link }"
+            link = e.link.gsub(/'/,"%27")
+            ele_link.text = "#{ link }"
             ele << ele_link
+            if @comment_aname
+              ele_comments = REXML::Element.new 'comments'
+              ele_comments.text = "#{ link }##@comment_aname"
+              ele << ele_comments
+            end
             ele_guid = REXML::Element.new 'guid'
             ele_guid.attributes['isPermaLink'] = 'false'
             ele_guid.text = "#{ e.id }@#{ vars[:weblog].link }"
@@ -78,7 +99,12 @@ EOXML
             ele_pubDate.text = ( e.modified || e.created ).dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
             ele << ele_pubDate
             ele_desc = REXML::Element.new 'description'
-            ele_desc.text = e.content.to_html.gsub( /(src|href)="\//, "\\1=\"#{ vars[:weblog].link.rooturi }/" )
+            ele_desc.text = 
+                if @summaries && e.summary
+                  e.summary.to_html + (@more_link ? %{<p><a href="#{e.link}">#@more_link</a></p>} : "")
+                else
+                  e.content.to_html
+                end.gsub( /(src|href)="\//, "\\1=\"#{ vars[:weblog].link.rooturi }/" )
             ele << ele_desc
             rssdoc.elements['/rss/channel'].add ele
         end
