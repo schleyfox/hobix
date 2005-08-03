@@ -384,6 +384,15 @@ class FileSys < Hobix::BaseStorage
         @attach_cache ||= {}
         @attach_cache[id] = e
     end
+
+    # Appends the given items to an entry attachment with the given type, and
+    # then saves the modified attachment. If an attachment of the given type
+    # does not exist, it will be created.
+    def append_to_attachment( entry_id, attachment_type, *items )
+      attachment = load_attached( entry_id, attachment_type ) rescue []
+      attachment += items
+      save_attached( entry_id, attachment_type, attachment )
+    end
 end
 end
 end

@@ -29,7 +29,7 @@ module Facets
 class Comments < BaseFacet
     def self.form_field( name ); "hobix_comment:#{ name }" end
     def self.comment_fields; ['author', 'content']; end
-    def self.comment_class; Hobix::Entry end
+    def self.comment_class; Hobix::Comment end
 
     def initialize( weblog, defaults = {} )
         @weblog = weblog
@@ -51,12 +51,11 @@ class Comments < BaseFacet
                         c.method( "#{ cf }=" ).call( app._POST[getf] )
                     end
                     c.created = Time.now
+                    c.ipaddress = app.remote_addr
                 end
-                comments = @weblog.storage.load_attached( entry_id, 'comments' ) rescue []
-                comments << comment
 
-                # Save the attachment, upgen
-                @weblog.storage.save_attached( entry_id, "comments", comments )
+                # Save the comment, upgen
+                @weblog.storage.append_to_attachment( entry_id, 'comments', comment )
                 @weblog.regenerate :update
 
                 # Redirect

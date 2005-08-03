@@ -37,22 +37,29 @@ append_def :head_tags_erb, %{
 }
 
 append_def :entry_erb, %{
-    <% if entry and not defined? entries %><+ entry_comment +><% end %> 
+    <% if entry and not defined? entries %>
+      <+ entry_comment +>
+      <+ entry_comment_form +>
+    <% end %> 
 }
 
 def entry_comment_erb; %{
   <% entry_id = entry.id %>
+  <a name="comments"></a>
   <div id="comments">
   <% comments = weblog.storage.load_attached( entry_id, "comments" ) rescue [] %>
-  <% comments.each do |entry| %>
+  <% comments.each do |comment| %>
   <div class="entry">
       <div class="entryAttrib">
-          <div class="entryAuthor"><h3><%= entry.author %></h3></div>
-          <div class="entryTime">said on <%= entry.created.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%I:%M %p</nobr>" ) %></div>
+          <div class="entryAuthor"><h3><%= comment.author %></h3></div>
+          <div class="entryTime">said on <%= comment.created.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%I:%M %p</nobr>" ) %></div>
       </div>
-      <div class="entryContentOuter"><div class="entryContent"><%= entry.content.to_html %></div></div>
+      <div class="entryContentOuter"><div class="entryContent"><%= comment.content.to_html %></div></div>
   </div>
   <% end %>
+} end
+
+def entry_comment_form_erb; %{
   <div class="entry">
   <form id="userComment" method="post" action="/control/comment/<%= entry_id %>">
     <div class="entryAttrib">
@@ -76,5 +83,17 @@ def entry_comment_erb; %{
   </div>
 } end
 end
+end
+
+class Comment < BaseContent
+  _! "Comment Information"
+  _ :author,    :req => true, :edit_as => :text, :search => :prefix
+  _ :created,   :edit_as => :datetime
+  _ :url,       :edit_as => :text
+  _ :email,     :edit_as => :text
+  _ :content,   :edit_as => :textarea, :search => :fulltext, :text_processor => true
+  _ :ipaddress, :edit_as => :text
+
+  yaml_type "tag:hobix.com,2005:comment"
 end
 end
