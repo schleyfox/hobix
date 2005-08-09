@@ -31,7 +31,7 @@ class Hobix::Out::Quick
     tags
   end
 
-  def sidebar_tags_erb
+  def sidebar_tag_list_erb
     %q{
         <div class="sidebarBox">
         <h2 class="sidebarTitle">Tags</h2>
