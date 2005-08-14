@@ -90,6 +90,12 @@ form fieldset div.notes p.last {
   margin: 0em;
 }
 
+form fieldset li a {
+  background-color: #efd;
+  font-size: 60%;
+  padding: 2px;
+}
+
 form div fieldset {
   clear: none;
   border-width: 1px;

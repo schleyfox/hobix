@@ -33,11 +33,7 @@ class BasePlugin
     # Initializes all the plugins, returning
     # an Array of plugin objects.  (Used by the
     # +Hobix::Weblog+ class.)
-    def BasePlugin.start( req, weblog )
-        opts = nil
-        unless req.respond_to? :to_str
-            req, opts = req.to_a.first
-        end
+    def BasePlugin.start( req, opts, weblog )
         @@required_from = req = req.dup
         if req.tainted?
             req.untaint if req =~ /^[\w\/\\]+$/
@@ -168,6 +164,32 @@ end
 class BaseFacet < BasePlugin
     def self.not_found app
         app.send_not_found "Action `#{ app.action_uri }' not found.  If this address should work, check your plugins."
+    end
+    def protect app, weblog
+        auth = ENV['HTTP_AUTHORIZATION'] || ENV['X-HTTP_AUTHORIZATION']
+        if auth
+            realm = 'Hobix login'
+            auth_type, auth = auth.split ' ', 2
+            authorized = false
+            case auth_type.downcase
+            when 'basic'
+                require 'base64'
+                name, pass = Base64::decode64( auth.strip ).split ':', 2
+                authorized = weblog.authorize name, pass
+            when 'digest'
+                require 'md5'
+                opts = {}
+                auth.gsub( /(\w+)="(.*?)"/ ) { opts[$1] = $2 }
+                app.puts opts.inspect
+            end
+            return true if authorized
+        end
+
+        app.send_unauthorized
+        # nonce = ["#{ Time.now.to_f }:#{ app.action_uri }"].pack("m").gsub /\s/, ''
+        # app.set_header 'WWW-Authenticate', %{Digest qop="auth", realm="#{ realm }", nonce="#{ nonce }", algorithm="MD5"}
+        app.set_header 'WWW-Authenticate', %{Basic realm="#{ realm }"}
+        false
     end
 end
 

@@ -193,6 +193,19 @@ class WebApp
 End
   end
 
+  def send_unauthorized
+    @response.status_line = '401 Unauthorized'
+    @response_body << <<End
+<html>
+  <head><title>401 Unauthorized</title></head>
+  <body>
+    <h1>401 Authorized</h1>
+    <p>You lack decent credentials to enter herein.</p>
+  </body>
+</html>
+End
+  end
+
   def check_last_modified(last_modified)
     if ims = @request_header['If-Modified-Since'] and
        ((ims = Time.httpdate(ims)) rescue nil) and

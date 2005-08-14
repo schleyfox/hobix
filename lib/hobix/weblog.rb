@@ -323,7 +323,21 @@ class Weblog
         end
         @plugins = []
         @requires.each do |req|
-            @plugins += Hobix::BasePlugin::start( req, self )
+            opts = nil
+            unless req.respond_to? :to_str
+                req, opts = req.to_a.first
+            end
+            plugin_conf = File.join( @path, req.gsub( /\W+/, '.' ) )
+            if File.exists? plugin_conf
+                puts "*** Loading #{ plugin_conf }"
+                plugin_conf = YAML::load_file plugin_conf
+                if opts
+                    opts.merge! plugin_conf
+                else
+                    opts = plugin_conf
+                end
+            end
+            @plugins += Hobix::BasePlugin::start( req, opts, self )
         end
     end
 
@@ -427,6 +441,16 @@ class Weblog
         vars[:page] = Page.new( page_name )
         vars[:page].timestamp = Time.now
         yield vars
+    end
+
+    # Sets up a weblog.  Should only be run once (which Hobix
+    # performs automatically upon blog creation).
+    def setup
+        @plugins.each do |p|
+            if p.respond_to? :setup
+                p.setup
+            end
+        end
     end
 
     # Returns the storage plugin currently in use.  (There
@@ -790,6 +814,11 @@ class Weblog
             raise AuthorNotFound, "Invalid author '#{ entry.author }' found in entry #{ entry_id }"
         end
         entry
+    end
+
+    def authorize( user, pass )
+        require 'digest/sha1'
+        authors[user]['password'] == Digest::SHA1.new( pass )
     end
 
     # For convenience, storage queries can be made through the Weblog

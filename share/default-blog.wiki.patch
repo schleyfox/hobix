@@ -1,0 +1,30 @@
+--- !hobix.com,2004/patches/^list
+hobix.yaml: !^yaml-merge
+  requires:
+  - hobix/out/quick
+  - hobix/bixwik
+
+# who needs dated archives on a wiki
+skel/monthly.html.quick-archive: !^file-remove ''
+skel/yearly.html.quick-archive: !^file-remove ''
+
+skel/list/index.html.quick-summary: !^file-create ''
+skel/recent/index.atom.atom: !^file-create ''
+skel/recent/index.xml.rss: !^file-create ''
+skel/recent/index.yaml.okaynews: !^file-create ''
+skel/recent/index.html.quick-summary: !^file-create |
+  entries: |
+    <% entries.each_day do |day, day_entries| %>
+        <a name="<%= day.strftime( "%Y%m%d" ) %>"></a>
+        <+ day_header +>
+        <ul>
+        <% day_entries.each do |entry| %>
+            <li><+ entry +></li>
+        <% end %>
+        </ul>
+    <% end %>
+  entry: |
+    <div class="entry">
+        <+ entry_title +>
+        <+ entry_footer +>
+    </div>

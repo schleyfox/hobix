@@ -23,6 +23,7 @@ class API < BaseFacet
     end
     def get app
         if app.respond_to? :action_uri
+            return true unless protect app, @weblog
             @app = app
             prefix, action, *args = app.action_uri.split( '/' )
             if prefix == "remote"

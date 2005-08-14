@@ -197,7 +197,9 @@ module CommandLine
 
         hobix_yaml = File.join( path, "hobix.yaml" )
         join_as_author( name, hobix_yaml )
-        edit_action( Hobix::Weblog.load( hobix_yaml ) )
+        weblog = Hobix::Weblog.load( hobix_yaml )
+        weblog.setup
+        edit_action( weblog )
     end
 
     # Add a weblog to local config

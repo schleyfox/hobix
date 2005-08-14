@@ -35,6 +35,7 @@ class Quick < Hobix::BaseOutput
     end
 
     def initialize( weblog, defaults = {} )
+        @hobix_path = weblog.path
         @path = weblog.skel_path
         defaults.each do |k, v|
             k = k.gsub( /\W/, '_' )
@@ -60,6 +61,26 @@ class Quick < Hobix::BaseOutput
                         #{ v }
                     end
                 }
+            end
+        end
+    end
+    def setup
+        quick_conf = File.join( @hobix_path, 'hobix.out.quick' )
+        unless File.exists? quick_conf
+            quicksand = {}
+            methods.each do |m|
+                if m =~ /^(.+)_erb$/
+                    key = $1
+                    qtmpl = method( m ).call
+                    if qtmpl.respond_to? :strip
+                        qtmpl = "\n#{ qtmpl.strip.gsub( /^ {8}/, '' ) }\n"
+                        def qtmpl.to_yaml_fold; '|'; end
+                    end
+                    quicksand[key] = qtmpl
+                end
+            end
+            File.open( quick_conf, 'w' ) do |f|
+                YAML.dump( quicksand, f )
             end
         end
     end
