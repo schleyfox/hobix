@@ -25,7 +25,7 @@ module CommandLine
     ##
     [
         [ENV['HOME'], ENV['HOME']],
-        [ENV['APPDATA'], File.join( ENV['APPDATA'], 'Hobix' )]
+        [ENV['APPDATA'], File.join( ENV['APPDATA'] || "", 'Hobix' )]
     ].each do |home_top, home_dir|
         next unless home_top
         if File.exists? home_top
