@@ -425,7 +425,7 @@ class Weblog
         vars = {}
         paths = page_name.split( '/' )
         loop do
-            try_page = paths.join( '_' )
+            try_page = paths.join( '_' ).gsub('-','_')
             if respond_to? "skel_#{ try_page }"
                 path_storage = storage.path_storage( File.dirname( page_name ) )
                 method( "skel_#{ try_page }" ).call( path_storage ) do |vars|
@@ -583,7 +583,6 @@ class Weblog
             puts "[Building #{ page_name } pages]"
             outputs.each do |vars|
                 full_out_path = File.join( output_path, vars[:page].link.split( '/' ) )
-
                 ## If retouching, skip pages outside of path
                 next if only_path and vars[:page].link.index( "/" + only_path ) != 0
 
@@ -616,6 +615,8 @@ class Weblog
                 output = vars.delete( :output )
                 template = vars.delete( :template )
                 txt = output.load( template, vars )
+                ## A plugin perhaps needs to change the output page name
+                full_out_path = File.join( output_path, vars[:page].link.split( '/' ) )
                 File.makedirs( File.dirname( full_out_path ) )
                 File.open( full_out_path, 'w' ) do |f| 
                     f << txt
