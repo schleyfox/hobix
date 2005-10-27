@@ -115,7 +115,7 @@ def ri_install( sucmd, libdir )
 end
 
 # Web root
-GO_HOBIX = 'http://go.hobix.com/0.3b/'
+GO_HOBIX = 'http://go.hobix.com/0.4/'
 
 # Tempdir
 TMPDIR = File.join( ENV['TMPDIR']||ENV['TMP']||ENV['TEMP']||'/tmp', Time.now.strftime( 'hobix_%Y-%m-%d_%H-%M-%S' ) )
@@ -153,6 +153,12 @@ den['setup'].each do |action, screen|
     case action
     when 'sitelibdir'
         check_hobix_version( conf[action], den['version'] )
+    when 'sharedir'
+        puts "Directory `#{ conf['sharedir'] }' will be deleted and filled with the latest"
+        print "hobix ingredients, okay + [y/N] ?"
+        unless gets.strip.downcase == 'y'
+            redo
+        end
     when 'installing'
         puts
         require 'ftools'

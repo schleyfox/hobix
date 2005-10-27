@@ -376,8 +376,8 @@ class BaseContent
     def tags;( canonical_tags + Array( @tags ) ).uniq; end
 
     def self.yaml_type( tag )
-        if self.respond_to? :tag_as
-            tag_as tag
+        if self.respond_to? :yaml_as
+            yaml_as tag
         else
             if tag =~ /^tag:([^:]+):(.+)$/
                 define_method( :to_yaml_type ) { "!#$1/#$2" }

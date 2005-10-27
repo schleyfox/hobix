@@ -16,7 +16,7 @@
 require 'find'
 require 'yaml'
 require 'fileutils'
-require 'hobix/search/simple'
+# require 'hobix/search/simple'
 
 module Hobix
 
@@ -108,7 +108,7 @@ class FileSys < Hobix::BaseStorage
             i.modified = e.modified
         end
         @modified[id] = e.modified
-        catalog_search_entry( e )
+        # catalog_search_entry( e )
         sort_index( true )
         e
     end
@@ -136,19 +136,19 @@ class FileSys < Hobix::BaseStorage
     end
 
     # Loads the search engine database.  The database will be cleansed and re-scanned if +wash+ is true.
-    def load_search_index( wash )
-        @search_index = Hobix::Search::Simple::Searcher.load( File.join( @basepath, 'index.search' ), wash )
-    end
+    # def load_search_index( wash )
+    #     @search_index = Hobix::Search::Simple::Searcher.load( File.join( @basepath, 'index.search' ), wash )
+    # end
 
     # Catalogs an entry object +e+ in the search engine.
-    def catalog_search_entry( e )
-        @search_index.catalog( Hobix::Search::Simple::Content.new( e.to_search, e.id, e.modified, e.content_ratings ) )
-    end
+    # def catalog_search_entry( e )
+    #     @search_index.catalog( Hobix::Search::Simple::Content.new( e.to_search, e.id, e.modified, e.content_ratings ) )
+    # end
 
     # Determines if the search engine has already scanned an entry represented by IndexEntry +ie+.
-    def search_needs_update? ie 
-        not @search_index.has_entry? ie.id, ie.modified
-    end
+    # def search_needs_update? ie 
+    #     not @search_index.has_entry? ie.id, ie.modified
+    # end
 
     # Load the internal index (saved at @entry_path/index.hobix) and refresh any timestamps
     # which may be stale.
@@ -161,7 +161,7 @@ class FileSys < Hobix::BaseStorage
                     YAML::Omap::new
                 end
         @index = YAML::Omap::new
-        load_search_index( index.length == 0 )
+        # load_search_index( index.length == 0 )
 
         modified = false
         index_fields = @weblog.index_class.properties.keys
@@ -182,10 +182,10 @@ class FileSys < Hobix::BaseStorage
                     index_entry = index[entry_id]
                 end
                 ## we will (re)load the entry if:
-                if index_entry.nil? or # it's new
+                if not index_entry.respond_to?( :modified ) or # it's new
                         ( index_entry.modified != @modified[entry_id] ) or # it's changed
-                        index_fields.detect { |f| index_entry.send( f ).nil? } or # index fields have been added
-                        search_needs_update? index_entry # entry is old or not available in search db
+                        index_fields.detect { |f| index_entry.send( f ).nil? } # index fields have been added
+                        # or search_needs_update? index_entry # entry is old or not available in search db
 
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
@@ -193,7 +193,7 @@ class FileSys < Hobix::BaseStorage
                     index_entry = @weblog.index_class.new( e, index_fields ) do |i|
                         i.modified = @modified[entry_id]
                     end
-                    catalog_search_entry( e )
+                    # catalog_search_entry( e )
                     modified = true
                 end
                 @index[index_entry.id] = index_entry
@@ -212,7 +212,7 @@ class FileSys < Hobix::BaseStorage
             File.open( index_path, 'w' ) do |f|
                 YAML::dump( @index, f )
             end
-            @search_index.dump
+            # @search_index.dump
         end
     end
 
@@ -262,9 +262,9 @@ class FileSys < Hobix::BaseStorage
             @modified[e.id] = e.modified
             _index = {e.id => @weblog.index_class.new(e)}
         end
-        if search[:search]
-            sr = @search_index.find_words( search[:search] )
-        end
+        # if search[:search]
+        #     sr = @search_index.find_words( search[:search] )
+        # end
         unless search[:all]
             ignore_test = nil
             ignored = @weblog.sections_ignored
@@ -288,8 +288,8 @@ class FileSys < Hobix::BaseStorage
                                      entry.id.index( sval ) != 0
                                  when :match
                                      not entry.id.match sval
-                                 when :search
-                                     not sr.results[entry.id]
+                                 # when :search
+                                 #     not sr.results[entry.id]
                                  else
                                      false
                                  end

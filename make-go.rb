@@ -23,23 +23,27 @@ def dir_to_base64( *dirs )
     end
     attached
 end
-attached = dir_to_base64( '../redcloth/lib/**/*.rb', 'lib/**/*.rb', 'bin/**/*', 'share/**/*' )
+attached = dir_to_base64( '../RedCloth-3.0.3/lib/redcloth.rb', 'lib/**/*.rb', 'bin/**/*', 'share/**/*' )
 hobix_install_yaml =<<EOY
 version: #{ check_hobix_version( 'lib', 'hobix.rb' ) }
 setup:
 - - welcome
   - |-
     #
+                                       _               
+        .        ()_'() ``,``-`-`.    (*`
+           *    (      )       , \\`       .
+         __ _. (  ^  ^  )  `'      .`  _ __  __
+        /  ^  ^ )      (   .,___,   ,;/ ^  `'
+       ````````` U|  |U . |      |. |^`````````
+               >_`  -| |^ |      |^ |
+                 `---' ^^^'      ^^^'
 
-                                   () ()
-                                    () ()
-                   o --- (--=   _--_ /    \\
-                 o( -- (---=  ~/     / ^ ^/
-              o. (___ (_(__-=  //  ///\\/\\/
+                  you slow elephant.
 
-                  you speedy little goat!!
-                    you got.. you got..
-                      ahee!! hobix!!
+                  but you got hobix.
+
+                        ahee.
 
     # halloo!! ready to install the very latest hobix??
     # DON'T BE 'FRAIDY!! nothing scary AT ALL!! (hobix is
@@ -109,6 +113,7 @@ setup:
     # when you have your blog up, let everybody know at let.us.all.hobix.com,
     # okay?? great, thanks.
 
+---
 EOY
 
 hobix_install_yaml += attached.to_yaml( :UseBlock => true, :UseFold => false )

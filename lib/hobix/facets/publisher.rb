@@ -97,6 +97,28 @@ class Publisher < BaseFacet
             }
             -->
             </style>
+            <script type="text/javascript" language="javascript">
+            // <![CDATA[
+            function sortable_to_csv(element) {
+                var element = $(element);
+                var options = {
+                    tag:  element.sortable.tag,
+                    only: element.sortable.only,
+                    name: element.id
+                }.extend(arguments[1] || {});
+
+                var items = $(element).childNodes;
+                var queryComponents = new Array();
+
+                for(var i=0; i<items.length; i++)
+                    if(items[i].tagName && items[i].tagName==options.tag.toUpperCase() &&
+                        (!options.only || (Element.Class.has(items[i], options.only))))
+                            queryComponents.push(items[i].id.replace(element.id+'_',''));
+
+                return queryComponents;
+            }
+            // ]]>
+            </script>
             <h2><%= form[:full_title] %></h2>
             <form id="publisher_form" method="post" enctype="multipart/form-data">
             <p><%= RedCloth.new( form[:intro] ).to_html %></p>
@@ -126,38 +148,43 @@ class Publisher < BaseFacet
 %         when :textarea
                 <textarea name="<%= name %>" id="<%= name %>" rows="<%= opts[:edit_rows] || 4 %>" cols="<%= opts[:edit_cols] || 36 %>" tabindex=""><%= val %></textarea>
 %         when :omap
-                <ol id="<%= name %>" class="edit_as_omap">
-%             val.each_with_index do |(vkey, vval), i|
+                <ol id="<%= name %>sort" class="edit_as_omap">
+%             val.each do |vkey, vval|
 %                 vkey = vkey.keys.first if vkey.is_a? Hash
-                    <li id="<%= name %>_<%= i %>" name="<%= vkey %>">
+                    <li id="<%= name %>sort_<%= vkey %>" class="sorty" name="<%= vkey %>">
                         <span class="handle">&raquo;</span>
-                        <%= vkey %>
-                        <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/edit/#{ name }/#{ i }" ) %>">edit</a>
-                        <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/del/#{ name }/#{ i }" ) %>">remove</a>
-                    </li>
-%             end if val
-                    <li id="<%= name %>_new">
-                    <span>&raquo;</span>
-                    <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/add/#{ name }" ) %>">add</a>
-                    </li>
-                </ul>
-                <script type="text/javascript" language="javascript">
-                // <![CDATA[
-                Sortable.create("<%= name %>", {handle:'handle', onUpdate:function () {
-                    alert(Sortable.serialize(this.element));
-                }});
-                // ]]>
-                </script>
-%         when :map
-                <ul id="<%= name %>_order" class="edit_as_map">
-%             val.each_with_index do |(vkey, vval), i|
-                    <li id="<%= name %>_<%= i %>">
                         <%= vkey %>
                         <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/edit/#{ name }/#{ vkey }" ) %>">edit</a>
                         <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/del/#{ name }/#{ vkey }" ) %>">remove</a>
                     </li>
 %             end if val
-                    <li id="<%= name %>_new">
+                    <li class="new_item">
+                    <span>&raquo;</span>
+                    <input type="text" name="<%= name %>_new" id="<%= name %>_new" style="width:150px" 
+                           class="inputText" tabindex="" maxlength="255" value="" />
+                    <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/add/#{ name }" ) %>">add</a>
+                    </li>
+                </ul>
+                <input type="hidden" name="<%= name %>" id="<%= name %>" value="" />
+                <script type="text/javascript" language="javascript">
+                // <![CDATA[
+                Sortable.create("<%= name %>sort", {handle:'handle', only: 'sorty', onUpdate:function () {
+                    $("<%= name %>").value = sortable_to_csv(this.element).join(' ');
+                }});
+                // ]]>
+                </script>
+%         when :map
+                <ul id="<%= name %>_order" class="edit_as_map">
+%             val.each do |vkey, vval|
+                    <li id="<%= name %>_<%= vkey %>">
+                        <%= vkey %>
+                        <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/edit/#{ name }/#{ vkey }" ) %>">edit</a>
+                        <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/del/#{ name }/#{ vkey }" ) %>">remove</a>
+                    </li>
+%             end if val
+                    <li id="new_item">
+                    <input type="text" name="<%= name %>_new" id="<%= name %>_new" style="width:150px"
+                           class="inputText" tabindex="" maxlength="255" value="" />
                     <a href="<%= form[:app].absuri( :path_info => "/publisher/#{ @title }/add/#{ name }" ) %>">add</a>
                     </li>
                 </ul>
@@ -207,7 +234,15 @@ class Publisher < BaseFacet
 
             case opts[:edit_as]
             when :omap
+                omap = obj.instance_variable_get( "@#{name}" )
+                sorted = val.to_s.split(/\s+/)
+                sorted.each { |item| omap << [item] unless omap.assoc(item) }
+                omap.sort_by { |item, val| sorted.index(item) || sorted.length }
             when :map
+                map = obj.instance_variable_get( "@#{name}" )
+                val.to_s.split(/\s+/).each do |item|
+                    map[item] ||= nil
+                end
             else
                 obj.instance_variable_set( "@#{name}", val )
             end
@@ -236,19 +271,20 @@ class Publisher < BaseFacet
             show_weblog_form( @weblog, app )
         when "POST"
             weblog, missing = save_form( @weblog, app )
-            if missing.empty?
-                weblog.save( weblog.hobix_yaml + ".edit" )
-                red %{
-                    *Your configuraton has been saved.*
-                    
-                    Please note that this development version of Hobix isn't
-                    yet equipped to deal with re-sorting of the requires.  I'm not that great with Prototype
-                    yet and I also want to write some code to sandbox the configuration, to check that the
-                    requires will load right before saving it.
-                }
-            else
-                show_weblog_form( weblog, app )
-            end
+            # if missing.empty?
+            #     weblog.save( weblog.hobix_yaml + ".edit" )
+            #     red %{
+            #         *Your configuraton has been saved.*
+            #         
+            #         Please note that this development version of Hobix isn't
+            #         yet equipped to deal with re-sorting of the requires.  I'm not that great with Prototype
+            #         yet and I also want to write some code to sandbox the configuration, to check that the
+            #         requires will load right before saving it.
+            #     }
+            # else
+            #     show_weblog_form( weblog, app )
+            # end
+            [weblog, missing].to_yaml
         end
     end
 

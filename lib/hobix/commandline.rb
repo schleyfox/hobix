@@ -309,17 +309,17 @@ module CommandLine
         end
     end
 
-    # List entries
-    def search_action_explain; "Search for words within posts of a given path."; end
-    def search_action_args; ['weblog-name', 'word1,word2', 'search/path']; end
-    def search_action( weblog, words, inpath = '' )
-        entries = weblog.storage.find( :all => true, :inpath => inpath, :search => words.split( ',' ) )
-        if entries.empty?
-            puts "** No posts found in the weblog for path '#{inpath}'."
-        else
-            tabular_entries( entries )
-        end
-    end
+    # Search (disabled in 0.4)
+    # def search_action_explain; "Search for words within posts of a given path."; end
+    # def search_action_args; ['weblog-name', 'word1,word2', 'search/path']; end
+    # def search_action( weblog, words, inpath = '' )
+    #     entries = weblog.storage.find( :all => true, :inpath => inpath, :search => words.split( ',' ) )
+    #     if entries.empty?
+    #         puts "** No posts found in the weblog for path '#{inpath}'."
+    #     else
+    #         tabular_entries( entries )
+    #     end
+    # end
 
     # Post a new entry
     def post_action_explain; "Add or edit a post with identifier 'shortName'.\n" +
