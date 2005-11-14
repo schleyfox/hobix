@@ -376,14 +376,14 @@ class BaseContent
     def tags;( canonical_tags + Array( @tags ) ).uniq; end
 
     def self.yaml_type( tag )
-        if self.respond_to? :yaml_as
-            yaml_as tag
-        else
+#         if self.respond_to? :yaml_as
+#             yaml_as tag
+#         else
             if tag =~ /^tag:([^:]+):(.+)$/
                 define_method( :to_yaml_type ) { "!#$1/#$2" }
                 YAML::add_domain_type( $1, $2 ) { |t, v| self.maker( v ) }
             end
-        end
+#         end
     end
 
     alias to_yaml_orig to_yaml
@@ -406,7 +406,7 @@ class BaseContent
 
     # Load the weblog entry from a file.
     def self.load( file )
-        File.open( file ) { |f| YAML::load( f ) }
+      File.open( file ) { |f| YAML::load( f ) }
     end
 
     # Accessor which returns the text processor used for untyped
