@@ -3,7 +3,7 @@
 require 'rubygems'
 spec = Gem::Specification.new do |s|
   s.name = 'Hobix'
-  s.version = "0.2"
+  s.version = "0.4"
   s.platform = Gem::Platform::RUBY
   s.summary = "Hobix"
 #  s.requirements << 'um?'
