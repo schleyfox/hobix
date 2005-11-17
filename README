@@ -1,4 +1,4 @@
-Hi, this is Hobix CVS.  I can't imagine inadvertantly pulling
+Hi, this is Hobix SVN.  I can't imagine inadvertantly pulling
 a checkout on Hobix source code, but if you did: well, then,
 Hobix is a weblahhging tool.  It comes with a command-line and
 a buncha libraries.
@@ -13,8 +13,6 @@ which can be activated by running:
 
 Or you can install the CVS version here by using:
 
-  ruby install.rb config
-  ruby install.rb setup
-  sudo ruby install.rb install
+  sudo ruby setup.rb
 
 Goo* luc*! -- _why
