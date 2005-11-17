@@ -109,6 +109,18 @@ module CommandLine
         require 'open-uri'
         c = ::Config::CONFIG.merge( config )
         eval(open("http://go.hobix.com/").read)
+
+      
+        # Now look at all blogs and delete entries/index.{hobix,search}
+        if @config['weblogs'].respond_to? :sort
+            blogs = @config['weblogs'].sort
+          blogs.each do |e|
+            weblog = Hobix::Weblog.load( e[1] )
+            puts "Removing index.search and index.hobix from #{weblog.entry_path}"
+            File.safe_unlink( File.join(weblog.entry_path, "index.search"),
+                              File.join(weblog.entry_path, "index.hobix"))
+          end
+        end
     end
 
     # List all your weblogs
