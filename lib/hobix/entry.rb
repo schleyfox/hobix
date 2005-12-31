@@ -31,8 +31,9 @@ module Hobix
 # tags::             A list of free-tagged categories.
 # author::           The author's username.
 # contributors::     An Array of contributors' usernames.
-# modified::         A modification time.
 # created::          The time the Entry was initially created.
+# modified::         A modification time.
+# updated::          Used internally to ensure an entry has been generated.
 # summary::          A brief description of this entry.  Can be used
 #                    for an abbreviated text of a long article.
 # content::          The full text of the entry.

@@ -94,6 +94,7 @@ class BaseStorage < BasePlugin
             e.link = e.class.url_link e, @link, "html"
             e.created = Time.now
             e.modified = Time.now
+            e.updated = Time.now
             e.title = "This Ghostly Message From the Slime Will Soon Vanish!"
             e.tagline = "A temporary message, a tingling sensation, Hobix is up!!"
             e.author = author
@@ -304,7 +305,8 @@ class BaseContent
     _ :link
     _ :title,               :edit_as => :text, :search => :fulltext
     _ :created,             :edit_as => :datetime, :search => :prefix
-    _ :modified
+    _ :modified,            :show_as => :datetime
+    _ :updated,             :show_as => :datetime
     _ :tags,                :edit_as => :text, :search => :prefix
 
     def initialize; yield self if block_given?; end
@@ -446,7 +448,8 @@ class BaseEntry < BaseContent
     _ :author,              :req => true, :edit_as => :text, :search => :prefix
     _ :contributors,        :edit_as => :array, :search => :prefix
     _ :created,             :edit_as => :datetime, :search => :prefix
-    _ :modified
+    _ :modified,            :show_as => :datetime
+    _ :updated,             :show_as => :datetime
     _ :tags,                :edit_as => :text, :search => :prefix
     _ :content,             :edit_as => :textarea, :search => :fulltext, :text_processor => true
     _ :content_ratings,     :edit_as => :array

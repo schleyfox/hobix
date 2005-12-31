@@ -65,7 +65,7 @@ EOXML
             ele.x( 'link', nil, {'rel' => 'alternate', 'type' => 'text/html', 'href' => e.link } )
             ele.x( 'id', "tag:#{ uri.host },#{ Time.now.year }:blog#{ CGI.escape(uri.path) }entry#{ CGI.escape( "/#{ e.id }" ) }" )
             ele.x( 'issued', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
-            ele.x( 'modified', e.modified.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
+            ele.x( 'modified', (e.modified || e.created).strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'dc:subject', e.section_id )
             e.tags.each do |t|
                 ele.x( 'dc:subject', t )

@@ -60,7 +60,7 @@ module BixWik
         index_entries = storage.find( :all => true )
         page = Page.new( '/list/index' )
         page.timestamp = index_entries.first.created
-        page.updated = storage.last_modified( index_entries )
+        page.updated = storage.last_updated( index_entries )
         yield :page => page, :entries => index_entries
     end
 
@@ -71,7 +71,7 @@ module BixWik
         index_entries = storage.lastn( @lastn || 120 )
         page = Page.new( '/recent/index' )
         page.timestamp = index_entries.first.created
-        page.updated = storage.last_modified( index_entries )
+        page.updated = storage.last_updated( index_entries )
         yield :page => page, :entries => index_entries
     end
 
@@ -81,7 +81,7 @@ module BixWik
         all_pages = storage.all
         page = Page.new( '/list/index' )
         page.timestamp = all_pages.first.created
-        page.updated = storage.last_modified( all_pages )
+        page.updated = storage.last_updated( all_pages )
         yield :page => page, :entries => all_pages, :no_load => true
     end
 

@@ -171,7 +171,7 @@ end
 #       page = Page.new( 'index' )
 #       page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
 #       page.timestamp = index_entries.first.created
-#       page.updated = path_storage.last_modified( index_entries )
+#       page.updated = path_storage.last_updated( index_entries )
 #       yield :page => page, :entries => index_entries
 #   end
 #
@@ -222,7 +222,7 @@ end
 #   
 #           ## Create page data
 #           page = Page.new( 'sidebar' )
-#           page.updated = path_storage.last_modified( abouts + learns )
+#           page.updated = path_storage.last_updated( abouts + learns )
 #           yield :page => page, 
 #                 :about_entries => abouts, :learn_entries => learns
 #       end
@@ -244,7 +244,7 @@ end
 #
 # We create a Page object, which dictates that the output will be saved to
 # /sidebar.ext.  A modification time is discovered by passing a combined list
-# to +Hobix::BaseStorage#last_modified+.  The +updated+ property is being
+# to +Hobix::BaseStorage#last_updated+.  The +updated+ property is being
 # set to the latest timestamp among the about and learn entries.
 #
 # PLEASE NOTE: The +updated+ property is very important.  The regeneration
@@ -647,7 +647,7 @@ class Weblog
         page = Page.new( 'index' )
         page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
         page.timestamp = index_entries.first.created
-        page.updated = path_storage.last_modified( index_entries )
+        page.updated = path_storage.last_updated( index_entries )
         yield :page => page, :entries => index_entries
     end
 
@@ -673,7 +673,7 @@ class Weblog
             page.prev = prev[0].strftime( "%Y/%m/%d" ) if prev
             page.next = nextd[0].strftime( "%Y/%m/%d" ) if nextd
             page.timestamp = curr[0]
-            page.updated = path_storage.last_modified( curr[1] )
+            page.updated = path_storage.last_updated( curr[1] )
             yield :page => page, :entries => curr[1]
         end
     end
@@ -691,7 +691,7 @@ class Weblog
             page.prev = prev[0].strftime( "%Y/%m/index" ) if prev
             page.next = nextm[0].strftime( "%Y/%m/index" ) if nextm
             page.timestamp = curr[1]
-            page.updated = path_storage.last_modified( entries )
+            page.updated = path_storage.last_updated( entries )
             yield :page => page, :entries => entries
         end
     end
@@ -713,7 +713,7 @@ class Weblog
             page.prev = prev[0].strftime( "%Y/index" ) if prev
             page.next = nextm[0].strftime( "%Y/index" ) if nextm
             page.timestamp = curr[1]
-            page.updated = path_storage.last_modified( entries )
+            page.updated = path_storage.last_updated( entries )
             yield :page => page, :entries => entries
         end
     end
@@ -731,7 +731,7 @@ class Weblog
                 page.prev = prev.id if prev
                 page.next = nexte.id if nexte
                 page.timestamp = entry.created
-                page.updated = path_storage.modified( entry.id )
+                page.updated = path_storage.updated( entry.id )
                 yield :page => page, :entry => entry
             end
         end
@@ -752,7 +752,7 @@ class Weblog
         end
         section_map.each do |section, entries|
             page = Page.new( "/#{ section }/index" )
-            page.updated = path_storage.last_modified( entries )
+            page.updated = path_storage.last_updated( entries )
             yield :page => page, :entries => entries
         end
     end
@@ -799,7 +799,7 @@ class Weblog
       tags.each do |tag|
         entries = path_storage.find.find_all { |e| e.tags.member? tag }
         page = Page.new( File::join('tags',tag,'index' ) )
-        page.updated = path_storage.last_modified( entries ) 
+        page.updated = path_storage.last_updated( entries ) 
         yield :page => page, :entries => entries
       end
     end

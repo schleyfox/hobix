@@ -51,7 +51,7 @@ class FileSys < Hobix::BaseStorage
     # Start the storage plugin for the +weblog+ passed in.
     def initialize( weblog )
         super( weblog )
-        @modified = {}
+        @updated = {}
         @basepath = weblog.entry_path
         @default_author = weblog.authors.keys.first
         @weblog = weblog
@@ -75,10 +75,10 @@ class FileSys < Hobix::BaseStorage
         File.join( @basepath, id.split( '/' ) ) + "." + ext
     end
 
-    # Brings an entry's modified time current.
+    # Brings an entry's updated time current.
     def touch_entry( id )
         check_id( id )
-        @modified[id] = Time.now
+        @updated[id] = Time.now
         FileUtils.touch entry_path( id )
     end
 
@@ -101,13 +101,13 @@ class FileSys < Hobix::BaseStorage
         @entry_cache ||= {}
         e.id = id
         e.link = e.class.url_link e, @link, @weblog.central_ext
-        e.modified = now
+        e.updated = e.modified = now
         @entry_cache[id] = e
 
         @index[id] = @weblog.index_class.new( e ) do |i|
-            i.modified = e.modified
+            i.updated = e.updated
         end
-        @modified[id] = e.modified
+        @updated[id] = e.updated
         # catalog_search_entry( e )
         sort_index( true )
         e
@@ -124,9 +124,10 @@ class FileSys < Hobix::BaseStorage
             e = Hobix::Entry::load( entry_file )
             e.id = id
             e.link = e.class.url_link e, @link, @weblog.central_ext
-            e.modified = modified( id )
+            e.updated = updated( id )
             unless e.created
                 e.created = @index[id].created
+                e.modified = @index[id].modified
                 File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
             end
             @entry_cache[id] = e
@@ -175,28 +176,30 @@ class FileSys < Hobix::BaseStorage
                 entry_paths = File.split( $` )
                 entry_paths.shift if entry_paths.first == '.'
                 entry_id = entry_paths.join( '/' )
-                @modified[entry_id] = File.mtime( path )
+                @updated[entry_id] = File.mtime( path )
 
                 index_entry = nil
                 if ( index.has_key? entry_id ) and !( index[entry_id].is_a? ::Time ) # pre-0.4 index format
                     index_entry = index[entry_id]
                 end
                 ## we will (re)load the entry if:
-                if not index_entry.respond_to?( :modified ) or # it's new
-                        ( index_entry.modified != @modified[entry_id] ) or # it's changed
-                        index_fields.detect { |f| index_entry.send( f ).nil? } # index fields have been added
+                if not index_entry.respond_to?( :updated ) or # it's new
+                        ( index_entry.updated != @updated[entry_id] ) # it's changed
+                        # or index_fields.detect { |f| index_entry.send( f ).nil? } # index fields have been added
                         # or search_needs_update? index_entry # entry is old or not available in search db
 
+                    puts "++ Reloaded #{ entry_id }"
                     efile = entry_path( entry_id )
                     e = Hobix::Entry::load( efile )
                     e.id = entry_id
                     index_entry = @weblog.index_class.new( e, index_fields ) do |i|
-                        i.modified = @modified[entry_id]
+                        i.updated = @updated[entry_id]
                     end
                     # catalog_search_entry( e )
                     modified = true
                 end
-                @index[index_entry.id] = index_entry
+                index_entry.id = entry_id
+                @index[entry_id] = index_entry
             end
         end
         sort_index( modified )
@@ -225,7 +228,7 @@ class FileSys < Hobix::BaseStorage
         path_storage.instance_eval do
             @index = @index.dup.delete_if do |id, entry|
                 if id.index( p ) != 0
-                    @modified.delete( p )
+                    @updated.delete( p )
                     true
                 end
             end
@@ -259,7 +262,7 @@ class FileSys < Hobix::BaseStorage
         _index = @index
         if _index.empty?
             e = default_entry( @default_author )
-            @modified[e.id] = e.modified
+            @updated[e.id] = e.updated
             _index = {e.id => @weblog.index_class.new(e)}
         end
         # if search[:search]
@@ -300,11 +303,19 @@ class FileSys < Hobix::BaseStorage
         entries
     end
 
+    # Returns a Time object for the latest updated time for a group of
+    # +entries+ (pass in an Array of IndexEntry objects).
+    def last_updated( entries )
+        entries.collect do |entry|
+            updated( entry.id )
+        end.max
+    end
+
     # Returns a Time object for the latest modified time for a group of
     # +entries+ (pass in an Array of IndexEntry objects).
     def last_modified( entries )
         entries.collect do |entry|
-            modified( entry.id )
+            entry.modified
         end.max
     end
 
@@ -316,10 +327,11 @@ class FileSys < Hobix::BaseStorage
         end.max
     end
 
-    # Returns a Time object representing the +modified+ time for the
-    # entry identified by +entry_id+.
-    def modified( entry_id )
-        find_attached( entry_id ).inject( @modified[entry_id] ) do |max, ext|
+    # Returns a Time object representing the +updated+ time for the
+    # entry identified by +entry_id+.  Takes into account attachments
+    # which have been updated.
+    def updated( entry_id )
+        find_attached( entry_id ).inject( @updated[entry_id] ) do |max, ext|
             mtime = File.mtime( entry_path( entry_id, ext ) )
             mtime > max ? mtime : max
         end
