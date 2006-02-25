@@ -617,10 +617,14 @@ class Weblog
                 txt = output.load( template, vars )
                 ## A plugin perhaps needs to change the output page name
                 full_out_path = File.join( output_path, vars[:page].link.split( '/' ) )
-                File.makedirs( File.dirname( full_out_path ) )
-                File.open( full_out_path, 'w' ) do |f| 
-                    f << txt
-                    f.chmod 0664 rescue nil
+                begin
+                  saved_umask = File.umask( 0002 ) rescue nil
+                  File.makedirs( File.dirname( full_out_path ) )
+                  File.open( full_out_path, 'w' ) do |f| 
+                      f << txt
+                  end
+                ensure
+                  File.umask( saved_umask ) rescue nil
                 end
                 published[vars[:page].link] = vars[:page]
                 published_types << page_name
