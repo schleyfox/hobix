@@ -17,6 +17,7 @@ require 'find'
 require 'yaml'
 require 'fileutils'
 # require 'hobix/search/simple'
+require 'hobix/storage/lockfile'
 
 module Hobix
 
@@ -90,12 +91,11 @@ class FileSys < Hobix::BaseStorage
         e.created ||= (@index.has_key?( id ) ? @index[id].created : now)
         path = entry_path( id )
 
-        begin
-            File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
-        rescue Errno::ENOENT
-            raise unless create_category and File.exists? @basepath
+        unless create_category and File.exists? @basepath
             FileUtils.makedirs File.dirname( path )
-            retry
+        end
+        Lockfile.new( path + ".lock" ) do
+            File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
         end
 
         @entry_cache ||= {}
@@ -128,7 +128,9 @@ class FileSys < Hobix::BaseStorage
             unless e.created
                 e.created = @index[id].created
                 e.modified = @index[id].modified
-                File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
+                Lockfile.new( entry_file + ".lock" ) do
+                    File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
+                end
             end
             @entry_cache[id] = e
         else
@@ -212,8 +214,10 @@ class FileSys < Hobix::BaseStorage
         index_path = File.join( @basepath, 'index.hobix' )
         @index.sort! { |x,y| y[1].created <=> x[1].created }
         if modified
-            File.open( index_path, 'w' ) do |f|
-                YAML::dump( @index, f )
+            Lockfile.new( index_path + ".lock" ) do
+                File.open( index_path, 'w' ) do |f|
+                    YAML::dump( @index, f )
+                end
             end
             # @search_index.dump
         end
@@ -389,8 +393,10 @@ class FileSys < Hobix::BaseStorage
     # +e+ is saved with an extension +ext+.
     def save_attached( id, ext, e )
         check_id( id )
-        File.open( entry_path( id, ext ), 'w' ) do |f|
-            YAML::dump( e, f )
+        Lockfile.new( entry_path( id, ext ) + ".lock" ) do
+            File.open( entry_path( id, ext ), 'w' ) do |f|
+                YAML::dump( e, f )
+            end
         end
 
         @attach_cache ||= {}
@@ -401,9 +407,9 @@ class FileSys < Hobix::BaseStorage
     # then saves the modified attachment. If an attachment of the given type
     # does not exist, it will be created.
     def append_to_attachment( entry_id, attachment_type, *items )
-      attachment = load_attached( entry_id, attachment_type ) rescue []
-      attachment += items
-      save_attached( entry_id, attachment_type, attachment )
+        attachment = load_attached( entry_id, attachment_type ) rescue []
+        attachment += items
+        save_attached( entry_id, attachment_type, attachment )
     end
 end
 end

@@ -15,6 +15,7 @@
 #++
 require 'hobix/config'
 require 'hobix/weblog'
+require 'rbconfig'
 
 # = Hobix
 #
@@ -211,7 +212,7 @@ module Hobix
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
     ## Share directory contains external data files
-    SHARE_PATH = "/usr/share/hobix/"
+    SHARE_PATH = "#{ ::Config::CONFIG['datadir'] }/hobix/"
 
     ## Get a top-level constant from a string
     def self.const_find( tclass )
