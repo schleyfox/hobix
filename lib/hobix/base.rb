@@ -397,7 +397,7 @@ class BaseContent
                 instance_eval %{
                     def @#{ f }.to_yaml( opts = {} )
                         s = self.to_str
-                        def s.to_yaml_style; :fold; end
+                        def s.to_yaml_style; :literal; end
                         s.to_yaml( opts )
                     end
                 }
