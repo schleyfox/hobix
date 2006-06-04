@@ -127,7 +127,7 @@ module CommandLine
     def blogs_weblog_explain; "List your weblogs."; end
     def blogs_weblog_args; []; end
     def blogs_weblog
-        if @config['weblogs'].respond_to? :sort
+        if @config['weblogs'].respond_to?( :sort ) && !@config['weblogs'].empty?
             blogs = @config['weblogs'].sort
             name_width = blogs.collect { |b| b[0].length }.max
             tabular( blogs, [[-name_width, 0, 'weblog-name'], [-40, 1, 'path']] )
