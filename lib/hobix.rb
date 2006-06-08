@@ -212,7 +212,12 @@ module Hobix
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
     ## Share directory contains external data files
-    SHARE_PATH = "#{ ::Config::CONFIG['datadir'] }/hobix/"
+    share_path = File.expand_path('../../share', __FILE__)
+    if File.exists? share_path
+        SHARE_PATH = share_path
+    else
+        SHARE_PATH = "#{ ::Config::CONFIG['datadir'] }/hobix/"
+    end 
 
     ## Get a top-level constant from a string
     def self.const_find( tclass )

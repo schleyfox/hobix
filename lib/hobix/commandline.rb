@@ -475,8 +475,8 @@ module CommandLine
         puts "If you want to join an existing hobix weblog, we can do that now."
         puts "Each weblog needs a name and a path.  Use <ENTER> at any prompt"
         puts "to simply move on."
+        puts
         loop do
-            puts
             puts "Short name for weblog, used on the command line (i.e. hobix upgen blogName)."
             print ": "
             blogname = gets.strip
@@ -489,6 +489,8 @@ module CommandLine
                 break
             end
             add_weblog( blogname, blogpath )
+            puts
+            puts "** Add another weblog?"
         end
 
         puts "To setup more weblogs later, use: hobix add #{ add_weblog_args.join( ' ' ) }"
