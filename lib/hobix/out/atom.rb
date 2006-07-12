@@ -15,6 +15,7 @@
 #++
 require 'hobix/base'
 require 'rexml/document'
+require 'erb'
 require 'uri'
 require 'cgi'
 
@@ -23,7 +24,8 @@ module Out
 module XmlQuick
     def x( title, txt, attrs = nil )
         e = REXML::Element.new title
-        e.text = txt if txt
+        # self-quote to work around REXML quoting issues with HTML entities
+        REXML::Text.new ::ERB::Util.h( txt ), false, e, true if txt
         attrs.each { |a,b| e.attributes[a] = b } if attrs
         self << e
     end
