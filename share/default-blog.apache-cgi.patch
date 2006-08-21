@@ -5,4 +5,4 @@ htdocs/control/.htaccess: !^file-ensure |
   
   RewriteEngine   On
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule     ^(.*)$              /control/hobix.cgi/$1
+  RewriteRule     ^(.*)$              /control/hobix.cgi
