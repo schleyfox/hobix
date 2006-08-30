@@ -60,7 +60,7 @@ class Comments < BaseFacet
 
                 # Redirect
                 link = @weblog.output_entry_map[entry_id]
-                app.setup_redirection( 302, link[:page].link )
+                app.setup_redirection( 302, @weblog.expand_path( link[:page].link ) )
                 return true
             when "preview"
                 app.puts RedCloth.new( app._POST[Comments.form_field('content')] ).to_html
