@@ -61,7 +61,7 @@ def entry_comment_erb; %{
 
 def entry_comment_form_erb; %{
   <div class="entry">
-  <form id="userComment" method="post" action="<%= weblog.expand_path "/control/comment/#{ entry_id }" %>">
+  <form id="userComment" method="post" action="<%= weblog.expand_path( '/control/comment/' ) %><%= entry_id %>">
     <div class="entryAttrib">
        <div class="entryAuthor"><input name="<%= Hobix::Facets::Comments.form_field 'author' %>" type="textbox" size="15" maxlength="50" /></div>
        <div id="liveTime" class="entryTime">said on <nobr>DD Mon YYYY</nobr> <nobr>at HH:MM AM</nobr></div>
