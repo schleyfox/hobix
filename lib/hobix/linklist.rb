@@ -47,7 +47,7 @@ require 'yaml'
 module Hobix
 class LinkList < BaseEntry
 
-    _ :links,   [:req, :textarea]
+    _ :links,   :req => true, :edit_as => :textarea
 
     # Converts the link list into a RedCloth string for display
     # in templates.
