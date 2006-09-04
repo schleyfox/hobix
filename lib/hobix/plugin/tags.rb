@@ -38,7 +38,7 @@ class Hobix::Out::Quick
         <ul>
         <% tags_list(weblog.storage.find).sort.each do |name, count| %>
           <li>
-            <a href="<%= weblog.link %>/tags/<%=name%>/index.html"><%= name
+            <a href="<%= weblog.expand_path "tags/#{ name }/" %>"><%= name
             %></a>:&nbsp;<%=count%>
           </li>
         <% end %>
