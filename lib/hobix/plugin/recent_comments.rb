@@ -60,9 +60,11 @@ class Hobix::Out::Quick
     <div class="sidebarBox">
     <h2 class="sidebarTitle">Recent Comments</h2>
     <ul>
-    <% recent_comments( weblog, weblog.storage.find, RecentCommentsPlugin.num ).each do |link, title, auth, created| %>
+    <% reccomm = recent_comments( weblog, weblog.storage.find, RecentCommentsPlugin.num ) %>
+    <% reccomm.each do |link, title, auth, created| %>
       <li><a href="<%= link %>"><%= title %></a> by <%= auth %> on <nobr><%= created.strftime "%m/%d at %I:%M %P" %></nobr></li>
     <% end %>
+    <%= "No comments (yet)!" if reccomm.empty? %>
     </ul>
     </div>
   }
