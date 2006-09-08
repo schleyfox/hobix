@@ -52,7 +52,7 @@ def entry_comment_erb; %{
   <div class="entry">
       <div class="entryAttrib">
           <div class="entryAuthor"><h3><%= comment.author %></h3></div>
-          <div class="entryTime">said on <%= comment.created.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%I:%M %p</nobr>" ) %></div>
+          <div class="entryTime">said on <%= comment.created.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%H:%M</nobr>" ) %></div>
       </div>
       <div class="entryContentOuter"><div class="entryContent"><%= comment.content.to_html %></div></div>
   </div>
@@ -61,10 +61,10 @@ def entry_comment_erb; %{
 
 def entry_comment_form_erb; %{
   <div class="entry">
-  <form id="userComment" method="post" action="<%= weblog.expand_path( '/control/comment/' ) %><%= entry_id %>">
+  <form id="userComment" method="post" action="<%= weblog.expand_path( '/control/comment/' + entry_id )%>">
     <div class="entryAttrib">
        <div class="entryAuthor"><input name="<%= Hobix::Facets::Comments.form_field 'author' %>" type="textbox" size="15" maxlength="50" /></div>
-       <div id="liveTime" class="entryTime">said on <nobr>DD Mon YYYY</nobr> <nobr>at HH:MM AM</nobr></div>
+       <div id="liveTime" class="entryTime">said on <%= Time.now.strftime( "<nobr>%d %b %Y</nobr> at <nobr>%H:%M</nobr>")%></div>
     </div>
     <div class="entryContentOuter"><div class="entryContent">
        <textarea name="<%= Hobix::Facets::Comments.form_field 'content' %>" rows="6" cols="50"></textarea>

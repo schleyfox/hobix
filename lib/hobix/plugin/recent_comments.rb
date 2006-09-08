@@ -62,7 +62,7 @@ class Hobix::Out::Quick
     <ul>
     <% reccomm = recent_comments( weblog, weblog.storage.find, RecentCommentsPlugin.num ) %>
     <% reccomm.each do |link, title, auth, created| %>
-      <li><a href="<%= link %>"><%= title %></a> by <%= auth %> on <nobr><%= created.strftime "%m/%d at %I:%M %P" %></nobr></li>
+      <li><a href="<%= link %>"><%= title %></a> by <%= auth %> on <nobr><%= created.strftime "%d %b at %H:%M" %></nobr></li>
     <% end %>
     <%= "No comments (yet)!" if reccomm.empty? %>
     </ul>

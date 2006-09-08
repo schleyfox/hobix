@@ -44,7 +44,7 @@ class Quick
     <div class="entry">
         <div class="entryAttrib">
             <div class="entryAuthor"><h3><%= trackback.blog_name %></h3></div>
-            <div class="entryTime">tracked back on <%= trackback.created.strftime("<nobr>%d %b %Y</nobr> at <nobr>%I:%M %p</nobr>" ) %></div>
+            <div class="entryTime">tracked back on <%= trackback.created.strftime("<nobr>%d %b %Y</nobr> at <nobr>%H:%M</nobr>" ) %></div>
         </div>
         <div class="entryContentOuter"><div class="entryContent">
             <h3><a href="<%= trackback.url %>"><%= trackback.title %></a></h3>

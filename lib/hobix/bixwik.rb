@@ -193,7 +193,7 @@ def entry_content_erb
 end
 def sidebar_erb; nil; end
 def entry_footer_erb; %{
-  Revision from <%= ( entry.modified || entry.created ).strftime( "%B %d, %Y %H:%M" ) %> by <%= weblog.wiki_link( "authors/" + entry.author ) %> }
+  Revision from <%= ( entry.modified || entry.created ).strftime( "%d %B %Y at %H:%M" ) %> by <%= weblog.wiki_link( "authors/" + entry.author ) %> }
 end
 end
 end
