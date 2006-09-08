@@ -59,6 +59,11 @@ class LinkList < BaseEntry
         )
     end
 
+    # Adds support for enumeration.
+    def each
+      @links.each { |title, url| yield title, url }
+    end
+
     # LinkLists currently output as YAML type family
     # !hobix.com,2004/linklist.
     yaml_type "tag:hobix.com,2004:linklist"
