@@ -228,7 +228,8 @@ class Quick < Hobix::BaseOutput
         %{ <div class="entryContent"><%= entry.content.to_html %></div> }
     end
     def entry_footer_erb
-     %{ posted by <%= weblog.authors[entry.author]['name'] %> | <a href="<%= entry.link %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
+     %{ posted by <%= weblog.authors[entry.author]['name'] %> | 
+        <a href="<%= weblog.expand_path entry.id %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
     end
     def head_tags_erb; end
     def css_erb; %{ @import "<%= weblog.expand_path "site.css" %>"; }; end
@@ -276,7 +277,7 @@ class QuickSummary < Quick
      %{ <div class="entryContent">
         <% if entry.respond_to? :summary and entry.summary %>
         <%= entry.summary.to_html %>
-        <p><a href="<%= entry.link %>">Continue to full post.</a></p>
+        <p><a href="<%= weblog.expand_path entry.id %>">Continue to full post.</a></p>
         <% else %>
         <%= entry.content.to_html %>
         <% end %>
@@ -289,7 +290,7 @@ class QuickArchive < Quick
         "quick-archive"
     end
     def entry_erb
-     %{ <h3 class="entryTitle"><a href="<%= entry.link %>"><%= entry.title %></a></h3> }
+     %{ <h3 class="entryTitle"><a href="<%= weblog.expand_path entry.id %>"><%= entry.title %></a></h3> }
     end
     def entries_erb
      %{ <div id="archives">
