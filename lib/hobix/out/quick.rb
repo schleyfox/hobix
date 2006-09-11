@@ -205,14 +205,15 @@ class Quick < Hobix::BaseOutput
     end
     def entries_erb
      %{ <% entries.each_day do |day, day_entries| %>
-            <a name="<%= day.strftime( "%Y%m%d" ) %>"></a>
             <+ day_header +>
             <% day_entries.each do |entry| %>
                 <+ entry +>
             <% end %>
         <% end %> }
     end
-    def day_header_erb; %{ <h2 class="dayHeader"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; end
+    def day_header_erb; 
+      %{ <h2 class="dayHeader" id="<%= day.strftime( "%Y%m%d" ) %>"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; 
+    end
     def entry_erb
      %{ <div class="entry">
             <+ entry_title +>

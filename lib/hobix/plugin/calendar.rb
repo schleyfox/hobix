@@ -88,11 +88,6 @@ class Out::Quick
   def sidebar_erb
     sidebar_calendar_ssi
   end
-
-  ## overwrite the default day header so that we can jump to the
-  ## corresponding day in the main body of the monthly/yearly index
-  ## files
-  def day_header_erb; %{ <h2 class="dayHeader"><a name="<%= day.strftime( "%Y%m%d" ) %>"><%= day.strftime( "%A, %B %d, %Y" ) %></a></h2> }; end
 end
 
 class Weblog

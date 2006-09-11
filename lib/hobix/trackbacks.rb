@@ -36,7 +36,6 @@ class Quick
   }
 
   def entry_trackback_erb; %{
-    <a name="trackbacks"></a>
     <div id="trackbacks">
     <% entry_id = entry.id %>
     <% trackbacks = weblog.storage.load_attached( entry_id, "trackbacks") rescue [] %>

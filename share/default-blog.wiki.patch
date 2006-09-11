@@ -15,7 +15,6 @@ skel/recent/index.yaml.okaynews: !^file-create ''
 skel/recent/index.html.quick-summary: !^file-create |
   entries: |
     <% entries.each_day do |day, day_entries| %>
-        <a name="<%= day.strftime( "%Y%m%d" ) %>"></a>
         <+ day_header +>
         <ul>
         <% day_entries.each do |entry| %>

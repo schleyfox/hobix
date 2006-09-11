@@ -45,7 +45,6 @@ append_def :entry_erb, %{
 
 def entry_comment_erb; %{
   <% entry_id = entry.id %>
-  <a name="comments"></a>
   <div id="comments">
   <% comments = weblog.storage.load_attached( entry_id, "comments" ) rescue [] %>
   <% comments.each do |comment| %>
