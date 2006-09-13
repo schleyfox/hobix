@@ -64,7 +64,7 @@ class Hobix::Out::Quick
     <% reccomm.each do |link, title, auth, created| %>
       <li><a href="<%= link %>"><%= title %></a> by <%= auth %> on <nobr><%= created.strftime "%d %b at %H:%M" %></nobr></li>
     <% end %>
-    <%= "No comments (yet)!" if reccomm.empty? %>
+    <%= "<li>No comments (yet)!</li>" if reccomm.empty? %>
     </ul>
     </div>
   }

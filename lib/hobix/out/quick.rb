@@ -212,7 +212,7 @@ class Quick < Hobix::BaseOutput
         <% end %> }
     end
     def day_header_erb; 
-      %{ <h2 class="dayHeader" id="<%= day.strftime( "%Y%m%d" ) %>"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; 
+      %{ <h2 class="dayHeader" id="<%= day.strftime( "day%Y%m%d" ) %>"><%= day.strftime( "%A, %B %d, %Y" ) %></h2> }; 
     end
     def entry_erb
      %{ <div class="entry">

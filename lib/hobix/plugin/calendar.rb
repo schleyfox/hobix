@@ -162,21 +162,17 @@ class Out::Quick
           title = d.strftime("%A, %B %e: " + (days[d] == 1 ? "one entry" : "#{days[d]} entries"))
           link = case index
                  when :yearly:
-                   d.strftime("/%Y/#%Y%m%d")
+                   d.strftime("/%Y/#day%Y%m%d")
                  when :monthly:
-                   d.strftime("/%Y/%m/#%Y%m%d")
+                   d.strftime("/%Y/%m/#day%Y%m%d")
                  else
-                   d.strftime("/%Y/%m/%d.html#%Y%m%d")
+                   d.strftime("/%Y/%m/%d.html#day%Y%m%d")
                  end
         %>
         <td class="sidebarCalendarLinkDay"><a title="<%= title %>" href="<%= weblog.expand_path link %>"><%= d.strftime("%e") %></a></td>
       <% else %>
         <td class="sidebarCalendarEmptyDay"><%= d.strftime("%e") %></td>
       <% end %>
-    <% end %>
-
-    <% (7 - offset).times do %>
-      <td class="sidebarCalendarFiller"> &nbsp; </td>
     <% end %>
 
     </tr>
