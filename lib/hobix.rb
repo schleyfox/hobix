@@ -207,7 +207,7 @@ require 'rbconfig'
 #
 module Hobix
     ## Version used to compare installations
-    VERSION = '0.4'
+    VERSION = '0.5'
     ## CVS information
     CVS_ID = "$Id$"
     CVS_REV = "$Revision$"[11..-3]
