@@ -189,7 +189,7 @@ class Quick < Hobix::BaseOutput
      %{ <div class="sidebarBox">
         <h2 class="sidebarTitle">Syndicate</h2>
         <ul>
-            <li><a href="<%= weblog.link %>/index.xml">RSS 2.0</a></li>
+            <li><a href="<%= weblog.link %>/index.atom">Atom 1.0</a></li>
         </ul>
         </div> }
     end
