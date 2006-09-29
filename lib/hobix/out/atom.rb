@@ -57,7 +57,7 @@ EOXML
         rssdoc << REXML::XMLDecl.new
         rssdoc.elements['/feed/title'].text = vars[:weblog].title
         rssdoc.elements['/feed/link[@rel="alternate"]'].attributes['href'] = vars[:weblog].link.to_s
-        rssdoc.elements['/feed/link[@rel="self"]'].attributes['href'] = vars[:page].link.to_s
+        rssdoc.elements['/feed/link[@rel="self"]'].attributes['href'] = "#{vars[:weblog].link}#{vars[:page].link}"
         rssdoc.elements['/feed/subtitle'].text = vars[:weblog].tagline
         rssdoc.elements['/feed/updated'].text = vars[:page].updated.strftime( "%Y-%m-%dT%H:%M:%SZ" )
         rssdoc.elements['/feed/id'].text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }"
