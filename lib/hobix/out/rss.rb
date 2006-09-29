@@ -53,7 +53,7 @@ class RSS < Hobix::BaseOutput
 </rss>
 EOXML
         rssdoc << REXML::XMLDecl.new
-        rssdoc.elements['/rss/channel/title'].text = vars[:weblog].title
+        rssdoc.elements['/rss/channel/title'].text = rss_mangle( vars[:weblog].title )
         rssdoc.elements['/rss/channel/link'].text = vars[:weblog].link.to_s
         rssdoc.elements['/rss/channel/description'].text = vars[:weblog].tagline
         rssdoc.elements['/rss/channel/dc:date'].text = Time.now.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
@@ -70,7 +70,7 @@ EOXML
         ( vars[:entries] || [vars[:entry]] ).each do |e|
             ele = REXML::Element.new 'item'
             ele_title = REXML::Element.new 'title'
-            ele_title.text = e.title
+            ele_title.text = rss_mangle( e.title )
             ele << ele_title
             ele_link = REXML::Element.new 'link'
             link = e.link.gsub(/'/,"%27")
@@ -113,6 +113,14 @@ EOXML
             rssdoc.elements['/rss/channel'].add ele
         end
         rssdoc.to_s
+    end
+
+private
+    def rss_mangle( string )
+      string = string.gsub( /&/, '[and]' )
+      string.gsub!( /</, '[less-than]' )
+      string.gsub!( />/, '[greater-than]' )
+      string
     end
 end
 end
