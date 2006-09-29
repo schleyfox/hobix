@@ -45,7 +45,7 @@ class Atom < Hobix::BaseOutput
   xml:lang="en">
     <title></title>
     <link rel="alternate" type="text/html" href="" />
-    <!--link rel="self" type="application/atom+xml" href="" /-->
+    <link rel="self" type="application/atom+xml" href="" />
     <updated></updated>
     <subtitle></subtitle>
     <id></id>
@@ -56,7 +56,8 @@ EOXML
         uri = vars[:weblog].link
         rssdoc << REXML::XMLDecl.new
         rssdoc.elements['/feed/title'].text = vars[:weblog].title
-        rssdoc.elements['/feed/link'].attributes['href'] = vars[:weblog].link.to_s
+        rssdoc.elements['/feed/link[@rel="alternate"]'].attributes['href'] = vars[:weblog].link.to_s
+        rssdoc.elements['/feed/link[@rel="self"]'].attributes['href'] = vars[:page].link.to_s
         rssdoc.elements['/feed/subtitle'].text = vars[:weblog].tagline
         rssdoc.elements['/feed/updated'].text = vars[:page].updated.strftime( "%Y-%m-%dT%H:%M:%SZ" )
         rssdoc.elements['/feed/id'].text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }"
