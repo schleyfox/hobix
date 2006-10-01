@@ -57,7 +57,9 @@ EOXML
         rssdoc << REXML::XMLDecl.new
         rssdoc.elements['/feed/title'].text = vars[:weblog].title
         rssdoc.elements['/feed/link[@rel="alternate"]'].attributes['href'] = vars[:weblog].link.to_s
-        rssdoc.elements['/feed/link[@rel="self"]'].attributes['href'] = "#{vars[:weblog].link}#{vars[:page].link}"
+        self_uri = "#{vars[:weblog].link}#{vars[:page].link}"
+        rssdoc.elements['/feed/link[@rel="self"]'].attributes['href'] = self_uri
+        rssdoc.elements['/feed'].attributes['xml:base'] = self_uri
         rssdoc.elements['/feed/subtitle'].text = vars[:weblog].tagline
         rssdoc.elements['/feed/updated'].text = vars[:page].updated.strftime( "%Y-%m-%dT%H:%M:%SZ" )
         rssdoc.elements['/feed/id'].text = "tag:#{ uri.host },#{ Time.now.year }:blog#{ uri.path }"
@@ -65,6 +67,7 @@ EOXML
         ( vars[:entries] || [vars[:entry]] ).each do |e|
             ele = REXML::Element.new 'entry'
             ele.extend XmlQuick
+            ele.attributes['xml:base'] = e.link
             ele.x( 'title', e.title )
             ele.x( 'link', nil, {'rel' => 'alternate', 'type' => 'text/html', 'href' => e.link } )
             ele.x( 'id', "tag:#{ uri.host },#{ Time.now.year }:blog#{ CGI.escape(uri.path) }entry#{ CGI.escape( "/#{ e.id }" ) }" )
@@ -84,9 +87,7 @@ EOXML
             ele_auth.x( 'uri', author['url'] ) if author['url']
             ele_auth.x( 'email', author['email'] ) if author['email']
             ele << ele_auth
-            ele.x( 'content',
-                e.content.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
-                {'type' => 'html'} )
+            ele.x( 'content', e.content.to_html, {'type' => 'html'} )
             rssdoc.elements['/feed'].add ele
         end
         rssdoc.to_s
