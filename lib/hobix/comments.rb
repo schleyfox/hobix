@@ -68,7 +68,7 @@ def entry_comment_form_erb; %{
     <div class="entryContentOuter"><div class="entryContent">
        <textarea name="<%= Hobix::Facets::Comments.form_field 'content' %>" rows="6" cols="50"></textarea>
        <p><input type="button" name="pleasePreview" value="preview" 
-           onClick="new Ajax.Request( <%= weblog.expand_path '/control/preview' %>, {parameters: Form.serialize('userComment'), onComplete: function(req) { $('textilePreview').innerHTML = req.responseText }})" />
+           onClick="new Ajax.Request( '<%= weblog.expand_path '/control/preview' %>', {parameters: Form.serialize('userComment'), onComplete: function(req) { $('textilePreview').innerHTML = req.responseText }})" />
           <input type="submit" name="<%= Hobix::Facets::Comments.form_field 'submit' %>" value="&gt;&gt;" />
           <small>* do <a href="javascript:quickRedReference();">fancy stuff</a> in your comment.</small>
        </p>
