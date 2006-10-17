@@ -54,11 +54,36 @@ class Comments < BaseFacet
                     c.ipaddress = app.remote_addr
                 end
 
-                # Save the comment, upgen
-                @weblog.storage.append_to_attachment( entry_id, 'comments', comment )
-                @weblog.regenerate :update
-
-                # Redirect
+               # A quick hack to try akismet content spam checking
+               if @weblog.requires.detect{ |i| i['hobix/plugin/akismet'] }         
+                   @akismet = Akismet.new(@weblog.link, AkismetKey.key)
+                   if @akismet.verifyAPIKey
+                       if @akismet.commentCheck(
+                               app.remote_addr,                            # remote IP
+                               app.get_request_header('User-Agent'),       # user agent
+                               app.get_request_header('Referer'),          # http referer
+                               '',                                         # permalink
+                               'comment',                                  # comment type
+                               app._POST['hobix_comment:author'].to_s,     # author name
+                               '',                                         # author email
+                               '',                                         # author url
+                               app._POST['hobix_comment:comment'].to_s,    # comment text
+                               {})                                         # other
+                           app.puts( "Sorry, that smelled like spam. If wasn't meant to, go back and try again" )
+                           return true
+                       end
+                   else
+                       # If the key does not verify, post the comment
+                       # but note the failure in the apache error logs.
+                       $stderr.puts( "Hobix: Akismet API key did not verify." )
+                   end
+               end
+                   
+               # Save the comment, upgen
+               @weblog.storage.append_to_attachment( entry_id, 'comments', comment )
+               @weblog.regenerate :update
+               
+               # Redirect
                 link = @weblog.output_entry_map[entry_id]
                 app.setup_redirection( 302, @weblog.expand_path( link[:page].link ) )
                 return true
