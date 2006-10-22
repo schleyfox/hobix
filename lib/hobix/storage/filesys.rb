@@ -359,7 +359,7 @@ class FileSys < Hobix::BaseStorage
                 next_month %= 12
             end
             month_end = Time.mktime( next_year, next_month, 1 ) - 1
-            months << [ start, month_end, start.strftime( "/%Y/%m/" ) ]
+            months << [ start, month_end, start.strftime( "/%Y/%m/" ) ] unless find( :after => start, :before => month_end).empty?
             start = month_end + 1
         end
         months
