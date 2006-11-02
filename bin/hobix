@@ -58,8 +58,12 @@ elsif cmdline.respond_to? "#{ cmd }_action"
         puts "*** type `hobix help' and check your spelling."
         exit
     end
-    hobix_weblog = URI::parse( cmdline.config['weblogs'][ weblog ] )
-    if hobix_weblog.scheme
+    begin
+      hobix_weblog = URI::parse( cmdline.config['weblogs'][ weblog ] )
+    rescue URI::InvalidURIError
+      hobix_weblog = URI.parse ''
+    end
+    if hobix_weblog.scheme and hobix_weblog.scheme.length > 1
         mname = "#{ hobix_weblog.scheme }_#{ cmd }_remote"
         unless cmdline.respond_to? mname
             opts.unshift cmd
