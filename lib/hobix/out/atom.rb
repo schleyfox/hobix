@@ -74,7 +74,7 @@ EOXML
             ele.x( 'published', e.created.strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'updated', (e.modified || e.created).strftime( "%Y-%m-%dT%H:%M:%SZ" ) )
             ele.x( 'dc:subject', e.section_id )
-            e.tags.each do |t|
+            e.tags.find_all {|t| not (t.nil? or t == '') }.each do |t|
                 ele.x( 'category', '', { 'term' => t, 'scheme' => "http://hobix.com/tags" } )
             end
             ele.x( 'summary', 
