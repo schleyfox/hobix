@@ -509,7 +509,7 @@ class Weblog
                     ## Build the output pages
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
-                        vars[:page].add_path( File.dirname( tpl_path ), tpl_ext )
+                        vars[:page].add_path( "", tpl_ext )
                         vars[:template] = path
                         vars[:output] = output
                         eid = ( vars[:entry] && vars[:entry].id ) || page_name
