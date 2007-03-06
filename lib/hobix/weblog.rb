@@ -4,7 +4,7 @@
 # Hobix command-line weblog system.
 #
 # Copyright (c) 2003-2004 why the lucky stiff
-# Copyright (c) 2005 MenTaLguY
+# Copyright (c) 2005-2007 MenTaLguY
 #
 # Written & maintained by why the lucky stiff <why@ruby-lang.org>
 # Additional bits by MenTaLguY <mental@rydia.net>
@@ -92,9 +92,10 @@ end
 #   <% if page.next %>"next":<%= page.next_link %><% end %>
 #
 class Page
+    attr_reader :id
     attr_accessor :link, :next, :prev, :timestamp, :updated
-    def initialize( id )
-        @id = id
+    def initialize( id, dir='.' )
+        @id, @dir = id, dir
     end
     def id; dirj( @dir, @id ).gsub( /^\/+/, '' ); end
     def link; dirj( @dir, @id ) + @ext; end
@@ -106,8 +107,8 @@ class Page
         end
         link
     end
-    def add_path( dir, ext ) #:nodoc:
-        @dir, @ext = dir, ext
+    def add_ext( ext ) #:nodoc:
+        @ext = ext
     end
     def reference_fields; [:next, :prev]; end
     def references; reference_fields.map { |f| self.send f }.compact; end
@@ -166,9 +167,9 @@ end
 #
 # To give you a general idea, skel_index looks something like this:
 #
-#   def skel_index( path_storage )
+#   def skel_index( path_storage, section_path )
 #       index_entries = path_storage.lastn( @lastn )
-#       page = Page.new( 'index' )
+#       page = Page.new( 'index', section_path )
 #       page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
 #       page.timestamp = index_entries.first.created
 #       page.updated = path_storage.last_updated( index_entries )
@@ -215,13 +216,13 @@ end
 #
 #   module Hobix
 #   class Weblog
-#       def skel_sidebar( path_storage )
+#       def skel_sidebar( path_storage, section_path )
 #           ## Load `about' and `learn' entries
 #           abouts = path_storage.find( :all => true, :inpath => 'about' ).reverse
 #           learns = path_storage.find( :all => true, :inpath => 'learn' ).reverse
 #   
 #           ## Create page data
-#           page = Page.new( 'sidebar' )
+#           page = Page.new( 'sidebar', section_path )
 #           page.updated = path_storage.last_updated( abouts + learns )
 #           yield :page => page, 
 #                 :about_entries => abouts, :learn_entries => learns
@@ -427,8 +428,9 @@ class Weblog
         loop do
             try_page = paths.join( '_' ).gsub('-','_')
             if respond_to? "skel_#{ try_page }"
-                path_storage = storage.path_storage( File.dirname( page_name ) )
-                method( "skel_#{ try_page }" ).call( path_storage ) do |vars|
+                section_path = File.dirname( page_name )
+                path_storage = storage.path_storage( section_path )
+                method( "skel_#{ try_page }" ).call( path_storage, section_path ) do |vars|
                     vars[:weblog] = self
                     raise TypeError, "No `page' variable returned from skel_#{ try_page }." unless vars[:page]
                     yield vars
@@ -509,7 +511,7 @@ class Weblog
                     ## Build the output pages
                     build_pages( page_name ) do |vars|
                         ## Extension and Path
-                        vars[:page].add_path( "", tpl_ext )
+                        vars[:page].add_ext( tpl_ext )
                         vars[:template] = path
                         vars[:output] = output
                         eid = ( vars[:entry] && vars[:entry].id ) || page_name
@@ -646,9 +648,9 @@ class Weblog
     # Handler for templates with `index' prefix.  These templates will
     # receive entries loaded by +Hobix::BaseStorage#lastn+.  Only one
     # index page is requested by this handler.
-    def skel_index( path_storage )
+    def skel_index( path_storage, section_path )
         index_entries = path_storage.lastn( @lastn )
-        page = Page.new( 'index' )
+        page = Page.new( 'index', section_path )
         page.prev = index_entries.last.created.strftime( "%Y/%m/index" )
         page.timestamp = index_entries.first.created
         page.updated = path_storage.last_updated( index_entries )
@@ -659,7 +661,7 @@ class Weblog
     # receive a list of entries for each day that has at least one entry
     # created in its time period.  This handler requests daily pages
     # to be output as `/%Y/%m/%d.ext'.
-    def skel_daily( path_storage )
+    def skel_daily( path_storage, section_path )
         entry_range = path_storage.find
         first_time, last_time = entry_range.last.created, entry_range.first.created
         start = Time.mktime( first_time.year, first_time.month, first_time.day, 0, 0, 0 ) + 1
@@ -673,7 +675,7 @@ class Weblog
         end
         days.extend Hobix::Enumerable
         days.each_with_neighbors do |prev, curr, nextd| 
-            page = Page.new( curr[0].strftime( "%Y/%m/%d" ) )
+            page = Page.new( curr[0].strftime( "%Y/%m/%d" ), section_path )
             page.prev = prev[0].strftime( "%Y/%m/%d" ) if prev
             page.next = nextd[0].strftime( "%Y/%m/%d" ) if nextd
             page.timestamp = curr[0]
@@ -686,12 +688,12 @@ class Weblog
     # receive a list of entries for each month that has at least one entry
     # created in its time period.  This handler requests monthly pages
     # to be output as `/%Y/%m/index.ext'.
-    def skel_monthly( path_storage )
+    def skel_monthly( path_storage, section_path )
         months = path_storage.get_months( path_storage.find )
         months.extend Hobix::Enumerable
         months.each_with_neighbors do |prev, curr, nextm| 
             entries = path_storage.within( curr[0], curr[1] )
-            page = Page.new( curr[0].strftime( "%Y/%m/index" ) )
+            page = Page.new( curr[0].strftime( "%Y/%m/index" ), section_path )
             page.prev = prev[0].strftime( "%Y/%m/index" ) if prev
             page.next = nextm[0].strftime( "%Y/%m/index" ) if nextm
             page.timestamp = curr[1]
@@ -704,7 +706,7 @@ class Weblog
     # receive a list of entries for each month that has at least one entry
     # created in its time period.  This handler requests yearly pages
     # to be output as `/%Y/index.ext'.
-    def skel_yearly( path_storage )
+    def skel_yearly( path_storage, section_path )
         entry_range = path_storage.find
         first_time, last_time = entry_range.last.created, entry_range.first.created
         years = (first_time.year..last_time.year).collect do |y|
@@ -713,7 +715,7 @@ class Weblog
         years.extend Hobix::Enumerable
         years.each_with_neighbors do |prev, curr, nextm| 
             entries = path_storage.within( curr[0], curr[1] )
-            page = Page.new( curr[0].strftime( "%Y/index" ) )
+            page = Page.new( curr[0].strftime( "%Y/index" ), section_path )
             page.prev = prev[0].strftime( "%Y/index" ) if prev
             page.next = nextm[0].strftime( "%Y/index" ) if nextm
             page.timestamp = curr[1]
@@ -725,13 +727,13 @@ class Weblog
     # Handler for templates with `entry' prefix.  These templates will
     # receive one entry for each entry in the weblog.  The handler requests
     # entry pages to be output as `/shortName.ext'.
-    def skel_entry( path_storage )
+    def skel_entry( path_storage, section_path )
         all_entries = [path_storage.find]
         all_entries += sections_ignored.collect { |ign| path_storage.find( :all => true, :inpath => ign ) }
         all_entries.each do |entry_set|
             entry_set.extend Hobix::Enumerable
             entry_set.each_with_neighbors do |nexte, entry, prev|
-                page = Page.new( entry.class.url_link( entry ) )
+                page = Page.new( entry.id )
                 page.prev = prev.id if prev
                 page.next = nexte.id if nexte
                 page.timestamp = entry.created
@@ -744,7 +746,7 @@ class Weblog
     # Handler for templates with `section' prefix.  These templates
     # will receive all entries below a given directory.  The handler
     # requests will be output as `/section/index.ext'.
-    def skel_section( path_storage )
+    def skel_section( path_storage, section_path )
         section_map = {}
         path_storage.all.each do |entry|
             dirs = entry.id.split( '/' )
@@ -796,18 +798,26 @@ class Weblog
     # Handler for templates with `tags' prefix.  These templates
     # will receive a tag with all entries tagged with it. The handler
     # requests will be output as `/tags/<tag>/index.ext'.
-    def skel_tags( path_storage ) 
+    def skel_tags( path_storage, section_path ) 
       # Get a list of all known tags
       tags = path_storage.find( :all => true ).map { |e| e.tags }.flatten.uniq
       
       tags.each do |tag|
         entries = path_storage.find.find_all { |e| e.tags.member? tag }
-        page = Page.new( File::join('tags',tag,'index' ) )
+        page = Page.new( File::join( 'tags',tag,'index' ), section_path )
         page.updated = path_storage.last_updated( entries ) 
         yield :page => page, :entries => entries
       end
     end
 
+    def join_path( prefix, suffix )
+        case prefix
+	when '', '.'
+            suffix
+	else
+            "#{ prefix }/#{ suffix }"
+	end
+    end
 
     class AuthorNotFound < Exception; end
 

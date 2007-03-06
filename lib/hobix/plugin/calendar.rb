@@ -92,7 +92,7 @@ end
 
 class Weblog
   ## generate all the sidebar calendar files
-  def skel_sidebar(path_storage)
+  def skel_sidebar( path_storage, section_path )
     months = path_storage.get_months(storage.find)
 
     months.extend Hobix::Enumerable
@@ -100,7 +100,8 @@ class Weblog
       month_start, month_end, month_id = cur
 
       entries = path_storage.within(month_start, month_end)
-      page = Page.new SidebarCalendarPlugin.dir_to(month_start, false)
+      entry_path = SidebarCalendarPlugin.dir_to(month_start, false)
+      page = Page.new( entry_path, section_path )
       page.timestamp = month_start
       page.updated = Time.now #path_storage.last_modified(entries)
       page.prev = prev[0].strftime("/%Y/%m/") if prev

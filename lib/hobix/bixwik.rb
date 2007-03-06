@@ -42,9 +42,9 @@ module BixWik
 
     # Handler for templates with `index' prefix.  These pages simply
     # mirror the `HomePage' entry.
-    def skel_index( path_storage )
+    def skel_index( path_storage, section_path )
         homePage = path_storage.match( /^HomePage$/ ).first
-        page = Page.new( '/index' )
+        page = Page.new( 'index' )
         unless homePage
             homePage = Hobix::Storage::IndexEntry.new( path_storage.default_entry( authors.keys.first ) )
         end
@@ -56,9 +56,9 @@ module BixWik
     # Handler for templates with `list/index' prefix.  These templates will
     # receive IndexEntry objects for every entry in the system.  Only one
     # index page is requested by this handler.
-    def skel_recent_index( path_storage )
+    def skel_recent_index( path_storage, section_path )
         index_entries = storage.find( :all => true )
-        page = Page.new( '/list/index' )
+        page = Page.new( 'list/index' )
         page.timestamp = index_entries.first.created
         page.updated = storage.last_updated( index_entries )
         yield :page => page, :entries => index_entries
@@ -67,9 +67,9 @@ module BixWik
     # Handler for templates with `recent/index' prefix.  These templates will
     # receive entries loaded by +Hobix::BaseStorage#lastn+.  Only one
     # index page is requested by this handler.
-    def skel_recent_index( path_storage )
+    def skel_recent_index( path_storage, section_path )
         index_entries = storage.lastn( @lastn || 120 )
-        page = Page.new( '/recent/index' )
+        page = Page.new( 'recent/index' )
         page.timestamp = index_entries.first.created
         page.updated = storage.last_updated( index_entries )
         yield :page => page, :entries => index_entries
@@ -77,9 +77,9 @@ module BixWik
 
     # Handler for templates with `list/index' prefix.  These templates will
     # receive a list of all pages in the Wiki.
-    def skel_list_index( path_storage )
+    def skel_list_index( path_storage, section_path )
         all_pages = storage.all
-        page = Page.new( '/list/index' )
+        page = Page.new( 'list/index' )
         page.timestamp = all_pages.first.created
         page.updated = storage.last_updated( all_pages )
         yield :page => page, :entries => all_pages, :no_load => true
