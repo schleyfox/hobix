@@ -79,7 +79,7 @@ EOXML
             end
             ele.x( 'summary', 
                 e.summary.to_html.gsub( /img src="\//, "img src=\"#{ vars[:weblog].link }/" ),
-                {'type' => 'text/html', 'mode' => 'escaped'} ) if e.respond_to? :summary and e.summary
+                {'type' => 'xhtml', 'mode' => 'escaped'} ) if e.respond_to? :summary and e.summary and !e.summary.empty?
             author = vars[:weblog].authors[e.author]
             ele_auth = REXML::Element.new 'author'
             ele_auth.extend XmlQuick
@@ -87,7 +87,7 @@ EOXML
             ele_auth.x( 'uri', author['url'] ) if author['url']
             ele_auth.x( 'email', author['email'] ) if author['email']
             ele << ele_auth
-            ele.x( 'content', e.content.to_html, {'type' => 'html'} )
+            ele.x( 'content', e.content.to_html, {'type' => 'xhtml'} )
             rssdoc.elements['/feed'].add ele
         end
         rssdoc.to_s
