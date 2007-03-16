@@ -6,7 +6,7 @@ hobix.yaml: !^yaml-merge
 lib/local.rb: !^file-create |
   module Hobix
   class Weblog
-      def skel_sidebar( path_storage )
+      def skel_sidebar( path_storage, section_path )
           months = path_storage.get_months( storage.find )
           page = Page.new( 'sidebar' )
           page.updated = Time.now
