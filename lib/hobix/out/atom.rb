@@ -24,8 +24,9 @@ module Out
 module XmlQuick
     def x( title, txt, attrs = nil )
         e = REXML::Element.new title
+	e.attributes['xml:space'] = "preserve"
         # self-quote to work around REXML quoting issues with HTML entities
-        REXML::Text.new ::ERB::Util.h( txt ), false, e, true if txt
+        REXML::Text.new ::ERB::Util.h( txt ), true, e, true if txt
         attrs.each { |a,b| e.attributes[a] = b } if attrs
         self << e
     end

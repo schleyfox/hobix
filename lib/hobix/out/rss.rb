@@ -100,6 +100,7 @@ EOXML
             ele_pubDate.text = ( e.modified || e.created ).dup.utc.strftime( "%Y-%m-%dT%H:%M:%S+00:00" )
             ele << ele_pubDate
             ele_desc = REXML::Element.new 'description'
+            ele_desc.attributes['xml:space'] = "preserve"
             text = 
                 if @summaries && e.summary
                   e.summary.to_html + (@more_link ? %{<p><a href="#{e.link}">#@more_link</a></p>} : "")
@@ -108,7 +109,7 @@ EOXML
                 end.gsub( /(src|href)="\//, "\\1=\"#{ vars[:weblog].link.rooturi }/" )
             # Quote the text ourselves rather than letting REXML do it,
             # due to REXML bug where it fails to quote e.g. &rarr;
-            REXML::Text.new ::ERB::Util.h( text ), false, ele_desc, true
+            REXML::Text.new ::ERB::Util.h( text ), true, ele_desc, true
             ele << ele_desc
             rssdoc.elements['/rss/channel'].add ele
         end
