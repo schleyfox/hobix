@@ -230,7 +230,7 @@ class Quick < Hobix::BaseOutput
     end
     def entry_footer_erb
      %{ posted by <%= weblog.authors[entry.author]['name'] %> | 
-        <a href="<%= weblog.expand_path entry.id %>"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
+        <a href="<%= weblog.expand_path entry.id %>.html"><%= entry.created.strftime( "%I:%M %p" ) %></a> }
     end
     def head_tags_erb; end
     def css_erb; %{ @import "<%= weblog.expand_path "site.css" %>"; }; end
