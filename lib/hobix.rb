@@ -205,6 +205,7 @@ require 'rbconfig'
 #     end    
 #   end
 #
+
 module Hobix
     ## Version used to compare installations
     VERSION = '0.5'

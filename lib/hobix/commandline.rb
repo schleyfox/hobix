@@ -445,6 +445,8 @@ module CommandLine
         else
             @config['post upgen'] = true
         end
+
+
         save_config
     end
 

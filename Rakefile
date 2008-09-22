@@ -6,7 +6,7 @@ require 'fileutils'
 include FileUtils
 
 NAME = "hobix"
-VERS = "0.5"
+VERS = "0.6"
 CLEAN.include ['**/.*.sw?', '*.gem', '.config']
 RDOC_OPTS = ['--quiet', '--title', "The Book of Hobix",
     # "--template", "extras/flipbook_rdoc.rb",
@@ -54,7 +54,7 @@ spec =
         s.add_dependency('RedCloth')
         s.required_ruby_version = '>= 1.8.2'
 
-        s.files = %w(COPYING README Rakefile) +
+        s.files = %w(COPYING README Rakefile git_hobix_update.php) +
           Dir.glob("{bin,doc,test,share,lib,contrib}/**/*") + 
           Dir.glob("ext/**/*.{h,c,rb}") +
           Dir.glob("examples/**/*.rb")
@@ -72,9 +72,9 @@ end
 
 task :install do
   sh %{rake gem}
-  sh %{sudo gem install pkg/#{NAME}-#{VERS}}
+  sh %{gem install pkg/#{NAME}-#{VERS}}
 end
 
 task :uninstall => [:clean] do
-  sh %{sudo gem uninstall #{NAME}}
+  sh %{gem uninstall #{NAME}}
 end

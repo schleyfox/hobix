@@ -17,7 +17,6 @@ require 'find'
 require 'yaml'
 require 'fileutils'
 # require 'hobix/search/simple'
-require 'hobix/storage/lockfile'
 
 module Hobix
 
@@ -94,9 +93,8 @@ class FileSys < Hobix::BaseStorage
         unless create_category and File.exists? @basepath
             FileUtils.makedirs File.dirname( path )
         end
-        Lockfile.new( path + ".lock" ) do
-            File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
-        end
+        
+        File.open( path, 'w' ) { |f| YAML::dump( e, f ) }
 
         @entry_cache ||= {}
         e.id = id
@@ -128,9 +126,7 @@ class FileSys < Hobix::BaseStorage
             unless e.created
                 e.created = @index[id].created
                 e.modified = @index[id].modified
-                Lockfile.new( entry_file + ".lock" ) do
-                    File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
-                end
+                File.open( entry_file, 'w' ) { |f| YAML::dump( e, f ) }
             end
             @entry_cache[id] = e
         else
@@ -214,10 +210,8 @@ class FileSys < Hobix::BaseStorage
         index_path = File.join( @basepath, 'index.hobix' )
         @index.sort! { |x,y| y[1].created <=> x[1].created }
         if modified
-            Lockfile.new( index_path + ".lock" ) do
-                File.open( index_path, 'w' ) do |f|
-                    YAML::dump( @index, f )
-                end
+            File.open( index_path, 'w' ) do |f|
+              YAML::dump( @index, f )
             end
             # @search_index.dump
         end
@@ -393,10 +387,8 @@ class FileSys < Hobix::BaseStorage
     # +e+ is saved with an extension +ext+.
     def save_attached( id, ext, e )
         check_id( id )
-        Lockfile.new( entry_path( id, ext ) + ".lock" ) do
-            File.open( entry_path( id, ext ), 'w' ) do |f|
-                YAML::dump( e, f )
-            end
+        File.open( entry_path( id, ext ), 'w' ) do |f|
+          YAML::dump( e, f )
         end
 
         @attach_cache ||= {}

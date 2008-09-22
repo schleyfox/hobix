@@ -402,7 +402,7 @@ class Weblog
     # Translate paths relative to the weblahhg's URL.  This is especially important
     # if a weblog isn't at the root directory for a domain.
     def expand_path( path )
-        File.expand_path( path.gsub( /^\/+/, '' ), self.link.path.gsub( /\/*$/, '/' ) )
+        File.expand_path( path.gsub( /^\/+/, '' ), self.link.path.gsub( /\/*$/, '/' ) ).gsub( /^C:/, '')
     end
 
     # Load the weblog information from a YAML file and +start+ the Weblog.
