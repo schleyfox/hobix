@@ -146,6 +146,9 @@ end
 # output_path::    Path to output directory.
 # lib_path::       Path to extension library directory.
 #
+# git::            If true, regenerations will commit to git and push the
+#                  site to the blahg remote.
+#
 # == Regeneration
 #
 # One of the primary uses of the Weblog class is to coordinate
@@ -307,6 +310,8 @@ class Weblog
 
     _! 'Libraries and Plugins'
     _ :requires,           :req => true, :edit_as => :omap
+
+    _ :git,                :edit_as => :text
     
     attr_accessor :path
     attr_reader   :hobix_yaml
@@ -642,7 +647,19 @@ class Weblog
                 p.publish( published )
             end
         end
+
+        commit_to_git if @git
+
         reset_output_map
+    end
+
+    # Method to commit to the local git repo and push pure happiness to the
+    # remote server named blahg (which should be of webserving character and
+    # a pleasant demeanor).
+    def commit_to_git
+      puts `git add .`
+      puts `git commit -a -m "New poshts for the syhtt"`
+      puts `git push blahg master`
     end
 
     # Handler for templates with `index' prefix.  These templates will
